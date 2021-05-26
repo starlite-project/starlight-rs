@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+use futures::StreamExt;
 use std::{convert::Into, error::Error};
 use twilight_cache_inmemory::{InMemoryCache, ResourceType};
 use twilight_gateway::{
@@ -7,7 +8,6 @@ use twilight_gateway::{
 };
 use twilight_http::Client as HttpClient;
 use twilight_model::gateway::Intents;
-use futures::StreamExt;
 
 #[derive(Debug, Clone)]
 pub struct Client {
@@ -16,13 +16,14 @@ pub struct Client {
     http: HttpClient,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct ClientBuilder {
     shard_scheme: Option<ShardScheme>,
     token: Option<String>,
     cache_resource_type: Option<ResourceType>,
     intents: Option<Intents>,
 }
+
 
 impl Client {
     pub fn builder(token: impl Into<String>) -> ClientBuilder {
@@ -39,7 +40,7 @@ impl Client {
         while let Some(data) = events.next().await {
             self.cache.update(&data.1);
 
-            tokio::spawn(Client::handle_event(data, self.http.clone()));
+            // tokio::spawn(Client::handle_event(data, self.http.clone()));
         }
 
         Ok(())
@@ -47,12 +48,15 @@ impl Client {
 
     async fn handle_event(
         data: (u64, Event),
-        _http: HttpClient
+        _http: HttpClient,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
         let (shard_id, event) = data;
-        match event {
-            Event::ShardConnected(_) => crate::log!("Connected with shard {}", shard_id),
-            _ => {}
+        // match event {
+        //     Event::ShardConnected(_) => crate::log!("Connected with shard {}", shard_id),
+        //     _ => {}
+        // }
+        if let Event::ShardConnected(_) = event {
+            crate::log!("Connected with shard {}", shard_id);
         }
 
         Ok(())
@@ -123,5 +127,36 @@ impl ClientBuilder {
             cluster,
             http,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ClientBuilder;
+
+    #[test]
+    fn new() {
+        assert_eq!(
+            ClientBuilder::new(),
+            ClientBuilder {
+                intents: None,
+                shard_scheme: None,
+                token: None,
+                cache_resource_type: None
+            }
+        );
+    }
+
+    #[test]
+    fn default() {
+        assert_eq!(
+            ClientBuilder::default(),
+            ClientBuilder {
+                intents: None,
+                shard_scheme: None,
+                token: None,
+                cache_resource_type: None
+            }
+        );
     }
 }
