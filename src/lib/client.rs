@@ -1,5 +1,5 @@
-#![allow(unused_imports, dead_code)]
-use std::convert::Into;
+#![allow(dead_code)]
+use std::{convert::Into, error::Error};
 use twilight_cache_inmemory::{InMemoryCache, ResourceType};
 use twilight_gateway::{
     cluster::{Cluster, ShardScheme},
@@ -7,21 +7,13 @@ use twilight_gateway::{
 };
 use twilight_http::Client as HttpClient;
 use twilight_model::gateway::Intents;
-
-macro_rules! match_default {
-    ($match_builder:expr, $default:expr) => {
-        match $match_builder {
-            Some(value) => value,
-            None => $default
-        };
-    }
-}
+use futures::StreamExt;
 
 #[derive(Debug, Clone)]
 pub struct Client {
     cache: InMemoryCache,
     cluster: Cluster,
-    client: HttpClient,
+    http: HttpClient,
 }
 
 #[derive(Debug, Default)]
@@ -36,6 +28,35 @@ impl Client {
     pub fn builder(token: impl Into<String>) -> ClientBuilder {
         ClientBuilder::new().token(token)
     }
+
+    pub async fn connect(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let cluster_spawn = self.cluster.clone();
+
+        tokio::spawn(async move { cluster_spawn.up().await });
+
+        let mut events = self.cluster.events();
+
+        while let Some(data) = events.next().await {
+            self.cache.update(&data.1);
+
+            tokio::spawn(Client::handle_event(data, self.http.clone()));
+        }
+
+        Ok(())
+    }
+
+    async fn handle_event(
+        data: (u64, Event),
+        _http: HttpClient
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let (shard_id, event) = data;
+        match event {
+            Event::ShardConnected(_) => crate::log!("Connected with shard {}", shard_id),
+            _ => {}
+        }
+
+        Ok(())
+    }
 }
 
 impl ClientBuilder {
@@ -44,7 +65,7 @@ impl ClientBuilder {
             shard_scheme: None,
             token: None,
             cache_resource_type: None,
-            intents: None
+            intents: None,
         }
     }
 
@@ -80,10 +101,27 @@ impl ClientBuilder {
         self
     }
 
-    pub fn build(self) {
-        let shard_scheme = match_default!(self.shard_scheme, ShardScheme::Auto);
-        let intents = match_default!(self.intents, Intents::all());
-        let token = self.token.expect("Expected a token to build a client");
-        let cache_resource_type = match_default!(self.cache_resource_type, ResourceType::all());
+    pub async fn build(self) -> Result<Client, Box<dyn Error + Send + Sync>> {
+        let shard_scheme = self.shard_scheme.unwrap_or(ShardScheme::Auto);
+        let intents = self.intents.unwrap_or_else(Intents::all);
+        let token = self.token.expect("Expected a token");
+        let resource_type = self.cache_resource_type.unwrap_or_else(ResourceType::all);
+
+        let cache = InMemoryCache::builder()
+            .resource_types(resource_type)
+            .build();
+
+        let cluster = Cluster::builder(token.clone(), intents)
+            .shard_scheme(shard_scheme)
+            .build()
+            .await?;
+
+        let http = HttpClient::new(&token);
+
+        Ok(Client {
+            cache,
+            cluster,
+            http,
+        })
     }
 }

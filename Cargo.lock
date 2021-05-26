@@ -1222,6 +1222,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_repr",
+ "simd-json",
  "tokio",
  "tracing",
  "twilight-model",

@@ -14,7 +14,7 @@ lazy_static = "1.4.0"
 tokio = { version = "1.6.0", features = ["macros", "rt-multi-thread"] }
 twilight-cache-inmemory = "0.4"
 twilight-gateway = { default-features = false, features = ["rustls", "simd-json", "simd-zlib"], version = "0.4" }
-twilight-http = "0.4"
+twilight-http = { default-features = false, features = ["simd-json"], version = "0.4" }
 twilight-model = "0.4"
 
 [build-dependencies]

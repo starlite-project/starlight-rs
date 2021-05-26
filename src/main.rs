@@ -1,70 +1,27 @@
 #[macro_use]
 extern crate lazy_static;
 
-use futures::stream::StreamExt;
+use lib::client::Client;
 use std::{env, error::Error};
-use twilight_cache_inmemory::{InMemoryCache, ResourceType};
-use twilight_gateway::{
-    cluster::{Cluster, ShardScheme},
-    Event,
-};
-use twilight_http::Client as HttpClient;
+use twilight_cache_inmemory::ResourceType;
 use twilight_model::gateway::Intents;
+use twilight_gateway::cluster::ShardScheme;
 
 mod i18n;
 mod lib;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
-    dotenv::dotenv().unwrap();
+    dotenv::dotenv()?;
 
-    let token = env::var("DISCORD_TOKEN")?;
-    let scheme = ShardScheme::Auto;
-
-    let cluster = Cluster::builder(&token, Intents::GUILD_MESSAGES)
-        .shard_scheme(scheme)
+    let client = Client::builder(env::var("DISCORD_TOKEN")?)
+        .intents(Intents::GUILD_MESSAGES)
+        .resource_type(ResourceType::MESSAGE)
+        .shard_scheme(ShardScheme::Auto)
         .build()
         .await?;
 
-    let cluster_spawn = cluster.clone();
-
-    tokio::spawn(async move {
-        cluster_spawn.up().await;
-    });
-
-    let http = HttpClient::new(&token);
-
-    let cache = InMemoryCache::builder()
-        .resource_types(ResourceType::MESSAGE)
-        .build();
-
-    let mut events = cluster.events();
-
-    while let Some((shard_id, event)) = events.next().await {
-        cache.update(&event);
-
-        tokio::spawn(handle_event(shard_id, event, http.clone()));
-    }
-
-    Ok(())
-}
-
-async fn handle_event(
-    shard_id: u64,
-    event: Event,
-    http: HttpClient,
-) -> Result<(), Box<dyn Error + Send + Sync>> {
-    match event {
-        Event::MessageCreate(msg) if msg.content == "!ping" => {
-            http.create_message(msg.channel_id)
-                .content("Pong!")?
-                .await?;
-        }
-        Event::ShardConnected(_) => {
-            log!("Connected on shard {}", shard_id)
-        }
-        _ => {}
-    };
+    client.connect().await?;
 
     Ok(())
 }
