@@ -1,60 +1,58 @@
 #![allow(dead_code)]
 use futures::StreamExt;
-use std::{convert::Into, error::Error};
-use twilight_cache_inmemory::{InMemoryCache, ResourceType};
+use twilight_cache_inmemory::{InMemoryCache as Cache, InMemoryCacheBuilder as CacheBuilder};
 use twilight_gateway::{
-    cluster::{Cluster, ShardScheme},
+    cluster::{Cluster, ClusterBuilder},
     Event,
 };
-use twilight_http::Client as HttpClient;
+use twilight_http::{client::ClientBuilder as HttpClientBuilder, Client as HttpClient};
 use twilight_model::gateway::Intents;
 
 #[derive(Debug, Clone)]
 pub struct Client {
-    cache: InMemoryCache,
+    cache: Cache,
     cluster: Cluster,
     http: HttpClient,
 }
 
-#[derive(Debug, Default, PartialEq, Eq)]
+#[derive(Debug, Default)]
 pub struct ClientBuilder {
-    shard_scheme: Option<ShardScheme>,
+    cluster: Option<ClusterBuilder>,
+    cache: Option<CacheBuilder>,
+    http: Option<HttpClientBuilder>,
     token: Option<String>,
-    cache_resource_type: Option<ResourceType>,
     intents: Option<Intents>,
 }
 
-
 impl Client {
-    pub fn builder(token: impl Into<String>) -> ClientBuilder {
-        ClientBuilder::new().token(token)
-    }
-
-    pub async fn connect(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
+    pub async fn connect(&self) -> super::GenericResult<()> {
         let cluster_spawn = self.cluster.clone();
+        println!("Got past cluster clone");
 
-        tokio::spawn(async move { cluster_spawn.up().await });
+        tokio::spawn(async move { cluster_spawn.up().await }).await?;
+
+        println!("Got past cluster spawn");
 
         let mut events = self.cluster.events();
+
+        println!("Got past cluster events");
 
         while let Some(data) = events.next().await {
             self.cache.update(&data.1);
 
-            // tokio::spawn(Client::handle_event(data, self.http.clone()));
+            println!("Got past events.next()");
+
+            tokio::spawn(Client::handle_event(data));
         }
 
         Ok(())
     }
 
-    async fn handle_event(
-        data: (u64, Event),
-        _http: HttpClient,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+    async fn handle_event(data: (u64, Event)) -> super::GenericResult<()> {
         let (shard_id, event) = data;
-        // match event {
-        //     Event::ShardConnected(_) => crate::log!("Connected with shard {}", shard_id),
-        //     _ => {}
-        // }
+
+        println!("Got past handle_event");
+
         if let Event::ShardConnected(_) = event {
             crate::log!("Connected with shard {}", shard_id);
         }
@@ -64,25 +62,26 @@ impl Client {
 }
 
 impl ClientBuilder {
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
-            shard_scheme: None,
+            cluster: None,
+            cache: None,
+            http: None,
             token: None,
-            cache_resource_type: None,
             intents: None,
         }
     }
 
-    pub fn token(mut self, str: impl Into<String>) -> Self {
-        let token = str.into();
+    pub fn token(mut self, token: impl ToString) -> Self {
+        let token_string = token.to_string();
 
-        let token = if token.starts_with("Bot ") {
-            token
+        let token_string = if token_string.starts_with("Bot ") {
+            token_string
         } else {
-            format!("Bot {}", token)
+            format!("Bot {}", token_string)
         };
 
-        self.token = Some(token);
+        self.token = Some(token_string);
 
         self
     }
@@ -93,70 +92,58 @@ impl ClientBuilder {
         self
     }
 
-    pub fn shard_scheme(mut self, scheme: ShardScheme) -> Self {
-        self.shard_scheme = Some(scheme);
+    pub fn cluster_builder(
+        mut self,
+        cluster_fn: &(dyn Fn(ClusterBuilder) -> ClusterBuilder),
+    ) -> Self {
+        let intents = self.intents.expect("Need intents to build cluster");
+        let token = self.token.clone().expect("Need token to build cluster");
+
+        let cluster_builder = (token, intents).into();
+
+        let built = cluster_fn(cluster_builder);
+
+        self.cluster = Some(built);
 
         self
     }
 
-    pub fn resource_type(mut self, resource_type: ResourceType) -> Self {
-        self.cache_resource_type = Some(resource_type);
+    pub fn cache_builder(mut self, cache_fn: &(dyn Fn(CacheBuilder) -> CacheBuilder)) -> Self {
+        let cache_builder = CacheBuilder::new();
+
+        let built = cache_fn(cache_builder);
+
+        self.cache = Some(built);
 
         self
     }
 
-    pub async fn build(self) -> Result<Client, Box<dyn Error + Send + Sync>> {
-        let shard_scheme = self.shard_scheme.unwrap_or(ShardScheme::Auto);
-        let intents = self.intents.unwrap_or_else(Intents::all);
-        let token = self.token.expect("Expected a token");
-        let resource_type = self.cache_resource_type.unwrap_or_else(ResourceType::all);
+    pub fn http_builder(
+        mut self,
+        http_fn: &(dyn Fn(HttpClientBuilder) -> HttpClientBuilder),
+    ) -> Self {
+        let http_builder = HttpClientBuilder::new();
 
-        let cache = InMemoryCache::builder()
-            .resource_types(resource_type)
-            .build();
+        let built = http_fn(http_builder);
 
-        let cluster = Cluster::builder(token.clone(), intents)
-            .shard_scheme(shard_scheme)
-            .build()
-            .await?;
+        self.http = Some(built);
 
-        let http = HttpClient::new(&token);
+        self
+    }
+
+    pub async fn build(self) -> super::GenericResult<Client> {
+        let http_builder = self.http.unwrap_or_default();
+        let cluster_builder = self.cluster.expect("Failed to get cluster_builder");
+        let cache_builder = self.cache.unwrap_or_default();
+
+        let http = http_builder.build();
+        let cache = cache_builder.build();
+        let cluster = cluster_builder.http_client(http.clone()).build().await?;
 
         Ok(Client {
+            http,
             cache,
             cluster,
-            http,
         })
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::ClientBuilder;
-
-    #[test]
-    fn new() {
-        assert_eq!(
-            ClientBuilder::new(),
-            ClientBuilder {
-                intents: None,
-                shard_scheme: None,
-                token: None,
-                cache_resource_type: None
-            }
-        );
-    }
-
-    #[test]
-    fn default() {
-        assert_eq!(
-            ClientBuilder::default(),
-            ClientBuilder {
-                intents: None,
-                shard_scheme: None,
-                token: None,
-                cache_resource_type: None
-            }
-        );
     }
 }
