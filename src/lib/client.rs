@@ -27,20 +27,13 @@ pub struct ClientBuilder {
 impl Client {
     pub async fn connect(&self) -> super::GenericResult<()> {
         let cluster_spawn = self.cluster.clone();
-        println!("Got past cluster clone");
 
-        tokio::spawn(async move { cluster_spawn.up().await }).await?;
-
-        println!("Got past cluster spawn");
+        cluster_spawn.up().await;
 
         let mut events = self.cluster.events();
 
-        println!("Got past cluster events");
-
         while let Some(data) = events.next().await {
             self.cache.update(&data.1);
-
-            println!("Got past events.next()");
 
             tokio::spawn(Client::handle_event(data));
         }
@@ -51,8 +44,6 @@ impl Client {
     async fn handle_event(data: (u64, Event)) -> super::GenericResult<()> {
         let (shard_id, event) = data;
 
-        println!("Got past handle_event");
-
         if let Event::ShardConnected(_) = event {
             crate::log!("Connected with shard {}", shard_id);
         }
@@ -62,7 +53,7 @@ impl Client {
 }
 
 impl ClientBuilder {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             cluster: None,
             cache: None,
@@ -138,7 +129,7 @@ impl ClientBuilder {
 
         let http = http_builder.build();
         let cache = cache_builder.build();
-        let cluster = cluster_builder.http_client(http.clone()).build().await?;
+        let cluster = cluster_builder.build().await?;
 
         Ok(Client {
             http,
