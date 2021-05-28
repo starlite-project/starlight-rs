@@ -1,0 +1,9 @@
+[package]
+name = "star-args"
+version = "0.1.0"
+authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+twilight-command-parser = "0.4"
+uwl = "0.6.0"

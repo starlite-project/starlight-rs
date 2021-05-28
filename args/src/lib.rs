@@ -1,5 +1,5 @@
-#![allow(dead_code)]
 use std::{borrow::Cow, error::Error as StdError, fmt, marker::PhantomData, str::FromStr};
+use twilight_command_parser::Arguments;
 use uwl::Stream;
 
 #[derive(Debug)]
@@ -473,6 +473,12 @@ impl Args {
     }
 }
 
+impl<'a> From<(Arguments<'a>, &[Delimiter])> for Args {
+    fn from(data: (Arguments<'a>, &[Delimiter])) -> Self {
+        Args::new(data.0.as_str(), data.1)
+    }
+}
+
 pub struct Iter<'a, T: FromStr> {
     args: &'a mut Args,
     state: State,
@@ -615,5 +621,5 @@ mod tests {
         );
     }
 
-    
+
 }

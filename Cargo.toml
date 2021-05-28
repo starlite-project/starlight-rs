@@ -12,12 +12,24 @@ dotenv = "0.15.0"
 futures = "0.3"
 lazy_static = "1.4.0"
 mimalloc = "0.1.25"
+star-args = { path = "./args" }
 tokio = { version = "1.6.0", features = ["macros", "rt-multi-thread"] }
 twilight-cache-inmemory = "0.4"
 twilight-gateway = { default-features = false, features = ["rustls", "simd-json", "simd-zlib"], version = "0.4" }
 twilight-http = { default-features = false, features = ["simd-json"], version = "0.4" }
 twilight-model = "0.4"
-uwl = "0.6.0"
 
 [build-dependencies]
 lang-build = { path = "./i18n-build" }
+
+[profile.release]
+lto = "fat"
+
+[profile.bench]
+lto = "fat"
+
+[workspace]
+members = [
+    "./args",
+    "./i18n-build"
+]
