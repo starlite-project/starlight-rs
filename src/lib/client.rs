@@ -38,7 +38,7 @@ impl Client {
             self.cache.update(&data.1);
             self.standby.process(&data.1);
 
-            tokio::spawn(Client::handle_event(data));
+            tokio::spawn(Self::handle_event(data));
         }
 
         Ok(())
@@ -47,8 +47,16 @@ impl Client {
     async fn handle_event(data: (u64, Event)) -> super::GenericResult<()> {
         let (shard_id, event) = data;
 
-        if let Event::ShardConnected(_) = event {
-            crate::log!("Connected with shard {}", shard_id);
+        match event {
+            Event::ShardConnected(_) => crate::log!("Connected with shard {}", shard_id),
+            Event::Ready(info) => {
+                let info = *info;
+                let username = info.user.name;
+                let discriminator = info.user.discriminator;
+                let id = info.user.id;
+                crate::log!("Ready as user {}#{} ({})", username, discriminator, id);
+            }
+            _ => {}
         }
 
         Ok(())
@@ -80,7 +88,7 @@ impl ClientBuilder {
         self
     }
 
-    pub fn intents(mut self, intents: Intents) -> Self {
+    pub const fn intents(mut self, intents: Intents) -> Self {
         self.intents = Some(intents);
 
         self
@@ -136,10 +144,10 @@ impl ClientBuilder {
         let standby = Standby::new();
 
         Ok(Client {
-            http,
             cache,
             cluster,
-            standby
+            http,
+            standby,
         })
     }
 }

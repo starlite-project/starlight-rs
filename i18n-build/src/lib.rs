@@ -51,6 +51,7 @@ fn process_json_files() -> IoResult<Vec<String>> {
     Ok(languages)
 }
 
+#[allow(clippy::branches_sharing_code)]
 fn process_json_entry_file(languages: Vec<String>) -> std::io::Result<()> {
     let file = File::open("i18n.json")?;
     let reader = BufReader::new(file);
@@ -66,7 +67,7 @@ fn process_json_entry_file(languages: Vec<String>) -> std::io::Result<()> {
     for (key, params) in map.iter() {
         let key = key.to_lowercase();
         let _ = writeln!(&mut fields, "    pub {}: &'static str,", key);
-        if params.len() == 0 {
+        if params.is_empty() {
             let _ = writeln!(&mut impls, "    pub fn {}(&self) -> String {{", key);
             let _ = writeln!(&mut impls, "        self.{}.to_owned()", key);
             let _ = writeln!(&mut impls, "    }}");

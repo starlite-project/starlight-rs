@@ -1,3 +1,7 @@
+#![warn(clippy::nursery, clippy::pedantic)]
+#![deny(clippy::correctness, clippy::perf, clippy::style)]
+#![allow(clippy::from_iter_instead_of_collect, clippy::module_name_repetitions)]
+
 #[macro_use]
 extern crate lazy_static;
 
