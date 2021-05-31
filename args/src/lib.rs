@@ -2,7 +2,7 @@ use std::{borrow::Cow, error::Error as StdError, fmt, marker::PhantomData, str::
 use twilight_command_parser::Arguments;
 use uwl::Stream;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub enum ArgError<E> {
     Eos,
@@ -43,6 +43,12 @@ impl Delimiter {
             Self::Single(c) => Cow::Owned(c.to_string()),
             Self::Multiple(s) => Cow::Borrowed(s),
         }
+    }
+}
+
+impl Default for Delimiter {
+    fn default() -> Self {
+        Self::Single(',')
     }
 }
 
@@ -479,6 +485,7 @@ impl<'a> From<(Arguments<'a>, &[Delimiter])> for Args {
     }
 }
 
+#[derive(Debug)]
 pub struct Iter<'a, T: FromStr> {
     args: &'a mut Args,
     state: State,
@@ -620,6 +627,4 @@ mod tests {
                 .collect::<Vec<String>>()
         );
     }
-
-
 }

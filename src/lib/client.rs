@@ -7,12 +7,14 @@ use twilight_gateway::{
 };
 use twilight_http::{client::ClientBuilder as HttpClientBuilder, Client as HttpClient};
 use twilight_model::gateway::Intents;
+use twilight_standby::Standby;
 
 #[derive(Debug, Clone)]
 pub struct Client {
     cache: Cache,
     cluster: Cluster,
     http: HttpClient,
+    standby: Standby,
 }
 
 #[derive(Debug, Default)]
@@ -34,6 +36,7 @@ impl Client {
 
         while let Some(data) = events.next().await {
             self.cache.update(&data.1);
+            self.standby.process(&data.1);
 
             tokio::spawn(Client::handle_event(data));
         }
@@ -63,7 +66,7 @@ impl ClientBuilder {
         }
     }
 
-    pub fn token(mut self, token: impl ToString) -> Self {
+    pub fn token(mut self, token: impl std::fmt::Display) -> Self {
         let token_string = token.to_string();
 
         let token_string = if token_string.starts_with("Bot ") {
@@ -130,11 +133,13 @@ impl ClientBuilder {
         let http = http_builder.build();
         let cache = cache_builder.build();
         let cluster = cluster_builder.build().await?;
+        let standby = Standby::new();
 
         Ok(Client {
             http,
             cache,
             cluster,
+            standby
         })
     }
 }

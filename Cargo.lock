@@ -664,6 +664,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
 
 [[package]]
+name = "permission-calculator"
+version = "0.1.0"
+dependencies = [
+ "twilight-model",
+]
+
+[[package]]
 name = "pin-project"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -990,12 +997,14 @@ dependencies = [
  "lang-build",
  "lazy_static",
  "mimalloc",
+ "permission-calculator",
  "star-args",
  "tokio",
  "twilight-cache-inmemory",
  "twilight-gateway",
  "twilight-http",
  "twilight-model",
+ "twilight-standby",
 ]
 
 [[package]]
@@ -1278,6 +1287,19 @@ dependencies = [
  "serde-value",
  "serde_repr",
  "tracing",
+]
+
+[[package]]
+name = "twilight-standby"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42cff37fb8f04dd2558fb6ca773aab0bac5d3a3a9ecc7fa016aac111287c506c"
+dependencies = [
+ "dashmap",
+ "futures-util",
+ "tokio",
+ "tracing",
+ "twilight-model",
 ]
 
 [[package]]

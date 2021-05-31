@@ -1,0 +1,8 @@
+[package]
+name = "permission-calculator"
+version = "0.1.0"
+authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+twilight-model = "0.4"
