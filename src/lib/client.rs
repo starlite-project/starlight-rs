@@ -11,10 +11,10 @@ use twilight_standby::Standby;
 
 #[derive(Debug, Clone)]
 pub struct Client {
-    cache: Cache,
-    cluster: Cluster,
-    http: HttpClient,
-    standby: Standby,
+    pub cache: Cache,
+    pub cluster: Cluster,
+    pub http: HttpClient,
+    pub standby: Standby,
 }
 
 #[derive(Debug, Default)]
@@ -94,41 +94,39 @@ impl ClientBuilder {
         self
     }
 
-    pub fn cluster_builder(
-        mut self,
-        cluster_fn: &(dyn Fn(ClusterBuilder) -> ClusterBuilder),
-    ) -> Self {
+    pub fn cluster_builder<F>(mut self, cluster_fn: F) -> Self
+    where
+        F: FnOnce(ClusterBuilder) -> ClusterBuilder,
+    {
         let intents = self.intents.expect("Need intents to build cluster");
         let token = self.token.clone().expect("Need token to build cluster");
 
-        let cluster_builder = (token, intents).into();
+        let cluster = cluster_fn((token, intents).into());
 
-        let built = cluster_fn(cluster_builder);
-
-        self.cluster = Some(built);
+        self.cluster = Some(cluster);
 
         self
     }
 
-    pub fn cache_builder(mut self, cache_fn: &(dyn Fn(CacheBuilder) -> CacheBuilder)) -> Self {
-        let cache_builder = CacheBuilder::new();
-
-        let built = cache_fn(cache_builder);
+    pub fn cache_builder<F>(mut self, cache_fn: F) -> Self
+    where
+        F: FnOnce(CacheBuilder) -> CacheBuilder,
+    {
+        let built = cache_fn(CacheBuilder::new());
 
         self.cache = Some(built);
 
         self
     }
 
-    pub fn http_builder(
-        mut self,
-        http_fn: &(dyn Fn(HttpClientBuilder) -> HttpClientBuilder),
-    ) -> Self {
-        let http_builder = HttpClientBuilder::new();
+    pub fn http_builder<F>(mut self, http_fn: F) -> Self
+    where
+        F: FnOnce(HttpClientBuilder) -> HttpClientBuilder,
+    {
+        let token = self.token.clone().expect("Need token to build http");
+        let http = http_fn(HttpClientBuilder::new()).token(token);
 
-        let built = http_fn(http_builder);
-
-        self.http = Some(built);
+        self.http = Some(http);
 
         self
     }

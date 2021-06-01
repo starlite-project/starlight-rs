@@ -1,5 +1,6 @@
 #![feature(test)]
 
+
 #[cfg(test)]
 mod benches {
     extern crate test;
