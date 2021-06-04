@@ -1,4 +1,4 @@
-use super::{MentionType, ParseMentionError, ParseMentionErrorType};
+use super::{MentionIter, MentionType, ParseMentionError, ParseMentionErrorType};
 use std::str::Chars;
 use twilight_model::id::{ChannelId, EmojiId, RoleId, UserId};
 
@@ -8,6 +8,14 @@ pub trait ParseMention: private::Sealed {
     fn parse(buf: &str) -> Result<Self, ParseMentionError<'_>>
     where
         Self: Sized;
+
+    #[must_use = "you must use the iterator to lazily"]
+    fn iter(buf: &str) -> MentionIter<'_, Self>
+    where
+        Self: Sized,
+    {
+        MentionIter::new(buf)
+    }
 }
 
 impl ParseMention for ChannelId {

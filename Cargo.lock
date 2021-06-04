@@ -1006,6 +1006,7 @@ dependencies = [
  "mimalloc",
  "permission-calculator",
  "star-args",
+ "star-mention",
  "tokio",
  "twilight-cache-inmemory",
  "twilight-gateway",

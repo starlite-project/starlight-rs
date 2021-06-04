@@ -4,6 +4,7 @@ mod iter;
 
 pub use self::{
     error::{ParseMentionError, ParseMentionErrorType},
+    iter::MentionIter,
     r#impl::ParseMention,
 };
 

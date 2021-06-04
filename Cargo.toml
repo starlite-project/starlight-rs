@@ -12,14 +12,24 @@ dotenv = "0.15.0"
 futures = "0.3"
 lazy_static = "1.4.0"
 mimalloc = "0.1.25"
-permission-calculator = { path = "./calculator" }
-star-args = { path = "./args" }
-tokio = { version = "1.6.0", features = ["macros", "rt-multi-thread"] }
 twilight-cache-inmemory = "0.4"
 twilight-gateway = { default-features = false, features = ["rustls", "simd-json", "simd-zlib"], version = "0.4" }
 twilight-http = { default-features = false, features = ["simd-json"], version = "0.4" }
 twilight-model = "0.4"
 twilight-standby = "0.4"
+
+[dependencies.permission-calculator]
+path = "./calculator"
+
+[dependencies.star-args]
+path = "./args"
+
+[dependencies.star-mention]
+path = "./mention"
+
+[dependencies.tokio]
+version = "1.6"
+features = ["macros", "rt-multi-thread"]
 
 [build-dependencies]
 lang-build = { path = "./i18n-build" }
