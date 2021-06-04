@@ -34,5 +34,6 @@ lto = "fat"
 members = [
     "./args",
     "./calculator",
-    "./i18n-build"
+    "./i18n-build",
+    "./mention"
 ]
