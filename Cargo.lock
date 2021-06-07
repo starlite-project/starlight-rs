@@ -3,18 +3,6 @@
 version = 3
 
 [[package]]
-name = "adler"
-version = "1.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f26201604c87b1e01bd3d98f8d5d9a8fcbb815e8cedb41ffccbeb4bf593a35fe"
-
-[[package]]
-name = "ahash"
-version = "0.3.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8fd72866655d1904d6b0997d0b07ba561047d070fbe29de039031c641b61217"
-
-[[package]]
 name = "autocfg"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -85,15 +73,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cmake"
-version = "0.1.45"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb6210b637171dfba4cda12e579ac6dc73f5165ad56133e5d72ef3131f320855"
-dependencies = [
- "cc",
-]
-
-[[package]]
 name = "core-foundation"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -116,15 +95,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed00c67cb5d0a7d64a44f6ad2668db7e7530311dd53ea79bcd4fb022c64911c8"
 dependencies = [
  "libc",
-]
-
-[[package]]
-name = "crc32fast"
-version = "1.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81156fece84ab6a9f2afdb109ce3ae577e42b1228441eded99bd77f627953b1a"
-dependencies = [
- "cfg-if",
 ]
 
 [[package]]
@@ -160,28 +130,6 @@ name = "dotenv"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
-
-[[package]]
-name = "flate2"
-version = "1.0.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cd3aec53de10fe96d7d8c565eb17f2c687bb5518a2ec453b5b1252964526abe0"
-dependencies = [
- "cfg-if",
- "crc32fast",
- "libc",
- "libz-sys",
- "miniz_oxide",
-]
-
-[[package]]
-name = "float-cmp"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1267f4ac4f343772758f7b1bdcbe767c218bbab93bb432acbf5162bbf85a6c4"
-dependencies = [
- "num-traits",
-]
 
 [[package]]
 name = "fnv"
@@ -334,26 +282,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "halfbrown"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c12499524b5585419ab2f51545a19b842263a373580a83c0eb98a0142a260a10"
-dependencies = [
- "hashbrown 0.7.2",
- "serde",
-]
-
-[[package]]
-name = "hashbrown"
-version = "0.7.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96282e96bfcd3da0d3aa9938bedf1e50df3269b6db08b4876d2da0bb1a0841cf"
-dependencies = [
- "ahash",
- "autocfg",
-]
-
-[[package]]
 name = "hashbrown"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -461,7 +389,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "824845a0bf897a9042383849b02c1bc219c2383772efcd5c6f9766fa4b81aef3"
 dependencies = [
  "autocfg",
- "hashbrown 0.9.1",
+ "hashbrown",
 ]
 
 [[package]]
@@ -508,28 +436,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "789da6d93f1b866ffe175afc5322a4d76c038605a1c3319bb57b06967ca98a36"
 
 [[package]]
-name = "libmimalloc-sys"
-version = "0.1.21"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2396cf99d2f58611cd69f0efeee4af3d2e2c7b61bed433515029163aa567e65c"
-dependencies = [
- "cc",
-]
-
-[[package]]
-name = "libz-sys"
-version = "1.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de5435b8549c16d423ed0c03dbaafe57cf6c3344744f1242520d59c9d8ecec66"
-dependencies = [
- "cc",
- "cmake",
- "libc",
- "pkg-config",
- "vcpkg",
-]
-
-[[package]]
 name = "log"
 version = "0.4.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -549,25 +455,6 @@ name = "memchr"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b16bd47d9e329435e309c58469fe0791c2d0d1ba96ec0954152a5ae2b04387dc"
-
-[[package]]
-name = "mimalloc"
-version = "0.1.25"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e7c6b11afd1e5e689ac96b6d18b1fc763398fe3d7eed99e8773426bc2033dfb"
-dependencies = [
- "libmimalloc-sys",
-]
-
-[[package]]
-name = "miniz_oxide"
-version = "0.4.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a92518e98c078586bc6c934028adcca4c92a53d6a958196de835170a01d84e4b"
-dependencies = [
- "adler",
- "autocfg",
-]
 
 [[package]]
 name = "mio"
@@ -664,13 +551,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
 
 [[package]]
-name = "permission-calculator"
-version = "0.1.0"
-dependencies = [
- "twilight-model",
-]
-
-[[package]]
 name = "pin-project"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -701,12 +581,6 @@ name = "pin-utils"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
-
-[[package]]
-name = "pkg-config"
-version = "0.3.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3831453b3449ceb48b6d9c7ad7c96d5ea673e9b470a1dc578c2ce6521230884c"
 
 [[package]]
 name = "ppv-lite86"
@@ -939,25 +813,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "simd-json"
-version = "0.4.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb1a57c9b8d86a530aa9a69e18b75c2ad6a07164b4e979792897db514535a826"
-dependencies = [
- "halfbrown",
- "serde",
- "serde_json",
- "simdutf8",
- "value-trait",
-]
-
-[[package]]
-name = "simdutf8"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c970da16e7c682fa90a261cf0724dee241c9f7831635ecc4e988ae8f3b505559"
-
-[[package]]
 name = "slab"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -988,13 +843,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "star-mention"
-version = "0.1.0"
-dependencies = [
- "twilight-model",
-]
-
-[[package]]
 name = "starlight-rs"
 version = "0.1.0"
 dependencies = [
@@ -1003,16 +851,15 @@ dependencies = [
  "futures",
  "lang-build",
  "lazy_static",
- "mimalloc",
- "permission-calculator",
  "star-args",
- "star-mention",
  "tokio",
  "twilight-cache-inmemory",
  "twilight-gateway",
  "twilight-http",
+ "twilight-mention",
  "twilight-model",
  "twilight-standby",
+ "twilight-util",
 ]
 
 [[package]]
@@ -1209,9 +1056,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-cache-inmemory"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50dbd417049e036ef3bb3036ff03e940811a1a3ce154e5de49b3142aba97cce0"
+version = "0.4.2"
+source = "git+https://github.com/twilight-rs/twilight.git#d563dcb67ff63bf1f15bf27a44a515a95583ad09"
 dependencies = [
  "bitflags",
  "dashmap",
@@ -1222,27 +1068,23 @@ dependencies = [
 
 [[package]]
 name = "twilight-command-parser"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8df1d7ee72cd2c745c7af8bd159749f04031310aa50ade56d26a07c226eb0d3a"
+version = "0.4.1"
+source = "git+https://github.com/twilight-rs/twilight.git#d563dcb67ff63bf1f15bf27a44a515a95583ad09"
 dependencies = [
  "unicase",
 ]
 
 [[package]]
 name = "twilight-gateway"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc6d8814fa4a2a13f5543364d95cf2293cf6b16e0cbce1592644e56fe1201f42"
+version = "0.4.1"
+source = "git+https://github.com/twilight-rs/twilight.git#d563dcb67ff63bf1f15bf27a44a515a95583ad09"
 dependencies = [
  "bitflags",
  "dashmap",
- "flate2",
  "futures-util",
  "once_cell",
  "serde",
  "serde_json",
- "simd-json",
  "tokio",
  "tokio-tungstenite",
  "tracing",
@@ -1255,8 +1097,7 @@ dependencies = [
 [[package]]
 name = "twilight-gateway-queue"
 version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca32c7b1a803cd295ceaeea9ad14a330775aaa87e087439f8ded1bee2945e120"
+source = "git+https://github.com/twilight-rs/twilight.git#d563dcb67ff63bf1f15bf27a44a515a95583ad09"
 dependencies = [
  "tokio",
  "tracing",
@@ -1265,9 +1106,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-http"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbe724aa4c3205d9f8c4719c4674c4a92120a6642feb57e7de368e62c24bb488"
+version = "0.4.2"
+source = "git+https://github.com/twilight-rs/twilight.git#d563dcb67ff63bf1f15bf27a44a515a95583ad09"
 dependencies = [
  "bytes",
  "futures-util",
@@ -1278,17 +1118,23 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_repr",
- "simd-json",
  "tokio",
  "tracing",
  "twilight-model",
 ]
 
 [[package]]
-name = "twilight-model"
+name = "twilight-mention"
 version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd4f5d2695c42e2628073384d141effefa49b2aa406afcd4294e1c0db5bfa51d"
+source = "git+https://github.com/twilight-rs/twilight.git#d563dcb67ff63bf1f15bf27a44a515a95583ad09"
+dependencies = [
+ "twilight-model",
+]
+
+[[package]]
+name = "twilight-model"
+version = "0.4.2"
+source = "git+https://github.com/twilight-rs/twilight.git#d563dcb67ff63bf1f15bf27a44a515a95583ad09"
 dependencies = [
  "bitflags",
  "serde",
@@ -1300,13 +1146,20 @@ dependencies = [
 [[package]]
 name = "twilight-standby"
 version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42cff37fb8f04dd2558fb6ca773aab0bac5d3a3a9ecc7fa016aac111287c506c"
+source = "git+https://github.com/twilight-rs/twilight.git#d563dcb67ff63bf1f15bf27a44a515a95583ad09"
 dependencies = [
  "dashmap",
  "futures-util",
  "tokio",
  "tracing",
+ "twilight-model",
+]
+
+[[package]]
+name = "twilight-util"
+version = "0.4.1"
+source = "git+https://github.com/twilight-rs/twilight.git#d563dcb67ff63bf1f15bf27a44a515a95583ad09"
+dependencies = [
  "twilight-model",
 ]
 
@@ -1378,24 +1231,6 @@ name = "uwl"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4bf03e0ca70d626ecc4ba6b0763b934b6f2976e8c744088bb3c1d646fbb1ad0"
-
-[[package]]
-name = "value-trait"
-version = "0.2.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b637f98040dfa411b01a85b238a8cadbd797b303c23007157dee4bbbd3a72af"
-dependencies = [
- "float-cmp",
- "halfbrown",
- "itoa",
- "ryu",
-]
-
-[[package]]
-name = "vcpkg"
-version = "0.2.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "025ce40a007e1907e58d5bc1a594def78e5573bb0b1160bc389634e8f12e4faa"
 
 [[package]]
 name = "version_check"

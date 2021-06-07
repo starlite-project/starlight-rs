@@ -30,7 +30,9 @@ impl Client {
     pub async fn connect(&self) -> super::GenericResult<()> {
         let cluster_spawn = self.cluster.clone();
 
-        cluster_spawn.up().await;
+        tokio::spawn(async move {
+            cluster_spawn.up().await;
+        });
 
         let mut events = self.cluster.events();
 
@@ -38,23 +40,28 @@ impl Client {
             self.cache.update(&data.1);
             self.standby.process(&data.1);
 
-            tokio::spawn(Self::handle_event(data));
+            self.handle(data).await?;
         }
 
         Ok(())
     }
 
-    async fn handle_event(data: (u64, Event)) -> super::GenericResult<()> {
+    async fn handle(&self, data: (u64, Event)) -> super::GenericResult<()> {
         let (shard_id, event) = data;
 
         match event {
             Event::ShardConnected(_) => crate::log!("Connected with shard {}", shard_id),
             Event::Ready(info) => {
-                let info = *info;
-                let username = info.user.name;
-                let discriminator = info.user.discriminator;
-                let id = info.user.id;
-                crate::log!("Ready as user {}#{} ({})", username, discriminator, id);
+                let user = (*info).user;
+                let username = user.name;
+                let discriminator = user.discriminator;
+                let id = user.id;
+                crate::log!(
+                    "Ready as user {username}#{discriminator} ({id})",
+                    username = username,
+                    discriminator = discriminator,
+                    id = id
+                );
             }
             _ => {}
         }

@@ -1,6 +1,5 @@
 #![feature(test)]
 
-
 #[cfg(test)]
 mod benches {
     extern crate test;
@@ -60,20 +59,23 @@ mod benches {
     fn iter_with_one_delimiter(b: &mut Bencher) {
         b.iter(|| {
             let mut args = Args::new("1,2,3,4,5,6,7,8,9,10", &[','.into()]);
-            args.iter::<String>().collect::<Result<Vec<_>, _>>().unwrap();
+            args.iter::<String>()
+                .collect::<Result<Vec<_>, _>>()
+                .unwrap();
         })
     }
 
     #[bench]
     fn iter_with_three_delimiters(b: &mut Bencher) {
         b.iter(|| {
-            let mut args = Args::new("1-2<3,4,5,6,7<8,9,10", &[
-                ','.into(),
-                '-'.into(),
-                '<'.into()
-            ]);
+            let mut args = Args::new(
+                "1-2<3,4,5,6,7<8,9,10",
+                &[','.into(), '-'.into(), '<'.into()],
+            );
 
-            args.iter::<String>().collect::<Result<Vec<_>, _>>().unwrap();
+            args.iter::<String>()
+                .collect::<Result<Vec<_>, _>>()
+                .unwrap();
         })
     }
 }

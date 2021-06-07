@@ -1,12 +1,10 @@
 #![warn(clippy::nursery, clippy::pedantic)]
-#![deny(clippy::correctness, clippy::perf, clippy::style)]
 #![allow(clippy::from_iter_instead_of_collect, clippy::module_name_repetitions)]
 
 #[macro_use]
 extern crate lazy_static;
 
 use lib::{client::ClientBuilder, GenericResult};
-use mimalloc::MiMalloc;
 use std::env;
 use twilight_cache_inmemory::ResourceType;
 use twilight_gateway::cluster::ShardScheme;
@@ -15,8 +13,6 @@ use twilight_model::gateway::Intents;
 mod i18n;
 mod lib;
 
-#[global_allocator]
-static GLOBAL: MiMalloc = MiMalloc;
 
 #[tokio::main]
 async fn main() -> GenericResult<()> {

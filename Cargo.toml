@@ -11,25 +11,37 @@ chrono = "0.4"
 dotenv = "0.15.0"
 futures = "0.3"
 lazy_static = "1.4.0"
-mimalloc = "0.1.25"
-twilight-cache-inmemory = "0.4"
-twilight-gateway = { default-features = false, features = ["rustls", "simd-json", "simd-zlib"], version = "0.4" }
-twilight-http = { default-features = false, features = ["simd-json"], version = "0.4" }
-twilight-model = "0.4"
-twilight-standby = "0.4"
-
-[dependencies.permission-calculator]
-path = "./calculator"
 
 [dependencies.star-args]
 path = "./args"
 
-[dependencies.star-mention]
-path = "./mention"
-
 [dependencies.tokio]
 version = "1.6"
 features = ["macros", "rt-multi-thread"]
+
+[dependencies.twilight-cache-inmemory]
+git = "https://github.com/twilight-rs/twilight.git"
+
+[dependencies.twilight-gateway]
+git = "https://github.com/twilight-rs/twilight.git"
+default-features = false
+features = ["rustls"]
+
+[dependencies.twilight-http]
+git = "https://github.com/twilight-rs/twilight.git"
+
+[dependencies.twilight-mention]
+git = "https://github.com/twilight-rs/twilight.git"
+
+[dependencies.twilight-model]
+git = "https://github.com/twilight-rs/twilight.git"
+
+[dependencies.twilight-standby]
+git = "https://github.com/twilight-rs/twilight.git"
+
+[dependencies.twilight-util]
+git = "https://github.com/twilight-rs/twilight.git"
+features = ["snowflake"]
 
 [build-dependencies]
 lang-build = { path = "./i18n-build" }
@@ -43,7 +55,5 @@ lto = "fat"
 [workspace]
 members = [
     "./args",
-    "./calculator",
     "./i18n-build",
-    "./mention"
 ]

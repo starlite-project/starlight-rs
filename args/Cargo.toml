@@ -5,5 +5,7 @@ authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-twilight-command-parser = "0.4"
 uwl = "0.6.0"
+
+[dependencies.twilight-command-parser]
+git = "https://github.com/twilight-rs/twilight.git"
