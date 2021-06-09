@@ -1,6 +1,10 @@
 use super::{EventHandler, State};
+use std::fmt::{Debug, Formatter, Result as FmtResult};
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
-use twilight_gateway::{cluster::ClusterBuilder, Intents};
+use twilight_gateway::{
+    cluster::{ClusterBuilder, ClusterStartError},
+    Intents,
+};
 use twilight_http::client::ClientBuilder as HttpBuilder;
 use twilight_standby::Standby;
 
@@ -98,17 +102,18 @@ impl StateBuilder {
         self
     }
 
-    pub async fn build(self) -> super::super::GenericResult<State> {
+    pub async fn build(self) -> Result<State, ClusterStartError> {
         let token = self.token.unwrap_or_default();
         let http_builder = self.http.unwrap_or_default();
         let cluster_builder = self.cluster.expect("Need cluster to build state");
         let cache_builder = self.cache.unwrap_or_default();
+        let event_handler_box = self.event_handler.unwrap_or_default();
+        let event_handler = event_handler_box.into();
 
         let http = http_builder.token(token).build();
         let cache = cache_builder.build();
         let cluster = cluster_builder.http_client(http.clone()).build().await?;
         let standby = Standby::new();
-        let event_handler = self.event_handler;
 
         Ok(State {
             cache,
@@ -117,5 +122,17 @@ impl StateBuilder {
             standby,
             event_handler,
         })
+    }
+}
+
+impl Debug for StateBuilder {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        f.debug_struct("StateBuilder")
+            .field("cluster", &self.cluster)
+            .field("cache", &self.cache)
+            .field("http", &self.http)
+            .field("token", &self.token)
+            .field("intents", &self.intents)
+            .finish()
     }
 }
