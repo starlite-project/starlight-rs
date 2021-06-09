@@ -1,4 +1,4 @@
-use super::{EventHandler, State};
+use super::State;
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
 use twilight_gateway::{
@@ -15,18 +15,16 @@ pub struct StateBuilder {
     http: Option<HttpBuilder>,
     token: Option<String>,
     intents: Option<Intents>,
-    event_handler: Option<Box<dyn EventHandler + 'static>>,
 }
 
 impl StateBuilder {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             cluster: None,
             cache: None,
             http: None,
             token: None,
             intents: None,
-            event_handler: None,
         }
     }
 
@@ -81,12 +79,6 @@ impl StateBuilder {
         self
     }
 
-    pub fn event_handler<H: EventHandler + 'static>(mut self, handler: H) -> Self {
-        self.event_handler = Some(Box::new(handler));
-
-        self
-    }
-
     pub fn http_builder<F>(mut self, http_fn: F) -> Self
     where
         F: FnOnce(HttpBuilder) -> HttpBuilder,
@@ -107,8 +99,6 @@ impl StateBuilder {
         let http_builder = self.http.unwrap_or_default();
         let cluster_builder = self.cluster.expect("Need cluster to build state");
         let cache_builder = self.cache.unwrap_or_default();
-        let event_handler_box = self.event_handler.unwrap_or_default();
-        let event_handler = event_handler_box.into();
 
         let http = http_builder.token(token).build();
         let cache = cache_builder.build();
@@ -120,7 +110,6 @@ impl StateBuilder {
             cluster,
             http,
             standby,
-            event_handler,
         })
     }
 }
