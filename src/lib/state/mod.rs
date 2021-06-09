@@ -11,7 +11,7 @@ mod events;
 
 pub use self::builder::StateBuilder;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct State {
     pub cache: Cache,
     pub cluster: Cluster,
@@ -34,6 +34,8 @@ impl State {
         let mut events = state.cluster.events();
 
         while let Some((_, event)) = events.next().await {
+            state.cache.update(&event);
+            state.standby.process(&event);
             let state_clone = Arc::clone(&state);
 
             tokio::spawn(async move {

@@ -8,7 +8,6 @@ pub type EventResult = Result<(), error::EventError>;
 
 #[allow(clippy::enum_glob_use, clippy::match_wildcard_for_single_variants)]
 pub async fn handle(event: Event, state: Arc<State>) -> EventResult {
-    dbg!(event.clone());
     use Event::*;
     match event {
         BanAdd(ban) => internal::ban_add(state, ban).await?,
@@ -119,7 +118,7 @@ mod internal {
         member_remove: [MemberRemove];
         member_update: [MemberUpdate];
         member_chunk: [MemberChunk];
-        message_create: [MessageCreate];
+        // message_create: [MessageCreate];
         message_delete: [MessageDelete];
         message_delete_bulk: [MessageDeleteBulk];
         message_update: [MessageUpdate];
@@ -152,7 +151,7 @@ mod internal {
         webhooks_update: [WebhooksUpdate];
     }
 
-    pub(super) async fn ready(_: Arc<State>, ready: Ready) -> EventResult {
+    pub(super) async fn ready(state: Arc<State>, ready: Ready) -> EventResult {
         let user = ready.user;
         let username = user.name;
         let discriminator = user.discriminator;
@@ -163,6 +162,11 @@ mod internal {
             discriminator = discriminator,
             id = id
         );
+        Ok(())
+    }
+
+    pub(super) async fn message_create(state: Arc<State>, _: MessageCreate) -> EventResult {
+        dbg!(&(*state).cache);
         Ok(())
     }
 }

@@ -47,6 +47,9 @@ features = ["snowflake"]
 [build-dependencies]
 lang-build = { path = "./i18n-build" }
 
+[dev-dependencies]
+static_assertions = "1"
+
 [profile.release]
 lto = "fat"
 

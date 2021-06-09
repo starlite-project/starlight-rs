@@ -4,7 +4,10 @@
 #[macro_use]
 extern crate lazy_static;
 
-use lib::{state::{StateBuilder, State}, GenericResult};
+use lib::{
+    state::{State, StateBuilder},
+    GenericResult,
+};
 use std::env;
 use twilight_cache_inmemory::ResourceType;
 use twilight_gateway::cluster::ShardScheme;

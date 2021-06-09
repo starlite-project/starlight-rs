@@ -1,5 +1,4 @@
 use super::State;
-use std::fmt::{Debug, Formatter, Result as FmtResult};
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
 use twilight_gateway::{
     cluster::{ClusterBuilder, ClusterStartError},
@@ -8,7 +7,7 @@ use twilight_gateway::{
 use twilight_http::client::ClientBuilder as HttpBuilder;
 use twilight_standby::Standby;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct StateBuilder {
     cluster: Option<ClusterBuilder>,
     cache: Option<CacheBuilder>,
@@ -111,17 +110,5 @@ impl StateBuilder {
             http,
             standby,
         })
-    }
-}
-
-impl Debug for StateBuilder {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        f.debug_struct("StateBuilder")
-            .field("cluster", &self.cluster)
-            .field("cache", &self.cache)
-            .field("http", &self.http)
-            .field("token", &self.token)
-            .field("intents", &self.intents)
-            .finish()
     }
 }
