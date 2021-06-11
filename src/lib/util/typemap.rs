@@ -12,39 +12,43 @@ pub trait Key: Any {
 }
 
 #[derive(Debug, Default)]
-pub struct TypeMap(HashMap<TypeId, Box<(dyn Any + Send + Sync)>>);
+pub struct TypeMap {
+    data: HashMap<TypeId, Box<(dyn Any + Send + Sync)>>,
+}
 
 impl TypeMap {
     pub fn new() -> Self {
-        Self(HashMap::new())
+        Self {
+            data: HashMap::new(),
+        }
     }
 
     pub fn contains_key<T>(&self) -> bool
     where
         T: Key,
     {
-        self.0.contains_key(&TypeId::of::<T>())
+        self.data.contains_key(&TypeId::of::<T>())
     }
 
     pub fn insert<T>(&mut self, value: T::Value)
     where
         T: Key,
     {
-        self.0.insert(TypeId::of::<T>(), Box::new(value));
+        self.data.insert(TypeId::of::<T>(), Box::new(value));
     }
 
     pub fn entry<T>(&mut self) -> Entry<'_, T>
     where
         T: Key,
     {
-        self.0.entry(TypeId::of::<T>()).into()
+        self.data.entry(TypeId::of::<T>()).into()
     }
 
     pub fn get<T>(&self) -> Option<&T::Value>
     where
         T: Key,
     {
-        self.0
+        self.data
             .get(&TypeId::of::<T>())
             .and_then(|b| b.downcast_ref::<T::Value>())
     }
@@ -53,7 +57,7 @@ impl TypeMap {
     where
         T: Key,
     {
-        self.0
+        self.data
             .get_mut(&TypeId::of::<T>())
             .and_then(|b| b.downcast_mut::<T::Value>())
     }
@@ -62,7 +66,7 @@ impl TypeMap {
     where
         T: Key,
     {
-        self.0
+        self.data
             .remove(&TypeId::of::<T>())
             .and_then(|b| (b as Box<dyn Any>).downcast::<T::Value>().ok())
             .map(|b| *b)
@@ -121,13 +125,14 @@ where
     }
 }
 
-impl<'a, K> From<HashMapEntry<'a, TypeId, Box<(dyn Any + Send + Sync)>>> for Entry<'a, K> where
-    K: Key
+impl<'a, K> From<HashMapEntry<'a, TypeId, Box<(dyn Any + Send + Sync)>>> for Entry<'a, K>
+where
+    K: Key,
 {
     fn from(entry: HashMapEntry<'a, TypeId, Box<(dyn Any + Send + Sync)>>) -> Self {
         match entry {
             HashMapEntry::Occupied(entry) => Self::Occupied(entry.into()),
-            HashMapEntry::Vacant(entry) => Self::Vacant(entry.into())
+            HashMapEntry::Vacant(entry) => Self::Vacant(entry.into()),
         }
     }
 }

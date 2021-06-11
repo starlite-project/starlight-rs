@@ -1,6 +1,7 @@
 #![allow(dead_code)]
+use super::util::TypeMap;
 use futures::StreamExt;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 use twilight_cache_inmemory::InMemoryCache as Cache;
 use twilight_gateway::Cluster;
 use twilight_http::Client as HttpClient;
@@ -17,6 +18,7 @@ pub struct State {
     pub cluster: Cluster,
     pub http: HttpClient,
     pub standby: Standby,
+    pub data: Arc<RwLock<TypeMap>>,
 }
 
 impl State {

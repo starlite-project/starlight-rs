@@ -1,3 +1,7 @@
+use std::sync::{Arc, RwLock};
+
+use crate::lib::util::{Key, TypeMap};
+
 use super::State;
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
 use twilight_gateway::{
@@ -14,6 +18,7 @@ pub struct StateBuilder {
     http: Option<HttpBuilder>,
     token: Option<String>,
     intents: Option<Intents>,
+    data: Option<TypeMap>,
 }
 
 impl StateBuilder {
@@ -24,6 +29,7 @@ impl StateBuilder {
             http: None,
             token: None,
             intents: None,
+            data: None,
         }
     }
 
@@ -93,6 +99,22 @@ impl StateBuilder {
         self
     }
 
+    pub fn insert_data<T>(mut self, value: T::Value) -> Self
+    where
+        T: Key,
+    {
+        if let Some(ref mut data) = self.data {
+            data.insert::<T>(value);
+        } else {
+            let mut type_map = TypeMap::new();
+            type_map.insert::<T>(value);
+
+            self.data = Some(type_map);
+        }
+
+        self
+    }
+
     pub async fn build(self) -> Result<State, ClusterStartError> {
         let token = self.token.unwrap_or_default();
         let http_builder = self.http.unwrap_or_default();
@@ -103,12 +125,17 @@ impl StateBuilder {
         let cache = cache_builder.build();
         let cluster = cluster_builder.http_client(http.clone()).build().await?;
         let standby = Standby::new();
+        let data = self
+            .data
+            .map(|val| Arc::new(RwLock::new(val)))
+            .unwrap_or_default();
 
         Ok(State {
             cache,
             cluster,
             http,
             standby,
+            data,
         })
     }
 }
