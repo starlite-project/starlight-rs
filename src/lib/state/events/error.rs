@@ -9,15 +9,15 @@ pub struct EventError {
     pub source: Option<Box<dyn Error + Send + Sync>>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum EventErrorType {
-    Unknown,
+    EventFailed { message: String },
 }
 
 impl EventError {
     #[must_use]
-    pub const fn kind(&self) -> EventErrorType {
-        self.kind
+    pub fn kind(&self) -> EventErrorType {
+        self.kind.clone()
     }
 
     #[must_use]
@@ -33,12 +33,8 @@ impl EventError {
 impl Display for EventError {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match self.kind {
-            EventErrorType::Unknown => {
-                if let Some(source) = &self.source {
-                    Display::fmt(source, f)
-                } else {
-                    write!(f, "Unknown error")
-                }
+            EventErrorType::EventFailed { ref message } => {
+                write!(f, "Event failed with message: {}", message.clone())
             }
         }
     }
