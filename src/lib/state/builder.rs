@@ -3,10 +3,11 @@ use std::sync::{Arc, RwLock};
 use crate::lib::util::{Key, TypeMap};
 
 use super::State;
+use futures::Stream;
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
 use twilight_gateway::{
     cluster::{ClusterBuilder, ClusterStartError},
-    Intents,
+    Event, Intents,
 };
 use twilight_http::client::ClientBuilder as HttpBuilder;
 use twilight_standby::Standby;
@@ -115,7 +116,9 @@ impl StateBuilder {
         self
     }
 
-    pub async fn build(self) -> Result<State, ClusterStartError> {
+    pub async fn build(
+        self,
+    ) -> Result<(State, impl Stream<Item = (u64, Event)>), ClusterStartError> {
         let token = self.token.unwrap_or_default();
         let http_builder = self.http.unwrap_or_default();
         let cluster_builder = self.cluster.expect("Need cluster to build state");
@@ -130,12 +133,15 @@ impl StateBuilder {
             .map(|val| Arc::new(RwLock::new(val)))
             .unwrap_or_default();
 
-        Ok(State {
-            cache,
-            cluster,
-            http,
-            standby,
-            data,
-        })
+        Ok((
+            State {
+                cache,
+                cluster: cluster.0,
+                http,
+                standby,
+                data,
+            },
+            cluster.1,
+        ))
     }
 }

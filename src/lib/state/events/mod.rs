@@ -112,6 +112,7 @@ mod internal {
         guild_emojis_update: [GuildEmojisUpdate];
         guild_integrations_update: [GuildIntegrationsUpdate];
         guild_update: [GuildUpdate];
+        interaction_create: [InteractionCreate];
         invite_create: [InviteCreate];
         invite_delete: [InviteDelete];
         member_add: [MemberAdd];
