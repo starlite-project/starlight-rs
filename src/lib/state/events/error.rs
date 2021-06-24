@@ -34,7 +34,8 @@ impl Display for EventError {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match self.kind {
             EventErrorType::EventFailed { ref message } => {
-                write!(f, "Event failed with message: {}", message.clone())
+                f.write_str("event failed with message: ")?;
+                Display::fmt(message, f)
             }
         }
     }

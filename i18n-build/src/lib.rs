@@ -1,3 +1,5 @@
+#![warn(clippy::nursery, clippy::pedantic)]
+
 use std::{
     collections::HashMap,
     fmt::Write as FmtWrite,

@@ -1,3 +1,5 @@
+#![warn(clippy::nursery, clippy::pedantic)]
+
 use std::{borrow::Cow, error::Error as StdError, fmt, marker::PhantomData, str::FromStr};
 use twilight_command_parser::Arguments;
 use uwl::Stream;
