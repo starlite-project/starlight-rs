@@ -66,6 +66,8 @@ lto = "fat"
 members = [
     "./args",
     "./lang_old",
+    "./lang/server",
+    "./lang/model",
     "./i18n-build",
     "./test"
 ]
