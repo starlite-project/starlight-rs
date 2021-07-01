@@ -5,4 +5,4 @@ edition = "2018"
 authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
 
 [dependencies.star-lang]
-path = "../lang_old"
+path = "../lang"
