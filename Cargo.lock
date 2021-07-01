@@ -642,6 +642,7 @@ version = "0.1.0"
 name = "lang-server"
 version = "0.1.0"
 dependencies = [
+ "rand",
  "rocket",
 ]
 

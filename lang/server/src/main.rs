@@ -1,11 +1,30 @@
-use rocket::{get, launch, routes};
+use rocket::{
+    data::{Data, ToByteUnit},
+    get,
+    http::uri::Absolute,
+    launch, main as rocket_main,
+    response::content::Plain,
+    routes,
+    tokio::fs::{self, File},
+};
+use self::paste_id::PasteId;
 
-#[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
+mod paste_id;
+
+const HOST: Absolute<'static> = uri!("http://localhost:8000");
+
+const ID_LENGTH: usize = 3;
+
+#[get("/hello/<name>")]
+fn hello(name: &str) -> String {
+    format!("Hello, {}!", name)
 }
 
-#[launch]
-fn launch_rocket() -> _ {
-    rocket::build().mount("/", routes![index])
+#[rocket_main]
+async fn main() {
+    rocket::build()
+        .mount("/", routes![hello])
+        .launch()
+        .await
+        .unwrap();
 }

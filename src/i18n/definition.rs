@@ -14,3 +14,6 @@ impl Language {
         self.ping.to_owned()
     }
 }
+ed()
+    }
+}
