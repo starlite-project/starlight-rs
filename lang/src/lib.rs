@@ -10,7 +10,14 @@ pub mod error;
 
 use self::error::LanguageErrorType;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, convert::TryFrom, fmt::{Display, Formatter, Result as FmtResult}, fs, io::BufReader, path::Path};
+use std::{
+    collections::HashMap,
+    convert::TryFrom,
+    fmt::{Display, Formatter, Result as FmtResult},
+    fs,
+    io::BufReader,
+    path::Path,
+};
 
 pub use self::error::LanguageError;
 
@@ -65,13 +72,7 @@ impl LanguageEntry {
 
     pub fn write(&self) -> LanguageResult<String> {
         if !self.params.is_empty() {
-            return Err(LanguageError {
-                kind: LanguageErrorType::InvalidParams {
-                    expected: self.params.len(),
-                    found: 0,
-                },
-                source: None,
-            });
+            return Err((self.params.len(), 0_usize).into());
         }
 
         Ok(self.base.clone())
@@ -79,13 +80,7 @@ impl LanguageEntry {
 
     pub fn write_params(&self, params: &[&str]) -> LanguageResult<String> {
         if params.len() != self.params.len() {
-            return Err(LanguageError {
-                kind: error::LanguageErrorType::InvalidParams {
-                    expected: self.params.len(),
-                    found: params.len(),
-                },
-                source: None,
-            });
+            return Err((self.params.len(), params.len()).into());
         }
 
         let mut base = self.base.clone();

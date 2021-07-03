@@ -2,6 +2,7 @@ use std::{
     error::Error,
     fmt::{Display, Formatter, Result as FmtResult},
 };
+use star_error::StarError;
 
 #[derive(Debug)]
 pub struct EventError {
@@ -14,18 +15,18 @@ pub enum EventErrorType {
     EventFailed { message: String },
 }
 
-impl EventError {
-    #[must_use]
-    pub fn kind(&self) -> EventErrorType {
+impl StarError for EventError {
+    type Kind = EventErrorType;
+
+    fn kind(&self) -> Self::Kind {
         self.kind.clone()
     }
 
-    #[must_use]
-    pub fn into_source(self) -> Option<Box<dyn Error + Send + Sync>> {
+    fn into_source(self) -> Option<Box<dyn Error + Send + Sync>> {
         self.source
     }
 
-    pub fn into_parts(self) -> (EventErrorType, Option<Box<dyn Error + Send + Sync>>) {
+    fn into_parts(self) -> (Self::Kind, Option<Box<dyn Error + Send + Sync>>) {
         (self.kind, self.source)
     }
 }

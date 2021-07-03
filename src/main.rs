@@ -1,9 +1,6 @@
 #![warn(clippy::nursery, clippy::pedantic)]
 #![allow(clippy::from_iter_instead_of_collect, clippy::module_name_repetitions)]
 
-#[macro_use]
-extern crate lazy_static;
-
 use futures::StreamExt;
 use lib::{state::StateBuilder, GenericResult};
 use std::env;
@@ -12,7 +9,6 @@ use twilight_cache_inmemory::ResourceType;
 use twilight_gateway::{cluster::ShardScheme, EventTypeFlags};
 use twilight_model::gateway::Intents;
 
-mod i18n;
 mod lib;
 
 #[tokio::main]

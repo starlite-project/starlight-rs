@@ -1,4 +1,5 @@
 use serde_json::Error as JsonError;
+use star_error::StarError;
 use std::{
     error::Error,
     fmt::{Display, Formatter, Result as FmtResult},
@@ -11,14 +12,18 @@ pub struct LanguageError {
     pub(super) source: Option<Box<dyn Error + Send + Sync>>,
 }
 
-impl LanguageError {
-    #[must_use = "retrieving the type has no effect if left unused"]
-    pub const fn kind(&self) -> LanguageErrorType {
+impl StarError for LanguageError {
+    type Kind = LanguageErrorType;
+
+    fn kind(&self) -> Self::Kind {
         self.kind
     }
 
-    #[must_use = "consuming the error into its parts has no effect if left unused"]
-    pub fn into_parts(self) -> (LanguageErrorType, Option<Box<dyn Error + Send + Sync>>) {
+    fn into_source(self) -> Option<Box<dyn Error + Send + Sync>> {
+        self.source
+    }
+
+    fn into_parts(self) -> (Self::Kind, Option<Box<dyn Error + Send + Sync>>) {
         (self.kind, self.source)
     }
 }
@@ -65,10 +70,43 @@ impl From<JsonError> for LanguageError {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+impl From<(usize, usize)> for LanguageError {
+    fn from((expected, found): (usize, usize)) -> Self {
+        Self {
+            kind: LanguageErrorType::InvalidParams { expected, found },
+            source: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LanguageErrorType {
     Io,
     Deser,
     InvalidParams { expected: usize, found: usize },
     DirectoryFound,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{LanguageError, LanguageErrorType};
+    use star_error::StarError;
+    use static_assertions::assert_impl_all;
+    use std::{
+        error::Error,
+        fmt::{Debug, Display},
+    };
+
+    assert_impl_all!(LanguageError: Debug, Display, Error, StarError);
+    assert_impl_all!(LanguageErrorType: Clone, Copy, Debug);
+
+    #[test]
+    fn kind() {
+        let err = LanguageError {
+            kind: LanguageErrorType::Io,
+            source: None,
+        };
+
+        assert_eq!(err.kind(), LanguageErrorType::Io);
+    }
 }
