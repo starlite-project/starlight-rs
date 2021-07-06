@@ -2,7 +2,7 @@
 use super::util::TypeMap;
 use std::sync::{Arc, RwLock};
 use twilight_cache_inmemory::InMemoryCache as Cache;
-use twilight_gateway::Cluster;
+use twilight_gateway::{Cluster, Event};
 use twilight_http::Client as HttpClient;
 use twilight_standby::Standby;
 
@@ -27,5 +27,10 @@ impl State {
         tokio::spawn(async move {
             cluster_spawn.up().await;
         });
+    }
+
+    pub fn handle_event(&self, event: &Event) {
+        self.cache.update(event);
+        self.standby.process(event);
     }
 }

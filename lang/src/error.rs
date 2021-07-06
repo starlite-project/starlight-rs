@@ -8,15 +8,15 @@ use std::{
 
 #[derive(Debug)]
 pub struct LanguageError {
-    pub(super) kind: LanguageErrorType,
-    pub(super) source: Option<Box<dyn Error + Send + Sync>>,
+    pub(crate) kind: LanguageErrorType,
+    pub(crate) source: Option<Box<dyn Error + Send + Sync>>,
 }
 
 impl StarError for LanguageError {
     type Kind = LanguageErrorType;
 
     fn kind(&self) -> Self::Kind {
-        self.kind
+        self.kind.clone()
     }
 
     fn into_source(self) -> Option<Box<dyn Error + Send + Sync>> {
@@ -30,16 +30,27 @@ impl StarError for LanguageError {
 
 impl Display for LanguageError {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        match self.kind {
+        match &self.kind {
             LanguageErrorType::Io => f.write_str("an IO error occured"),
             LanguageErrorType::Deser => f.write_str("a deserialization error occured"),
             LanguageErrorType::InvalidParams { expected, found } => {
                 f.write_str("invalid number of params were provided, expected ")?;
-                Display::fmt(&expected, f)?;
+                Display::fmt(expected, f)?;
                 f.write_str(" found ")?;
-                Display::fmt(&found, f)
+                Display::fmt(found, f)
             }
             LanguageErrorType::DirectoryFound => f.write_str("an invalid file type was found"),
+            LanguageErrorType::LanguageNotFound(lang) => {
+                f.write_str("the language ")?;
+                Display::fmt(lang, f)?;
+                f.write_str(" was not found")
+            }
+            LanguageErrorType::EntryNotFound(lang, entry) => {
+                f.write_str("the entry ")?;
+                Display::fmt(entry, f)?;
+                f.write_str(" was not found in lang ")?;
+                Display::fmt(lang, f)
+            }
         }
     }
 }
@@ -79,12 +90,32 @@ impl From<(usize, usize)> for LanguageError {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+impl From<String> for LanguageError {
+    fn from(lang: String) -> Self {
+        Self {
+            kind: LanguageErrorType::LanguageNotFound(lang),
+            source: None,
+        }
+    }
+}
+
+impl From<(String, String)> for LanguageError {
+    fn from((lang, entry): (String, String)) -> Self {
+        Self {
+            kind: LanguageErrorType::EntryNotFound(lang, entry),
+            source: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum LanguageErrorType {
     Io,
     Deser,
     InvalidParams { expected: usize, found: usize },
     DirectoryFound,
+    LanguageNotFound(String),
+    EntryNotFound(String, String),
 }
 
 #[cfg(test)]
@@ -98,7 +129,7 @@ mod tests {
     };
 
     assert_impl_all!(LanguageError: Debug, Display, Error, StarError);
-    assert_impl_all!(LanguageErrorType: Clone, Copy, Debug);
+    assert_impl_all!(LanguageErrorType: Clone, Debug);
 
     #[test]
     fn kind() {

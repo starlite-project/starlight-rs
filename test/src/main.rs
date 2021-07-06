@@ -1,8 +1,6 @@
-#![feature(backtrace)]
-
 use star_lang::*;
 
-fn main() {
+fn main() -> LanguageResult<()> {
     let lang = LangMap::from_dir("./languages").unwrap();
 
     let english = lang.get("en_us").unwrap();
@@ -13,11 +11,15 @@ fn main() {
 
     dbg!(ping.clone());
 
-    dbg!(ping.write().unwrap());
+    dbg!(ping.run().unwrap());
 
     let pong = english.get("pong").unwrap();
 
     dbg!(pong.clone());
 
-    dbg!(pong.write_params(&["10"]).unwrap());
+    dbg!(pong.run_params(&["10"]).unwrap());
+
+    dbg!(i18n!(lang, "en_us", "ping"));
+
+    Ok(())
 }

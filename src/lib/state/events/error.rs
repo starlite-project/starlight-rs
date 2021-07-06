@@ -1,8 +1,8 @@
+use star_error::StarError;
 use std::{
     error::Error,
     fmt::{Display, Formatter, Result as FmtResult},
 };
-use star_error::StarError;
 
 #[derive(Debug)]
 pub struct EventError {
@@ -48,4 +48,22 @@ impl Error for EventError {
             .as_ref()
             .map(|source| &**source as &(dyn Error + 'static))
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{EventError, EventErrorType};
+    use star_error::StarError;
+    use static_assertions::assert_impl_all;
+    use std::{
+        error::Error,
+        fmt::{Debug, Display},
+    };
+
+    assert_impl_all!(
+        EventError: Debug,
+        Display,
+        Error,
+        StarError<Kind = EventErrorType>
+    );
 }

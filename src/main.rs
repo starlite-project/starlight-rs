@@ -32,8 +32,7 @@ async fn main() -> GenericResult<()> {
     let state = Arc::new(client);
 
     while let Some((_, event)) = events.next().await {
-        state.cache.update(&event);
-        state.standby.process(&event);
+        state.handle_event(&event);
         let state_clone = Arc::clone(&state);
 
         tokio::spawn(async move {

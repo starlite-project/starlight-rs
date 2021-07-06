@@ -1,0 +1,10 @@
+{
+    "ping": {
+        "base": "Ping...",
+        "params": []
+    },
+    "pong": {
+        "base": "Pong! Took [latency] milliseconds",
+        "params": ["latency"]
+    }
+}
