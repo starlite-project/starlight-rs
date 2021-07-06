@@ -5,7 +5,6 @@ edition = "2018"
 authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
 
 [dependencies]
-bincode = "1"
 serde_json = "1"
 
 [dependencies.serde]
