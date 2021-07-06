@@ -1,4 +1,0 @@
-{
-    "PING": "Ping...",
-    "PONG": "Pong! I took {latency} milliseconds!"
-}

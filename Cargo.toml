@@ -51,9 +51,6 @@ git = "https://github.com/twilight-rs/twilight.git"
 git = "https://github.com/twilight-rs/twilight.git"
 features = ["snowflake"]
 
-[build-dependencies]
-lang-build = { path = "./i18n-build" }
-
 [dev-dependencies]
 static_assertions = "1"
 
@@ -68,6 +65,5 @@ members = [
     "./args",
     "./error",
     "./lang",
-    "./i18n-build",
     "./test"
 ]
