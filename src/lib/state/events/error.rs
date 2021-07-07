@@ -3,6 +3,7 @@ use std::{
     error::Error,
     fmt::{Display, Formatter, Result as FmtResult},
 };
+use twilight_http::error::Error as HttpError;
 
 #[derive(Debug)]
 pub struct EventError {
@@ -13,6 +14,7 @@ pub struct EventError {
 #[derive(Debug, Clone)]
 pub enum EventErrorType {
     EventFailed { message: String },
+    HttpError,
 }
 
 impl StarError for EventError {
@@ -38,6 +40,7 @@ impl Display for EventError {
                 f.write_str("event failed with message: ")?;
                 Display::fmt(message, f)
             }
+            EventErrorType::HttpError => f.write_str("an http error occured"),
         }
     }
 }
@@ -47,6 +50,15 @@ impl Error for EventError {
         self.source
             .as_ref()
             .map(|source| &**source as &(dyn Error + 'static))
+    }
+}
+
+impl From<HttpError> for EventError {
+    fn from(err: HttpError) -> Self {
+        Self {
+            kind: EventErrorType::HttpError,
+            source: Some(Box::new(err)),
+        }
     }
 }
 

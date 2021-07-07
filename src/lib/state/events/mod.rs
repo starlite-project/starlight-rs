@@ -8,6 +8,7 @@ pub type EventResult = Result<(), error::EventError>;
 
 #[allow(clippy::enum_glob_use, clippy::match_wildcard_for_single_variants)]
 pub async fn handle(event: Event, state: Arc<State>) -> EventResult {
+    let state = &*state;
     use Event::*;
     match event {
         BanAdd(ban) => internal::ban_add(state, ban).await?,
@@ -80,14 +81,14 @@ pub async fn handle(event: Event, state: Arc<State>) -> EventResult {
 
 mod internal {
     #![allow(unused_variables, dead_code, clippy::wildcard_imports)]
-    use super::{super::State, EventResult};
-    use std::sync::Arc;
+    use super::EventResult;
+    use crate::lib::state::State;
     use twilight_model::gateway::{event::shard::*, payload::*};
 
     macro_rules! gen_empty_handlers {
         ($($fn_names:ident: [$($fn_args:ty),*];)*) => {
             $(
-                pub(super) async fn $fn_names(state: Arc<State>, $(_: $fn_args),*) -> EventResult {
+                pub(super) async fn $fn_names(state: &State, $(_: $fn_args),*) -> EventResult {
                     Ok(())
                 }
             )*
@@ -152,7 +153,10 @@ mod internal {
         webhooks_update: [WebhooksUpdate];
     }
 
-    pub(super) async fn ready(state: Arc<State>, ready: Ready) -> EventResult {
+    pub(super) async fn ready(state: &State, ready: Ready) -> EventResult {
+        // Get the application id, and set it
+        let current_application = state.http.current_user_application().await?;
+        state.http.set_application_id(current_application.id);
         let user = ready.user;
         let username = user.name;
         let discriminator = user.discriminator;
@@ -163,8 +167,6 @@ mod internal {
             discriminator = discriminator,
             id = id
         );
-        let global_commands = (*state).http.get_global_commands().unwrap().await.unwrap();
-        dbg!(global_commands);
         Ok(())
     }
 }
