@@ -119,7 +119,7 @@ mod internal {
         member_remove: [MemberRemove];
         member_update: [MemberUpdate];
         member_chunk: [MemberChunk];
-        // message_create: [MessageCreate];
+        message_create: [MessageCreate];
         message_delete: [MessageDelete];
         message_delete_bulk: [MessageDeleteBulk];
         message_update: [MessageUpdate];
@@ -163,11 +163,8 @@ mod internal {
             discriminator = discriminator,
             id = id
         );
-        Ok(())
-    }
-
-    pub(super) async fn message_create(state: Arc<State>, _: MessageCreate) -> EventResult {
-        dbg!(&(*state).cache);
+        let global_commands = (*state).http.get_global_commands().unwrap().await.unwrap();
+        dbg!(global_commands);
         Ok(())
     }
 }
