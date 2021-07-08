@@ -9,3 +9,10 @@ uwl = "0.6.0"
 
 [dependencies.twilight-command-parser]
 git = "https://github.com/twilight-rs/twilight.git"
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "bench_args"
+harness = false

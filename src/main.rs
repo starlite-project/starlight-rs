@@ -3,8 +3,7 @@
 
 use futures::StreamExt;
 use lib::{state::StateBuilder, GenericResult};
-use std::env;
-use std::sync::Arc;
+use std::{env, sync::Arc};
 use twilight_cache_inmemory::ResourceType;
 use twilight_gateway::cluster::ShardScheme;
 use twilight_model::gateway::Intents;
