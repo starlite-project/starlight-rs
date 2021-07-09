@@ -1,4 +1,3 @@
 {
-    "rust-analyzer.cargo.allFeatures": true,
-    "rust-analyzer.updates.channel": "nightly"
+    "rust-analyzer.cargo.allFeatures": true
 }
