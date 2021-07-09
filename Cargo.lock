@@ -1176,6 +1176,7 @@ dependencies = [
  "serde_json",
  "star-args",
  "star-error",
+ "star-lang",
  "static_assertions",
  "tokio",
  "twilight-cache-inmemory",

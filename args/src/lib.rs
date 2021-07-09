@@ -1,4 +1,5 @@
 #![warn(clippy::nursery, clippy::pedantic)]
+#![allow(clippy::missing_errors_doc)]
 
 use std::{borrow::Cow, error::Error as StdError, fmt, marker::PhantomData, str::FromStr};
 use twilight_command_parser::Arguments;
@@ -19,7 +20,7 @@ impl<E> From<E> for ArgError<E> {
 
 impl<E: fmt::Display> fmt::Display for ArgError<E> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use self::ArgError::*;
+        use self::ArgError::{Eos, Parse};
 
         match *self {
             Eos => write!(f, "ArgError(\"end of string\")"),
@@ -96,7 +97,7 @@ struct Token {
 
 impl Token {
     #[inline]
-    fn new(kind: TokenKind, start: usize, end: usize) -> Self {
+    const fn new(kind: TokenKind, start: usize, end: usize) -> Self {
         Self {
             kind,
             span: (start, end),
@@ -137,7 +138,7 @@ fn lex(stream: &mut Stream<'_>, delims: &[Cow<'_, str>]) -> Option<Token> {
         for delim in delims {
             end = stream.offset();
 
-            if stream.eat(&delim) {
+            if stream.eat(delim) {
                 break 'outer;
             }
         }
@@ -175,6 +176,7 @@ pub struct Args {
 }
 
 impl Args {
+    #[must_use]
     pub fn new(message: &str, possible_delimiters: &[Delimiter]) -> Self {
         let delims = possible_delimiters
             .iter()
@@ -182,7 +184,7 @@ impl Args {
                 Delimiter::Single(c) => message.contains(*c),
                 Delimiter::Multiple(s) => message.contains(s),
             })
-            .map(|delim| delim.to_str())
+            .map(Delimiter::to_str)
             .collect::<Vec<_>>();
 
         let args = if delims.is_empty() && !message.is_empty() {
@@ -208,7 +210,7 @@ impl Args {
             args
         };
 
-        Args {
+        Self {
             args,
             message: message.to_string(),
             offset: 0,
@@ -288,6 +290,7 @@ impl Args {
     }
 
     #[inline]
+    #[must_use]
     pub fn current(&self) -> Option<&str> {
         if self.is_empty() {
             return None;
@@ -376,6 +379,7 @@ impl Args {
     }
 
     #[inline]
+    #[must_use]
     pub fn raw(&self) -> RawArguments<'_> {
         RawArguments {
             tokens: &self.args,
@@ -385,6 +389,7 @@ impl Args {
     }
 
     #[inline]
+    #[must_use]
     pub fn raw_quoted(&self) -> RawArguments<'_> {
         let mut raw = self.raw();
         raw.quoted = true;
@@ -399,12 +404,11 @@ impl Args {
         let before = self.offset;
         self.restore();
 
-        let pos = match self.iter::<T>().quoted().position(|res| res.is_ok()) {
-            Some(p) => p,
-            None => {
-                self.offset = before;
-                return Err(ArgError::Eos);
-            }
+        let pos = if let Some(p) = self.iter::<T>().quoted().position(|res| res.is_ok()) {
+            p
+        } else {
+            self.offset = before;
+            return Err(ArgError::Eos);
         };
 
         self.offset = pos;
@@ -425,12 +429,11 @@ impl Args {
         let before = self.offset;
         self.restore();
 
-        let pos = match self.iter::<T>().quoted().position(|res| res.is_ok()) {
-            Some(p) => p,
-            None => {
-                self.offset = before;
-                return Err(ArgError::Eos);
-            }
+        let pos = if let Some(p) = self.iter::<T>().quoted().position(|res| res.is_ok()) {
+            p
+        } else {
+            self.offset = before;
+            return Err(ArgError::Eos);
         };
 
         self.offset = pos;
@@ -442,16 +445,19 @@ impl Args {
     }
 
     #[inline]
+    #[must_use]
     pub fn message(&self) -> &str {
         &self.message
     }
 
     #[inline]
+    #[must_use]
     pub fn rest(&self) -> &str {
         self.remains().unwrap_or_default()
     }
 
     #[inline]
+    #[must_use]
     pub fn remains(&self) -> Option<&str> {
         if self.is_empty() {
             return None;
@@ -462,16 +468,19 @@ impl Args {
     }
 
     #[inline]
+    #[must_use]
     pub fn len(&self) -> usize {
         self.args.len()
     }
 
     #[inline]
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.offset >= self.len()
     }
 
     #[inline]
+    #[must_use]
     pub fn remaining(&self) -> usize {
         if self.is_empty() {
             return 0;
@@ -483,7 +492,7 @@ impl Args {
 
 impl<'a> From<(Arguments<'a>, &[Delimiter])> for Args {
     fn from(data: (Arguments<'a>, &[Delimiter])) -> Self {
-        Args::new(data.0.as_str(), data.1)
+        Self::new(data.0.as_str(), data.1)
     }
 }
 

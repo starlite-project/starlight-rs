@@ -24,6 +24,9 @@ path = "./args"
 [dependencies.star-error]
 path = "./error"
 
+[dependencies.star-lang]
+path = "./lang"
+
 [dependencies.tokio]
 version = "1.6"
 features = ["macros", "rt-multi-thread"]

@@ -55,12 +55,12 @@ pub use self::error::LanguageError;
 
 pub type LanguageResult<T> = Result<T, LanguageError>;
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct LangMap(HashMap<String, Arc<Language>>);
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct I18nMap(HashMap<String, Arc<Language>>);
 
-impl LangMap {
+impl I18nMap {
     pub fn new() -> Self {
-        Self::default()
+        Self(HashMap::new())
     }
 
     pub fn from_dir<P: AsRef<Path>>(path: P) -> LanguageResult<Self> {
@@ -78,16 +78,22 @@ impl LangMap {
     }
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Language(HashMap<String, LanguageEntry>);
 
 impl Language {
     pub fn new() -> Self {
-        Self::default()
+        Self(HashMap::new())
     }
 
     pub fn get<P: Into<String>>(&self, key: P) -> Option<LanguageEntry> {
         lang_get(&self.0, key)
+    }
+
+    fn insert<P: Into<String>>(&mut self, key: P, entry: LanguageEntry) -> &mut Self {
+        self.0.insert(key.into(), entry);
+
+        self
     }
 }
 
@@ -100,6 +106,13 @@ pub struct LanguageEntry {
 impl LanguageEntry {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    fn create<B: Into<String>>(base: B, params: Vec<String>) -> Self {
+        Self {
+            base: base.into(),
+            params,
+        }
     }
 
     pub fn run(&self) -> LanguageResult<String> {
@@ -131,7 +144,17 @@ fn lang_get<K: Into<String>, Rt: Clone>(map: &HashMap<String, Rt>, key: K) -> Op
     map.get(&key.into()).cloned()
 }
 
-impl TryFrom<fs::ReadDir> for LangMap {
+impl Default for I18nMap {
+    fn default() -> Self {
+        let mut map = Self::new();
+
+        map.insert("en_us", Language::default());
+
+        map
+    }
+}
+
+impl TryFrom<fs::ReadDir> for I18nMap {
     type Error = LanguageError;
 
     fn try_from(dir: fs::ReadDir) -> Result<Self, Self::Error> {
@@ -176,6 +199,24 @@ impl TryFrom<fs::ReadDir> for LangMap {
     }
 }
 
+// Sets the default language, which is english
+impl Default for Language {
+    fn default() -> Self {
+        let mut lang = Self::new();
+
+        lang.insert("ping", LanguageEntry::create("Ping...", vec![]));
+        lang.insert(
+            "pong",
+            LanguageEntry::create(
+                "Pong! Took [latency] milliseconds",
+                vec!["latency".to_string()],
+            ),
+        );
+
+        lang
+    }
+}
+
 #[derive(Debug, Clone)]
 struct LangFormatter(String);
 
@@ -199,13 +240,13 @@ impl From<String> for LangFormatter {
 mod tests {
     use crate::LanguageResult;
 
-    use super::{i18n, LangMap, Language};
+    use super::{i18n, I18nMap, Language};
     use serde::{Deserialize, Serialize};
     use static_assertions::assert_impl_all;
     use std::{collections::HashMap, convert::TryFrom, fmt::Debug, fs::ReadDir};
 
     assert_impl_all!(
-        LangMap: Clone,
+        I18nMap: Clone,
         Debug,
         Deserialize<'static>,
         Serialize,
@@ -214,7 +255,7 @@ mod tests {
 
     #[test]
     fn new() {
-        let test_map = LangMap::new();
+        let test_map = I18nMap::new();
 
         assert_eq!(test_map.0, HashMap::new());
 
@@ -225,7 +266,7 @@ mod tests {
 
     #[test]
     fn from_dir() -> LanguageResult<()> {
-        let map = LangMap::from_dir("./test")?;
+        let map = I18nMap::from_dir("./test")?;
 
         assert_eq!(map.0.len(), 1);
 
@@ -234,7 +275,7 @@ mod tests {
 
     #[test]
     fn map_get() -> LanguageResult<()> {
-        let map = LangMap::from_dir("./test")?;
+        let map = I18nMap::from_dir("./test")?;
 
         let lang = map.get("en_us");
 
@@ -249,7 +290,7 @@ mod tests {
 
     #[test]
     fn lang_get() -> LanguageResult<()> {
-        let map = LangMap::from_dir("./test")?;
+        let map = I18nMap::from_dir("./test")?;
 
         let lang = map.get("en_us").expect("something went wrong");
 
@@ -266,7 +307,7 @@ mod tests {
 
     #[test]
     fn lang_entry_run() -> LanguageResult<()> {
-        let map = LangMap::from_dir("./test")?;
+        let map = I18nMap::from_dir("./test")?;
 
         let lang = map.get("en_us").expect("something went wrong");
 
@@ -279,7 +320,7 @@ mod tests {
 
     #[test]
     fn lang_entry_run_params() -> LanguageResult<()> {
-        let map = LangMap::from_dir("./test")?;
+        let map = I18nMap::from_dir("./test")?;
 
         let lang = map.get("en_us").expect("something went wrong");
 
@@ -292,7 +333,7 @@ mod tests {
 
     #[test]
     fn i18n() -> LanguageResult<()> {
-        let map = LangMap::from_dir("./test")?;
+        let map = I18nMap::from_dir("./test")?;
 
         assert_eq!(i18n!(map, "en_us", "ping"), "Ping...");
 
