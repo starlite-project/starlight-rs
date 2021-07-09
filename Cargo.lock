@@ -1198,6 +1198,7 @@ dependencies = [
  "serde_json",
  "star-args",
  "star-error",
+ "star-lang",
  "static_assertions",
  "tokio 1.8.0",
  "twilight-cache-inmemory",

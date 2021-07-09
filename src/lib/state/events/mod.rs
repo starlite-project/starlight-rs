@@ -8,8 +8,8 @@ pub type EventResult = Result<(), error::EventError>;
 
 #[allow(clippy::enum_glob_use, clippy::match_wildcard_for_single_variants)]
 pub async fn handle(event: Event, state: Arc<State>) -> EventResult {
-    let state = &*state;
     use Event::*;
+    let state = &*state;
     match event {
         BanAdd(ban) => internal::ban_add(state, ban).await?,
         BanRemove(ban) => internal::ban_remove(state, ban).await?,

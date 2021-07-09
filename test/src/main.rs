@@ -1,7 +1,7 @@
 use star_lang::*;
 
 fn main() -> LanguageResult<()> {
-    let lang = LangMap::from_dir("./languages").unwrap();
+    let lang = I18nMap::from_dir("./languages").unwrap();
 
     let english = lang.get("en_us").unwrap();
 
