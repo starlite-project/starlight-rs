@@ -1,4 +1,7 @@
 pub mod entity;
 pub mod repository;
 
-pub use self::entity::Entity;
+mod backend;
+mod utils;
+
+pub use self::{backend::Backend, entity::Entity, repository::Repository};

@@ -1,4 +1,6 @@
+pub mod channel;
 pub mod gateway;
+pub mod user;
 
 use std::hash::Hash;
 

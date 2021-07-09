@@ -1,9 +1,13 @@
+mod r#impl;
 mod noop;
 
 use futures_util::stream::Stream;
 use std::{future::Future, pin::Pin};
 
-pub use self::noop::NoopRepository;
+pub use self::{
+    noop::NoopRepository,
+    r#impl::{Repository, SingleEntityRepository},
+};
 
 pub type GetEntityFuture<'a, T, E> =
     Pin<Box<dyn Future<Output = Result<Option<T>, E>> + Send + 'a>>;
