@@ -64,6 +64,7 @@ lto = "fat"
 [workspace]
 members = [
     "./args",
+    "./cache/base",
     "./error",
     "./lang",
     "./test"
