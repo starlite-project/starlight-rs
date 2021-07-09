@@ -1,4 +1,5 @@
 use crate::{
+    entity::user::UserEntity,
     repository::{GetEntityFuture, ListEntitiesFuture, Repository},
     utils, Backend, Entity,
 };
@@ -130,6 +131,29 @@ pub trait MessageRepository<B: Backend>: Repository<MessageEntity, B> + Send {
         &self,
         message_id: MessageId,
     ) -> ListEntitiesFuture<'_, AttachmentEntity, B::Error> {
-        todo!()
+        utils::stream(
+            self.backend().messages(),
+            self.backend().attachments(),
+            message_id,
+            |message| message.attachments.into_iter(),
+        )
+    }
+
+    fn author(&self, message_id: MessageId) -> GetEntityFuture<'_, UserEntity, B::Error> {
+        utils::relation_map(
+            self.backend().messages(),
+            self.backend().users(),
+            message_id,
+            |message| message.author_id,
+        )
+    }
+
+    fn mentions(&self, message_id: MessageId) -> ListEntitiesFuture<'_, UserEntity, B::Error> {
+        utils::stream(
+            self.backend().messages(),
+            self.backend().users(),
+            message_id,
+            |message| message.mentions.into_iter(),
+        )
     }
 }

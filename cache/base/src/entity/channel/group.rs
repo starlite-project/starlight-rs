@@ -1,4 +1,5 @@
 use crate::{
+    entity::user::UserEntity,
     repository::{GetEntityFuture, ListEntitiesFuture, Repository},
     utils, Backend, Entity,
 };
@@ -47,4 +48,22 @@ impl Entity for GroupEntity {
     }
 }
 
-pub trait GroupRepository<B: Backend>: Repository<GroupEntity, B> {}
+pub trait GroupRepository<B: Backend>: Repository<GroupEntity, B> {
+    fn owner(&self, group_id: ChannelId) -> GetEntityFuture<'_, UserEntity, B::Error> {
+        utils::relation_map(
+            self.backend().groups(),
+            self.backend().users(),
+            group_id,
+            |group| group.owner_id,
+        )
+    }
+
+    fn recipients(&self, group_id: ChannelId) -> ListEntitiesFuture<'_, UserEntity, B::Error> {
+        utils::stream(
+            self.backend().groups(),
+            self.backend().users(),
+            group_id,
+            |group| group.recipient_ids.into_iter(),
+        )
+    }
+}
