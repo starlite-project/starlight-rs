@@ -10,6 +10,8 @@ use twilight_model::{
     id::{AttachmentId, MessageId},
 };
 
+use super::MessageEntity;
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AttachmentEntity {
     pub filename: String,
@@ -45,4 +47,13 @@ impl Entity for AttachmentEntity {
     }
 }
 
-pub trait AttachmentRepository<B: Backend>: Repository<AttachmentEntity, B> + Send {}
+pub trait AttachmentRepository<B: Backend>: Repository<AttachmentEntity, B> + Send {
+    fn message(&self, attachment_id: AttachmentId) -> GetEntityFuture<'_, MessageEntity, B::Error> {
+        utils::relation_map(
+            self.backend().attachments(),
+            self.backend().messages(),
+            attachment_id,
+            |attachment| attachment.message_id,
+        )
+    }
+}

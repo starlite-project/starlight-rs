@@ -1,5 +1,8 @@
 use crate::{
-    entity::user::UserEntity,
+    entity::{
+        guild::{GuildEntity, RoleEntity},
+        user::UserEntity,
+    },
     repository::{GetEntityFuture, ListEntitiesFuture, Repository},
     utils, Backend, Entity,
 };
@@ -14,7 +17,7 @@ use twilight_model::{
     id::{ApplicationId, AttachmentId, ChannelId, GuildId, MessageId, RoleId, UserId, WebhookId},
 };
 
-use super::attachment::AttachmentEntity;
+use super::{attachment::AttachmentEntity, ChannelEntity, GuildChannelEntity, TextChannelEntity};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MessageEntity {
@@ -145,6 +148,72 @@ pub trait MessageRepository<B: Backend>: Repository<MessageEntity, B> + Send {
             self.backend().users(),
             message_id,
             |message| message.author_id,
+        )
+    }
+
+    fn channel(&self, message_id: MessageId) -> GetEntityFuture<'_, ChannelEntity, B::Error> {
+        let backend: B = self.backend();
+
+        Box::pin(async move {
+            let messages = backend.messages();
+
+            let channel_id = if let Some(msg) = messages.get(message_id).await? {
+                msg.channel_id
+            } else {
+                return Ok(None);
+            };
+
+            let text_channels = backend.text_channels();
+
+            if let Some(channel) = text_channels.get(channel_id).await? {
+                return Ok(Some(ChannelEntity::Guild(GuildChannelEntity::Text(
+                    channel,
+                ))));
+            }
+
+            let private_channels = backend.private_channels();
+
+            if let Some(channel) = private_channels.get(channel_id).await? {
+                return Ok(Some(ChannelEntity::Private(channel)));
+            }
+
+            let groups = backend.groups();
+
+            if let Some(channel) = groups.get(channel_id).await? {
+                return Ok(Some(ChannelEntity::Group(channel)));
+            }
+
+            Ok(None)
+        })
+    }
+
+    fn guild(&self, message_id: MessageId) -> GetEntityFuture<'_, GuildEntity, B::Error> {
+        utils::relation_and_then(
+            self.backend().messages(),
+            self.backend().guilds(),
+            message_id,
+            |message| message.guild_id,
+        )
+    }
+
+    fn mention_channels(
+        &self,
+        message_id: MessageId,
+    ) -> ListEntitiesFuture<'_, TextChannelEntity, B::Error> {
+        utils::stream(
+            self.backend().messages(),
+            self.backend().text_channels(),
+            message_id,
+            |message| message.mention_channels.into_iter(),
+        )
+    }
+
+    fn mention_roles(&self, message_id: MessageId) -> ListEntitiesFuture<'_, RoleEntity, B::Error> {
+        utils::stream(
+            self.backend().messages(),
+            self.backend().roles(),
+            message_id,
+            |message| message.mention_roles.into_iter(),
         )
     }
 

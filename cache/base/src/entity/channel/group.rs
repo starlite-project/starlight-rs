@@ -9,6 +9,8 @@ use twilight_model::{
     id::{ApplicationId, ChannelId, MessageId, UserId},
 };
 
+use super::MessageEntity;
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GroupEntity {
     pub application_id: Option<ApplicationId>,
@@ -49,6 +51,15 @@ impl Entity for GroupEntity {
 }
 
 pub trait GroupRepository<B: Backend>: Repository<GroupEntity, B> {
+    fn last_message(&self, group_id: ChannelId) -> GetEntityFuture<'_, MessageEntity, B::Error> {
+        utils::relation_and_then(
+            self.backend().groups(),
+            self.backend().messages(),
+            group_id,
+            |group| group.last_message_id,
+        )
+    }
+
     fn owner(&self, group_id: ChannelId) -> GetEntityFuture<'_, UserEntity, B::Error> {
         utils::relation_map(
             self.backend().groups(),

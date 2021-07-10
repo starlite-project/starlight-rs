@@ -4,7 +4,7 @@ pub use self::current_user::{CurrentUserEntity, CurrentUserRepository};
 
 use crate::{
     entity::Entity,
-    repository::{ListEntitiesFuture, ListEntityIdsFuture, Repository},
+    repository::{ListEntitiesFuture, Repository},
     utils, Backend,
 };
 use serde::{Deserialize, Serialize};
@@ -12,6 +12,8 @@ use twilight_model::{
     id::{GuildId, UserId},
     user::{PremiumType, User, UserFlags},
 };
+
+use super::guild::GuildEntity;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 
@@ -61,4 +63,8 @@ impl Entity for UserEntity {
 
 pub trait UserRepository<B: Backend>: Repository<UserEntity, B> {
     fn guild_ids(&self, user_id: UserId) -> ListEntitiesFuture<'_, GuildId, B::Error>;
+
+    fn guilds(&self, user_id: UserId) -> ListEntitiesFuture<'_, GuildEntity, B::Error> {
+        utils::stream_ids(self.guild_ids(user_id), self.backend().guilds())
+    }
 }

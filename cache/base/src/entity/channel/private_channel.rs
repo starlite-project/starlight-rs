@@ -4,6 +4,12 @@ use twilight_model::{
     id::{ChannelId, MessageId, UserId},
 };
 
+use crate::{
+    entity::user::UserEntity, repository::GetEntityFuture, utils, Backend, Entity, Repository,
+};
+
+use super::message::MessageEntity;
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PrivateChannelEntity {
     pub id: ChannelId,
@@ -24,5 +30,33 @@ impl From<PrivateChannel> for PrivateChannelEntity {
             kind: channel.kind,
             recipient_id,
         }
+    }
+}
+
+impl Entity for PrivateChannelEntity {
+    type Id = ChannelId;
+
+    fn id(&self) -> Self::Id {
+        self.id
+    }
+}
+
+pub trait PrivateChannelRepository<B: Backend>: Repository<PrivateChannelEntity, B> {
+    fn last_message(&self, channel_id: ChannelId) -> GetEntityFuture<'_, MessageEntity, B::Error> {
+        utils::relation_and_then(
+            self.backend().private_channels(),
+            self.backend().messages(),
+            channel_id,
+            |channel| channel.last_message_id,
+        )
+    }
+
+    fn recipient(&self, channel_id: ChannelId) -> GetEntityFuture<'_, UserEntity, B::Error> {
+        utils::relation_and_then(
+            self.backend().private_channels(),
+            self.backend().users(),
+            channel_id,
+            |channel| channel.recipient_id,
+        )
     }
 }

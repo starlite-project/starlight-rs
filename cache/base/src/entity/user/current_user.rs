@@ -1,4 +1,5 @@
 use crate::{
+    entity::guild::GuildEntity,
     repository::{ListEntitiesFuture, ListEntityIdsFuture, SingleEntityRepository},
     utils, Backend, Entity,
 };
@@ -51,4 +52,8 @@ impl Entity for CurrentUserEntity {
 
 pub trait CurrentUserRepository<B: Backend>: SingleEntityRepository<CurrentUserEntity, B> {
     fn guild_ids(&self) -> ListEntityIdsFuture<'_, GuildId, B::Error>;
+
+    fn guilds(&self) -> ListEntitiesFuture<'_, GuildEntity, B::Error> {
+        utils::stream_ids(self.guild_ids(), self.backend().guilds())
+    }
 }

@@ -1,6 +1,8 @@
 pub mod channel;
 pub mod gateway;
+pub mod guild;
 pub mod user;
+pub mod voice;
 
 use std::hash::Hash;
 
