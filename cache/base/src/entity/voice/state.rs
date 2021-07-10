@@ -4,7 +4,10 @@ use twilight_model::{
     voice::VoiceState,
 };
 
-use crate::{Backend, Entity, Repository, entity::channel::VoiceChannelEntity, repository::GetEntityFuture, utils};
+use crate::{
+    entity::channel::VoiceChannelEntity, repository::GetEntityFuture, utils, Backend, Entity,
+    Repository,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct VoiceStateEntity {

@@ -1,4 +1,8 @@
-use crate::{Backend, Entity, entity::guild::GuildEntity, repository::{GetEntityFuture, Repository}, utils};
+use crate::{
+    entity::guild::GuildEntity,
+    repository::{GetEntityFuture, Repository},
+    utils, Backend, Entity,
+};
 use serde::{Deserialize, Serialize};
 use twilight_model::{
     channel::{permission_overwrite::PermissionOverwrite, CategoryChannel, ChannelType},
@@ -42,7 +46,7 @@ pub trait CategoryChannelRepository<B: Backend>: Repository<CategoryChannelEntit
             self.backend().category_channels(),
             self.backend().guilds(),
             channel_id,
-            |channel| channel.guild_id
+            |channel| channel.guild_id,
         )
     }
 }
