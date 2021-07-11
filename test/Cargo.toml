@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2018"
 authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
 
-[dependencies.star-lang]
-path = "../lang"
+[dependencies]
+serde = { features = ["derive"], version = "1" }
+serde_json = "1"
+serde_cbor = "0.10"
