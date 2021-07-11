@@ -133,7 +133,7 @@ impl<B: Backend + Clone + Send> GuildRepository<B> for NoopRepository<B> {
         empty_stream!()
     }
 
-    fn emoji_ids(&self, _: GuildId) -> super::ListEntityIdsFuture<'_, EmojiId, B::Error> {
+    fn emoji_ids(&self, _: GuildId) -> ListEntityIdsFuture<'_, EmojiId, B::Error> {
         empty_stream!()
     }
 
