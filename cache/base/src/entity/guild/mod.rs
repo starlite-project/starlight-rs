@@ -116,6 +116,7 @@ impl From<Guild> for GuildEntity {
 }
 
 impl GuildEntity {
+    #[must_use]
     pub fn update(self, update: PartialGuild) -> Self {
         Self {
             afk_channel_id: update.afk_channel_id.or(self.afk_channel_id),

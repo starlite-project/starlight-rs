@@ -44,6 +44,7 @@ impl From<Member> for MemberEntity {
 }
 
 impl MemberEntity {
+    #[must_use]
     pub fn update(self, update: MemberUpdate) -> Self {
         Self {
             guild_id: update.guild_id,

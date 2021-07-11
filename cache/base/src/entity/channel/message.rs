@@ -91,6 +91,7 @@ impl From<Message> for MessageEntity {
 }
 
 impl MessageEntity {
+    #[must_use]
     pub fn update(self, update: MessageUpdate) -> Self {
         let attachments = update
             .attachments
