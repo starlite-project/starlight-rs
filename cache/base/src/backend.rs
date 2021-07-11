@@ -34,10 +34,10 @@ pub trait Backend: Send + Sync + Sized + 'static {
     fn current_user(&self) -> Self::CurrentUserRepository;
 
     fn emojis(&self) -> Self::EmojiRepository;
-
-    fn guilds(&self) -> Self::GuildRepository;
-
+    
     fn groups(&self) -> Self::GroupRepository;
+    
+    fn guilds(&self) -> Self::GuildRepository;
 
     fn members(&self) -> Self::MemberRepository;
 

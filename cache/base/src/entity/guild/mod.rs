@@ -183,7 +183,7 @@ pub trait GuildRepository<B: Backend>: Repository<GuildEntity, B> {
         utils::stream_ids(self.emoji_ids(guild_id), self.backend().emojis())
     }
 
-    fn member_ids(&self, guild_id: GuildId) -> ListEntityIdsFuture<'_, MemberEntity, B::Error>;
+    fn member_ids(&self, guild_id: GuildId) -> ListEntityIdsFuture<'_, UserId, B::Error>;
 
     fn members(&self, guild_id: GuildId) -> ListEntitiesFuture<'_, MemberEntity, B::Error>;
 
