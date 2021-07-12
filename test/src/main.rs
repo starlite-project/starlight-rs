@@ -1,25 +1,21 @@
-use star_lang::*;
+use serde::{Deserialize, Serialize};
+use std::{error::Error, fs::File};
 
-fn main() -> LanguageResult<()> {
-    let lang = I18nMap::from_dir("./languages").unwrap();
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+struct Entity {
+    x: f32,
+    y: f32,
+}
 
-    let english = lang.get("en_us").unwrap();
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+struct World(Vec<Entity>);
 
-    dbg!(english.clone());
+fn main() -> Result<(), Box<dyn Error>> {
+    let file = File::open("./file.cbor")?;
 
-    let ping = english.get("ping").unwrap();
+    let deserialized: World = serde_cbor::from_reader(&file)?;
 
-    dbg!(ping.clone());
-
-    dbg!(ping.run().unwrap());
-
-    let pong = english.get("pong").unwrap();
-
-    dbg!(pong.clone());
-
-    dbg!(pong.run_params(&["10"]).unwrap());
-
-    dbg!(i18n!(lang, "en_us", "ping"));
+    dbg!(deserialized);
 
     Ok(())
 }
