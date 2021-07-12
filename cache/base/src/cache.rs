@@ -1,7 +1,16 @@
-use crate::{Backend, Repository, entity::{channel::{
-            CategoryChannelEntity, GroupEntity, PrivateChannelEntity, TextChannelEntity,
-            VoiceChannelEntity,
-        }, gateway::PresenceEntity, guild::{EmojiEntity, GuildEntity, GuildRepository, MemberEntity, RoleEntity}, user::UserEntity, voice::VoiceStateEntity}};
+use crate::{
+    entity::{
+        channel::{
+            CategoryChannelEntity, GroupEntity, GuildChannelEntity, PrivateChannelEntity,
+            TextChannelEntity, VoiceChannelEntity,
+        },
+        gateway::PresenceEntity,
+        guild::{EmojiEntity, GuildEntity, GuildRepository, MemberEntity, RoleEntity},
+        user::UserEntity,
+        voice::VoiceStateEntity,
+    },
+    Backend, Repository,
+};
 use futures_util::{
     future::{self, FutureExt, TryFutureExt},
     stream::{FuturesUnordered, StreamExt, TryStreamExt},
@@ -18,7 +27,7 @@ use twilight_model::{
         event::Event,
         payload::{
             ChannelCreate, ChannelDelete, ChannelPinsUpdate, ChannelUpdate, GuildCreate,
-            GuildDelete,
+            GuildDelete, GuildEmojisUpdate, GuildUpdate, MemberAdd, MemberRemove, MemberUpdate,
         },
     },
 };
@@ -79,7 +88,8 @@ impl<B: Backend> Cache<B> {
         let attachments = backend.attachments();
         let category_channels = backend.category_channels();
         let current_user = backend.current_user();
-        let emojis = backend.emojis();
+        // This is here to fix rust-analyzer in thinking all of these require arguments
+        let emojis: B::EmojiRepository = backend.emojis();
         let groups = backend.groups();
         let guilds = backend.guilds();
         let members = backend.members();
@@ -425,7 +435,135 @@ impl<B: Backend> CacheUpdate<B> for GuildDelete {
 
             let mut channels = cache.guilds.channels(self.id).await?;
 
-            todo!()
+            while let Some(Ok(c)) = channels.next().await {
+                match c {
+                    GuildChannelEntity::Category(c) => {
+                        futures.push(cache.category_channels.remove(c.id));
+                    }
+                    GuildChannelEntity::Text(c) => {
+                        futures.push(cache.text_channels.remove(c.id));
+                    }
+                    GuildChannelEntity::Voice(c) => futures.push(cache.voice_channels.remove(c.id)),
+                }
+            }
+
+            let mut emojis = cache.guilds.emoji_ids(self.id).await?;
+
+            while let Some(Ok(id)) = emojis.next().await {
+                futures.push(cache.emojis.remove(id));
+            }
+
+            let mut members = cache.guilds.member_ids(self.id).await?;
+
+            while let Some(Ok(id)) = members.next().await {
+                futures.push(cache.members.remove((self.id, id)));
+            }
+
+            let mut presences = cache.guilds.presence_ids(self.id).await?;
+
+            while let Some(Ok(id)) = presences.next().await {
+                futures.push(cache.presences.remove((self.id, id)));
+            }
+
+            let mut roles = cache.guilds.role_ids(self.id).await?;
+
+            while let Some(Ok(id)) = roles.next().await {
+                futures.push(cache.roles.remove(id));
+            }
+
+            let mut voice_states = cache.guilds.voice_state_ids(self.id).await?;
+
+            while let Some(Ok(id)) = voice_states.next().await {
+                futures.push(cache.voice_states.remove((self.id, id)));
+            }
+
+            futures.try_collect::<()>().await?;
+            cache.guilds.remove(self.id).await
         })
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for GuildEmojisUpdate {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        cache.emojis.upsert_bulk(
+            self.emojis
+                .iter()
+                .cloned()
+                .map(|e| EmojiEntity::from((self.guild_id, e))),
+        )
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for GuildUpdate {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        cache
+            .guilds
+            .get(self.id)
+            .and_then(move |guild| {
+                guild.map_or_else(
+                    || future::ok(()).boxed(),
+                    |guild| cache.guilds.upsert(guild.update(self.0.clone())),
+                )
+            })
+            .boxed()
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for MemberAdd {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        let futures = FuturesUnordered::new();
+
+        let user_entity = UserEntity::from(self.user.clone());
+        futures.push(cache.users.upsert(user_entity));
+
+        let member_entity = MemberEntity::from(self.0.clone());
+        futures.push(cache.members.upsert(member_entity));
+
+        futures.try_collect().boxed()
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for MemberRemove {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        cache.members.remove((self.guild_id, self.user.id))
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for MemberUpdate {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        cache
+            .members
+            .get((self.guild_id, self.user.id))
+            .and_then(move |member| {
+                member.map_or_else(
+                    || future::ok(()).boxed(),
+                    |member| {
+                        let futures = FuturesUnordered::new();
+
+                        let user_entity = UserEntity::from(self.user.clone());
+                        futures.push(cache.users.upsert(user_entity));
+
+                        futures.push(cache.members.upsert(member.update(self.clone())));
+
+                        futures.try_collect().boxed()
+                    },
+                )
+            })
+            .boxed()
     }
 }
