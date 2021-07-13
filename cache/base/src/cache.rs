@@ -1,8 +1,9 @@
 use crate::{
     entity::{
         channel::{
-            CategoryChannelEntity, GroupEntity, GuildChannelEntity, PrivateChannelEntity,
-            TextChannelEntity, VoiceChannelEntity,
+            AttachmentEntity, CategoryChannelEntity, GroupEntity, GuildChannelEntity,
+            MessageEntity, MessageRepository, PrivateChannelEntity, TextChannelEntity,
+            VoiceChannelEntity,
         },
         gateway::PresenceEntity,
         guild::{EmojiEntity, GuildEntity, GuildRepository, MemberEntity, RoleEntity},
@@ -27,7 +28,8 @@ use twilight_model::{
         event::Event,
         payload::{
             ChannelCreate, ChannelDelete, ChannelPinsUpdate, ChannelUpdate, GuildCreate,
-            GuildDelete, GuildEmojisUpdate, GuildUpdate, MemberAdd, MemberRemove, MemberUpdate,
+            GuildDelete, GuildEmojisUpdate, GuildUpdate, MemberAdd, MemberChunk, MemberRemove,
+            MemberUpdate, MessageCreate, MessageDelete,
         },
     },
 };
@@ -565,5 +567,100 @@ impl<B: Backend> CacheUpdate<B> for MemberUpdate {
                 )
             })
             .boxed()
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for MemberChunk {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        let futures = FuturesUnordered::new();
+
+        futures.push(
+            cache
+                .members
+                .upsert_bulk(self.members.iter().cloned().map(MemberEntity::from)),
+        );
+
+        futures.push(
+            cache.users.upsert_bulk(
+                self.members
+                    .iter()
+                    .cloned()
+                    .map(|m| UserEntity::from(m.user)),
+            ),
+        );
+
+        futures.push(
+            cache
+                .presences
+                .upsert_bulk(self.presences.iter().cloned().map(PresenceEntity::from)),
+        );
+
+        futures.try_collect().boxed()
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for MessageCreate {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        Box::pin(async move {
+            let futures = FuturesUnordered::new();
+
+            if let Some(group) = cache.groups.get(self.channel_id).await? {
+                futures.push(cache.groups.upsert(GroupEntity {
+                    last_message_id: Some(self.id),
+                    ..group
+                }));
+            }
+
+            if let Some(text_channel) = cache.text_channels.get(self.channel_id).await? {
+                futures.push(cache.text_channels.upsert(TextChannelEntity {
+                    last_message_id: Some(self.id),
+                    ..text_channel
+                }));
+            }
+
+            if let Some(private_channel) = cache.private_channels.get(self.channel_id).await? {
+                futures.push(cache.private_channels.upsert(PrivateChannelEntity {
+                    last_message_id: Some(self.id),
+                    ..private_channel
+                }));
+            }
+
+            for attachment in self.0.attachments.iter().cloned() {
+                let entity = AttachmentEntity::from((self.id, attachment));
+
+                futures.push(cache.attachments.upsert(entity));
+            }
+
+            let entity = MessageEntity::from(self.0.clone());
+            futures.push(cache.messages.upsert(entity));
+
+            futures.try_collect().await
+        })
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for MessageDelete {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        Box::pin(async move {
+            let futures = FuturesUnordered::new();
+
+            let mut attachments = cache.messages.attachments(self.id).await?;
+
+            while let Some(Ok(attachment)) = attachments.next().await {
+                futures.push(cache.attachments.remove(attachment.id));
+            }
+
+            futures.try_collect::<()>().await?;
+            cache.messages.remove(self.id).await
+        })
     }
 }
