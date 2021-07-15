@@ -68,6 +68,7 @@ lto = "fat"
 members = [
     "./args",
     "./cache/base",
+    "./cache/in-memory",
     "./error",
     "./lang",
     "./test"

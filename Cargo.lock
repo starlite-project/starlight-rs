@@ -1173,6 +1173,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "star-cache-inmemory"
+version = "0.1.0"
+dependencies = [
+ "bitflags",
+ "dashmap",
+ "futures-util",
+ "star-cache-base",
+ "twilight-model",
+]
+
+[[package]]
 name = "star-error"
 version = "0.1.0"
 dependencies = [

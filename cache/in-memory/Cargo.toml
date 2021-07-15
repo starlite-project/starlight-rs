@@ -1,0 +1,24 @@
+[package]
+name = "star-cache-inmemory"
+edition = "2018"
+version = "0.1.0"
+authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
+
+[dependencies.bitflags]
+version = "1"
+default-features = false
+
+[dependencies.dashmap]
+version = "4"
+default-features = false
+
+[dependencies.futures-util]
+version = "0.3"
+features = ["std"]
+default-features = false
+
+[dependencies.star-cache-base]
+path = "../base"
+
+[dependencies.twilight-model]
+git = "https://github.com/twilight-rs/twilight.git"
