@@ -7,7 +7,7 @@ use crate::{
         },
         gateway::PresenceEntity,
         guild::{EmojiEntity, GuildEntity, GuildRepository, MemberEntity, RoleEntity},
-        user::UserEntity,
+        user::{CurrentUserEntity, UserEntity},
         voice::VoiceStateEntity,
     },
     Backend, Repository,
@@ -29,8 +29,11 @@ use twilight_model::{
         payload::{
             ChannelCreate, ChannelDelete, ChannelPinsUpdate, ChannelUpdate, GuildCreate,
             GuildDelete, GuildEmojisUpdate, GuildUpdate, MemberAdd, MemberChunk, MemberRemove,
-            MemberUpdate, MessageCreate, MessageDelete,
+            MemberUpdate, MessageCreate, MessageDelete, MessageDeleteBulk, MessageUpdate,
+            PresenceUpdate, Ready, RoleCreate, RoleDelete, RoleUpdate, UserUpdate,
+            VoiceStateUpdate,
         },
+        presence::UserOrId,
     },
 };
 
@@ -145,6 +148,53 @@ impl<B: Backend> CacheUpdate<B> for Event {
         match self {
             Self::BanAdd(_) => noop::<B>(),
             Self::BanRemove(_) => noop::<B>(),
+            Self::ChannelCreate(event) => event.process(cache),
+            Self::ChannelDelete(event) => event.process(cache),
+            Self::ChannelPinsUpdate(event) => event.process(cache),
+            Self::ChannelUpdate(event) => event.process(cache),
+            Self::GuildCreate(event) => event.process(cache),
+            Self::GuildDelete(event) => event.process(cache),
+            Self::GuildEmojisUpdate(event) => event.process(cache),
+            Self::GuildIntegrationsUpdate(_) => noop::<B>(),
+            Self::GuildUpdate(event) => event.process(cache),
+            Self::InviteCreate(_) => noop::<B>(),
+            Self::InviteDelete(_) => noop::<B>(),
+            Self::MemberAdd(event) => event.process(cache),
+            Self::MemberRemove(event) => event.process(cache),
+            Self::MemberUpdate(event) => event.process(cache),
+            Self::MemberChunk(event) => event.process(cache),
+            Self::MessageCreate(event) => event.process(cache),
+            Self::MessageDelete(event) => event.process(cache),
+            Self::MessageDeleteBulk(event) => event.process(cache),
+            Self::MessageUpdate(event) => event.process(cache),
+            Self::PresenceUpdate(event) => event.process(cache),
+            Self::ReactionAdd(_) => noop::<B>(),
+            Self::ReactionRemove(_) => noop::<B>(),
+            Self::ReactionRemoveAll(_) => noop::<B>(),
+            Self::Ready(event) => event.process(cache),
+            Self::RoleCreate(event) => event.process(cache),
+            Self::RoleDelete(event) => event.process(cache),
+            Self::RoleUpdate(event) => event.process(cache),
+            Self::TypingStart(_) => noop::<B>(),
+            Self::UnavailableGuild(_) => noop::<B>(),
+            Self::UserUpdate(event) => event.process(cache),
+            Self::VoiceServerUpdate(_) => noop::<B>(),
+            Self::VoiceStateUpdate(event) => event.process(cache),
+            Self::WebhooksUpdate(_) => noop::<B>(),
+            Self::GatewayHeartbeat(_)
+            | Self::GatewayHeartbeatAck
+            | Self::GatewayHello(_)
+            | Self::GatewayInvalidateSession(_)
+            | Self::GatewayReconnect
+            | Self::Resumed
+            | Self::GiftCodeUpdate
+            | Self::PresencesReplace
+            | Self::ShardConnected(_)
+            | Self::ShardConnecting(_)
+            | Self::ShardIdentifying(_)
+            | Self::ShardPayload(_)
+            | Self::ShardReconnecting(_)
+            | Self::ShardResuming(_) => noop::<B>(),
             _ => todo!(),
         }
     }
@@ -662,5 +712,157 @@ impl<B: Backend> CacheUpdate<B> for MessageDelete {
             futures.try_collect::<()>().await?;
             cache.messages.remove(self.id).await
         })
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for MessageDeleteBulk {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        Box::pin(async move {
+            let attachment_futures = FuturesUnordered::new();
+            let message_futures = FuturesUnordered::new();
+
+            for id in self.ids.iter().copied() {
+                let mut attachments = cache.messages.attachments(id).await?;
+                while let Some(Ok(attachment)) = attachments.next().await {
+                    attachment_futures.push(cache.attachments.remove(attachment.id));
+                }
+
+                message_futures.push(cache.messages.remove(id));
+            }
+
+            attachment_futures.try_collect::<()>().await?;
+            message_futures.try_collect().await
+        })
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for MessageUpdate {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        Box::pin(async move {
+            let futures = FuturesUnordered::new();
+
+            if let Some(attachments) = &self.attachments {
+                futures.push(
+                    cache.attachments.upsert_bulk(
+                        attachments
+                            .iter()
+                            .cloned()
+                            .map(|a| AttachmentEntity::from((self.id, a))),
+                    ),
+                );
+            }
+
+            futures.push(
+                cache
+                    .messages
+                    .get(self.id)
+                    .and_then(|message: Option<MessageEntity>| {
+                        message.map_or_else(
+                            || future::ok(()).boxed(),
+                            |message| cache.messages.upsert(message.update(self.clone())),
+                        )
+                    })
+                    .boxed(),
+            );
+
+            futures.try_collect().await
+        })
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for PresenceUpdate {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        let futures = FuturesUnordered::new();
+
+        if let UserOrId::User(user) = &self.user {
+            let entity = UserEntity::from(user.clone());
+
+            futures.push(cache.users.upsert(entity));
+        }
+
+        let entity = PresenceEntity::from(self.clone());
+        futures.push(cache.presences.upsert(entity));
+
+        futures.try_collect().boxed()
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for Ready {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        use crate::repository::SingleEntityRepository;
+        let entity = CurrentUserEntity::from(self.user.clone());
+
+        cache.current_user.upsert(entity)
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for RoleCreate {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        let entity = RoleEntity::from((self.role.clone(), self.guild_id));
+
+        cache.roles.upsert(entity)
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for RoleDelete {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        cache.roles.remove(self.role_id)
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for RoleUpdate {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        let entity = RoleEntity::from((self.role.clone(), self.guild_id));
+
+        cache.roles.upsert(entity)
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for UserUpdate {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        use crate::repository::SingleEntityRepository;
+        let entity = CurrentUserEntity::from(self.0.clone());
+
+        cache.current_user.upsert(entity)
+    }
+}
+
+impl<B: Backend> CacheUpdate<B> for VoiceStateUpdate {
+    fn process<'a>(
+        &'a self,
+        cache: &'a Cache<B>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), B::Error>> + Send + 'a>> {
+        self.0.guild_id.map_or_else(
+            || future::ok(()).boxed(),
+            |guild_id| {
+                let entity = VoiceStateEntity::from((self.0.clone(), guild_id));
+
+                cache.voice_states.upsert(entity)
+            },
+        )
     }
 }

@@ -42,5 +42,5 @@ pub trait SingleEntityRepository<E: Entity, B: Backend> {
 
     fn remove(&self) -> RemoveEntityFuture<'_, B::Error>;
 
-    fn upsert(&self) -> UpsertEntityFuture<'_, B::Error>;
+    fn upsert(&self, entity: E) -> UpsertEntityFuture<'_, B::Error>;
 }
