@@ -22,7 +22,6 @@ pub trait Backend: Send + Sync + Sized + 'static {
     type PresenceRepository: PresenceRepository<Self> + Send + Sync;
     type PrivateChannelRepository: PrivateChannelRepository<Self> + Send + Sync;
     type RoleRepository: RoleRepository<Self> + Send + Sync;
-    type StageChannelRepository: VoiceChannelRepository<Self> + Send + Sync;
     type TextChannelRepository: TextChannelRepository<Self> + Send + Sync;
     type UserRepository: UserRepository<Self> + Send + Sync;
     type VoiceChannelRepository: VoiceChannelRepository<Self> + Send + Sync;
@@ -49,8 +48,6 @@ pub trait Backend: Send + Sync + Sized + 'static {
     fn private_channels(&self) -> Self::PrivateChannelRepository;
 
     fn roles(&self) -> Self::RoleRepository;
-
-    fn stage_channels(&self) -> Self::StageChannelRepository;
 
     fn text_channels(&self) -> Self::TextChannelRepository;
 

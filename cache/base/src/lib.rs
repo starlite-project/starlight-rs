@@ -8,4 +8,4 @@ pub mod repository;
 mod backend;
 mod utils;
 
-pub use self::{backend::Backend, entity::Entity, repository::Repository};
+pub use self::{backend::Backend, cache::Cache, entity::Entity, repository::Repository};

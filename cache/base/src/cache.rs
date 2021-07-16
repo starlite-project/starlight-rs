@@ -74,7 +74,6 @@ pub struct Cache<B: Backend> {
     pub presences: B::PresenceRepository,
     pub private_channels: B::PrivateChannelRepository,
     pub roles: B::RoleRepository,
-    pub stage_channels: B::StageChannelRepository,
     pub text_channels: B::TextChannelRepository,
     pub users: B::UserRepository,
     pub voice_channels: B::VoiceChannelRepository,
@@ -102,7 +101,6 @@ impl<B: Backend> Cache<B> {
         let presences = backend.presences();
         let private_channels = backend.private_channels();
         let roles = backend.roles();
-        let stage_channels = backend.stage_channels();
         let text_channels = backend.text_channels();
         let users = backend.users();
         let voice_channels = backend.voice_channels();
@@ -121,7 +119,6 @@ impl<B: Backend> Cache<B> {
             presences,
             private_channels,
             roles,
-            stage_channels,
             text_channels,
             users,
             voice_channels,
@@ -230,11 +227,6 @@ impl<B: Backend> CacheUpdate<B> for ChannelCreate {
 
                 cache.text_channels.upsert(entity)
             }
-            Channel::Guild(GuildChannel::Stage(c)) => {
-                let entity = VoiceChannelEntity::from(c.clone());
-
-                cache.stage_channels.upsert(entity)
-            }
             Channel::Guild(GuildChannel::Voice(c)) => {
                 let entity = VoiceChannelEntity::from(c.clone());
 
@@ -254,6 +246,7 @@ impl<B: Backend> CacheUpdate<B> for ChannelCreate {
 
                 futures.try_collect().boxed()
             }
+            _ => unimplemented!(),
         }
     }
 }
@@ -267,9 +260,9 @@ impl<B: Backend> CacheUpdate<B> for ChannelDelete {
             Channel::Group(group) => cache.groups.remove(group.id),
             Channel::Guild(GuildChannel::Category(c)) => cache.category_channels.remove(c.id),
             Channel::Guild(GuildChannel::Text(c)) => cache.text_channels.remove(c.id),
-            Channel::Guild(GuildChannel::Stage(c)) => cache.stage_channels.remove(c.id),
             Channel::Guild(GuildChannel::Voice(c)) => cache.voice_channels.remove(c.id),
             Channel::Private(c) => cache.private_channels.remove(c.id),
+            _ => unimplemented!(),
         }
     }
 }
@@ -346,11 +339,6 @@ impl<B: Backend> CacheUpdate<B> for ChannelUpdate {
 
                 cache.text_channels.upsert(entity)
             }
-            Channel::Guild(GuildChannel::Stage(c)) => {
-                let entity = VoiceChannelEntity::from(c.clone());
-
-                cache.stage_channels.upsert(entity)
-            }
             Channel::Guild(GuildChannel::Voice(c)) => {
                 let entity = VoiceChannelEntity::from(c.clone());
 
@@ -370,6 +358,7 @@ impl<B: Backend> CacheUpdate<B> for ChannelUpdate {
 
                 futures.try_collect().boxed()
             }
+            _ => unimplemented!(),
         }
     }
 }
@@ -391,14 +380,11 @@ impl<B: Backend> CacheUpdate<B> for GuildCreate {
                     let entity = TextChannelEntity::from(c.clone());
                     futures.push(cache.text_channels.upsert(entity))
                 }
-                GuildChannel::Stage(c) => {
-                    let entity = VoiceChannelEntity::from(c.clone());
-                    futures.push(cache.stage_channels.upsert(entity));
-                }
                 GuildChannel::Voice(c) => {
                     let entity = VoiceChannelEntity::from(c.clone());
                     futures.push(cache.voice_channels.upsert(entity));
                 }
+                _ => unimplemented!(),
             }
         }
 
