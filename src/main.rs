@@ -14,6 +14,10 @@ mod lib;
 async fn main() -> GenericResult<()> {
     dotenv::dotenv()?;
 
+    let unqlite_backend = star_cache_unqlite::UnqliteBackend::create("./db");
+
+    let unqlite_cache = star_cache_unqlite::UnqliteCache::with_backend(unqlite_backend);
+
     let (client, mut events) = StateBuilder::new()
         .token(env::var("DISCORD_TOKEN")?)
         .intents(Intents::all())
@@ -28,6 +32,7 @@ async fn main() -> GenericResult<()> {
 
     while let Some((_, event)) = events.next().await {
         state.handle_event(&event);
+        unqlite_cache.process(&event);
         let state_clone = Arc::clone(&state);
 
         tokio::spawn(async move {

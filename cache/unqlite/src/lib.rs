@@ -1,20 +1,28 @@
-use std::sync::Arc;
-
-use serde::Serialize;
-use star_cache_base::{
-    entity::{
+use futures_util::future::{self, FutureExt};
+use serde::{de::DeserializeOwned, Serialize};
+use star_cache_base::{Backend, Cache, Entity, Repository, entity::{
         channel::{
-            AttachmentEntity, CategoryChannelEntity, GroupEntity, MessageEntity,
-            PrivateChannelEntity, TextChannelEntity, VoiceChannelEntity,
+            AttachmentEntity, AttachmentRepository, CategoryChannelEntity,
+            CategoryChannelRepository, GroupEntity, GroupRepository, GuildChannelEntity,
+            MessageEntity, MessageRepository, PrivateChannelEntity, PrivateChannelRepository,
+            TextChannelEntity, TextChannelRepository, VoiceChannelEntity, VoiceChannelRepository,
         },
-        gateway::PresenceEntity,
-        guild::{EmojiEntity, GuildEntity, MemberEntity, RoleEntity},
-        user::{CurrentUserEntity, UserEntity},
-        voice::VoiceStateEntity,
-    },
-    Entity,
-};
-use unqlite::UnQLite;
+        gateway::{PresenceEntity, PresenceRepository},
+        guild::{
+            EmojiEntity, EmojiRepository, GuildEntity, GuildRepository, MemberEntity,
+            MemberRepository, RoleEntity, RoleRepository,
+        },
+        user::{CurrentUserEntity, CurrentUserRepository, UserEntity, UserRepository},
+        voice::{VoiceStateEntity, VoiceStateRepository},
+    }, repository::{
+        GetEntityFuture, ListEntitiesFuture, ListEntityIdsFuture, RemoveEntityFuture,
+        SingleEntityRepository, UpsertEntityFuture,
+    }};
+use std::{marker::PhantomData, sync::Arc};
+use twilight_model::id::{ChannelId, EmojiId, GuildId, RoleId, UserId};
+use unqlite::{Error, UnQLite, KV};
+
+pub type UnqliteCache = Cache<UnqliteBackend>;
 
 pub trait UnqliteEntity: Entity + Serialize {
     fn key(id: Self::Id) -> Vec<u8>;
@@ -122,6 +130,144 @@ impl UnqliteEntity for VoiceStateEntity {
     }
 }
 
+pub struct UnqliteRepository<T>(UnqliteBackend, PhantomData<T>);
+
+impl<T> UnqliteRepository<T> {
+    const fn new(backend: UnqliteBackend) -> Self {
+        Self(backend, PhantomData)
+    }
+}
+
+impl<T: DeserializeOwned + Serialize + UnqliteEntity> Repository<T, UnqliteBackend>
+    for UnqliteRepository<T>
+{
+    fn backend(&self) -> UnqliteBackend {
+        self.0.clone()
+    }
+
+    fn get(&self, entity_id: T::Id) -> GetEntityFuture<'_, T, Error> {
+        let bytes: Vec<u8> = (self.0).0.kv_fetch(T::key(entity_id)).unwrap();
+
+        future::ok(Some(bincode::deserialize::<T>(&bytes).unwrap())).boxed()
+    }
+
+    fn list(&self) -> ListEntitiesFuture<'_, T, Error> {
+        unimplemented!("not implemented by this backend")
+    }
+
+    fn remove(&self, entity_id: T::Id) -> RemoveEntityFuture<'_, Error> {
+        future::ready((self.0).0.kv_delete(T::key(entity_id))).boxed()
+    }
+
+    fn upsert(&self, entity: T) -> UpsertEntityFuture<'_, Error> {
+        let bytes = entity.value();
+
+        future::ready((self.0).0.kv_store(T::key(entity.id()), bytes)).boxed()
+    }
+}
+
+impl<T: DeserializeOwned + Serialize + UnqliteSingleEntity>
+    SingleEntityRepository<T, UnqliteBackend> for UnqliteRepository<T>
+{
+    fn backend(&self) -> UnqliteBackend {
+        self.0.clone()
+    }
+
+    fn get(&self) -> GetEntityFuture<'_, T, Error> {
+        let bytes = (self.0).0.kv_fetch(T::key()).unwrap();
+
+        future::ok(Some(bincode::deserialize::<T>(&bytes).unwrap())).boxed()
+    }
+
+    fn remove(&self) -> RemoveEntityFuture<'_, Error> {
+        future::ready((self.0).0.kv_delete(T::key())).boxed()
+    }
+
+    fn upsert(&self, entity: T) -> UpsertEntityFuture<'_, Error> {
+        let bytes = entity.value();
+
+        future::ready((self.0).0.kv_store(T::key(), bytes)).boxed()
+    }
+}
+
+impl AttachmentRepository<UnqliteBackend> for UnqliteRepository<AttachmentEntity> {}
+
+impl CategoryChannelRepository<UnqliteBackend> for UnqliteRepository<CategoryChannelEntity> {}
+
+impl CurrentUserRepository<UnqliteBackend> for UnqliteRepository<CurrentUserEntity> {
+    fn guild_ids(&self) -> ListEntityIdsFuture<'_, GuildId, Error> {
+        unimplemented!("not implemented by this backend")
+    }
+}
+
+impl EmojiRepository<UnqliteBackend> for UnqliteRepository<EmojiEntity> {}
+
+impl GroupRepository<UnqliteBackend> for UnqliteRepository<GroupEntity> {}
+
+impl GuildRepository<UnqliteBackend> for UnqliteRepository<GuildEntity> {
+    fn channel_ids(&self, _: GuildId) -> ListEntitiesFuture<'_, ChannelId, Error> {
+        unimplemented!("not implemented by this backend")
+    }
+
+    fn channels(&self, _: GuildId) -> ListEntitiesFuture<'_, GuildChannelEntity, Error> {
+        unimplemented!("not implemented by this backend")
+    }
+
+    fn emoji_ids(&self, _: GuildId) -> ListEntityIdsFuture<'_, EmojiId, Error> {
+        unimplemented!("not implemented by this backend")
+    }
+
+    fn member_ids(&self, _: GuildId) -> ListEntityIdsFuture<'_, UserId, Error> {
+        unimplemented!("not implemented by this backend")
+    }
+
+    fn members(&self, _: GuildId) -> ListEntitiesFuture<'_, MemberEntity, Error> {
+        unimplemented!("not implemented by this backend")
+    }
+
+    fn presence_ids(&self, _: GuildId) -> ListEntityIdsFuture<'_, UserId, Error> {
+        unimplemented!("not implemented by this backend")
+    }
+
+    fn presences(&self, _: GuildId) -> ListEntitiesFuture<'_, PresenceEntity, Error> {
+        unimplemented!("not implemented by this backend")
+    }
+
+    fn role_ids(&self, _: GuildId) -> ListEntityIdsFuture<'_, RoleId, Error> {
+        unimplemented!("not implemented by this backend")
+    }
+
+    fn voice_state_ids(&self, _: GuildId) -> ListEntityIdsFuture<'_, UserId, Error> {
+        unimplemented!("not implemented by this backend")
+    }
+
+    fn voice_states(&self, _: GuildId) -> ListEntitiesFuture<'_, VoiceStateEntity, Error> {
+        unimplemented!("not implemented by this backend")
+    }
+}
+
+impl MemberRepository<UnqliteBackend> for UnqliteRepository<MemberEntity> {}
+
+impl MessageRepository<UnqliteBackend> for UnqliteRepository<MessageEntity> {}
+
+impl PresenceRepository<UnqliteBackend> for UnqliteRepository<PresenceEntity> {}
+
+impl PrivateChannelRepository<UnqliteBackend> for UnqliteRepository<PrivateChannelEntity> {}
+
+impl RoleRepository<UnqliteBackend> for UnqliteRepository<RoleEntity> {}
+
+impl TextChannelRepository<UnqliteBackend> for UnqliteRepository<TextChannelEntity> {}
+
+impl VoiceChannelRepository<UnqliteBackend> for UnqliteRepository<VoiceChannelEntity> {}
+
+impl VoiceStateRepository<UnqliteBackend> for UnqliteRepository<VoiceStateEntity> {}
+
+impl UserRepository<UnqliteBackend> for UnqliteRepository<UserEntity> {
+    fn guild_ids(&self, _: UserId) -> ListEntitiesFuture<'_, GuildId, Error> {
+        unimplemented!("not implemented by this backend")
+    }
+}
+
 #[derive(Clone)]
 pub struct UnqliteBackend(Arc<UnQLite>);
 
@@ -148,5 +294,88 @@ impl UnqliteBackend {
 
     pub fn open_readonly<F: AsRef<str>>(filename: F) -> Self {
         Self::new(UnQLite::open_readonly(filename))
+    }
+
+    fn repo<T>(&self) -> UnqliteRepository<T> {
+        UnqliteRepository::new(self.clone())
+    }
+}
+
+impl Backend for UnqliteBackend {
+    type Error = Error;
+    type AttachmentRepository = UnqliteRepository<AttachmentEntity>;
+    type CategoryChannelRepository = UnqliteRepository<CategoryChannelEntity>;
+    type CurrentUserRepository = UnqliteRepository<CurrentUserEntity>;
+    type EmojiRepository = UnqliteRepository<EmojiEntity>;
+    type GroupRepository = UnqliteRepository<GroupEntity>;
+    type GuildRepository = UnqliteRepository<GuildEntity>;
+    type MemberRepository = UnqliteRepository<MemberEntity>;
+    type MessageRepository = UnqliteRepository<MessageEntity>;
+    type PresenceRepository = UnqliteRepository<PresenceEntity>;
+    type PrivateChannelRepository = UnqliteRepository<PrivateChannelEntity>;
+    type RoleRepository = UnqliteRepository<RoleEntity>;
+    type TextChannelRepository = UnqliteRepository<TextChannelEntity>;
+    type UserRepository = UnqliteRepository<UserEntity>;
+    type VoiceChannelRepository = UnqliteRepository<VoiceChannelEntity>;
+    type VoiceStateRepository = UnqliteRepository<VoiceStateEntity>;
+
+    fn attachments(&self) -> Self::AttachmentRepository {
+        self.repo()
+    }
+
+    fn category_channels(&self) -> Self::CategoryChannelRepository {
+        self.repo()
+    }
+
+    fn current_user(&self) -> Self::CurrentUserRepository {
+        self.repo()
+    }
+
+    fn emojis(&self) -> Self::EmojiRepository {
+        self.repo()
+    }
+
+    fn groups(&self) -> Self::GroupRepository {
+        self.repo()
+    }
+
+    fn guilds(&self) -> Self::GuildRepository {
+        self.repo()
+    }
+
+    fn members(&self) -> Self::MemberRepository {
+        self.repo()
+    }
+
+    fn messages(&self) -> Self::MessageRepository {
+        self.repo()
+    }
+
+    fn presences(&self) -> Self::PresenceRepository {
+        self.repo()
+    }
+
+    fn private_channels(&self) -> Self::PrivateChannelRepository {
+        self.repo()
+    }
+
+    fn roles(&self) -> Self::RoleRepository {
+        self.repo()
+    }
+
+    fn text_channels(&self) -> Self::TextChannelRepository {
+        self.repo()
+    }
+
+    fn users(&self) -> Self::UserRepository {
+        self.repo()
+    }
+
+    fn voice_channels(&self) -> Self::VoiceChannelRepository {
+        self.repo()
+    }
+
+    fn voice_states(&self) -> Self::VoiceStateRepository {
+        self.repo()
     }
 }
