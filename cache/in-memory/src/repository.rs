@@ -8,11 +8,14 @@ use star_cache_base::{
     entity::{
         channel::{
             AttachmentEntity, AttachmentRepository, CategoryChannelEntity,
-            CategoryChannelRepository, GroupEntity, GroupRepository, MessageEntity,
-            PrivateChannelEntity, TextChannelEntity, VoiceChannelEntity,
+            CategoryChannelRepository, GroupEntity, GroupRepository, GuildChannelEntity,
+            MessageEntity, PrivateChannelEntity, TextChannelEntity, VoiceChannelEntity,
         },
         gateway::PresenceEntity,
-        guild::{EmojiEntity, EmojiRepository, GuildEntity, MemberEntity, RoleEntity},
+        guild::{
+            EmojiEntity, EmojiRepository, GuildEntity, GuildRepository, MemberEntity,
+            MemberRepository, RoleEntity,
+        },
         user::{CurrentUserEntity, CurrentUserRepository, UserEntity},
         voice::VoiceStateEntity,
     },
@@ -20,10 +23,10 @@ use star_cache_base::{
         GetEntityFuture, ListEntitiesFuture, ListEntityIdsFuture, RemoveEntityFuture,
         SingleEntityRepository, UpsertEntityFuture,
     },
-    Backend, Entity, Repository,
+    Entity, Repository,
 };
 use std::{marker::PhantomData, sync::Mutex};
-use twilight_model::id::{AttachmentId, ChannelId, EmojiId, GuildId};
+use twilight_model::id::{AttachmentId, ChannelId, EmojiId, GuildId, RoleId, UserId};
 
 pub type InMemoryAttachmentRepository = InMemoryRepository<AttachmentEntity>;
 pub type InMemoryCategoryChannelRepository = InMemoryRepository<CategoryChannelEntity>;
@@ -230,11 +233,11 @@ impl<E: EntityExt> Repository<E, InMemoryBackend> for InMemoryRepository<E> {
         self.0.clone()
     }
 
-    fn get(&self, entity_id: E::Id) -> GetEntityFuture<'_, E, <InMemoryBackend as Backend>::Error> {
+    fn get(&self, entity_id: E::Id) -> GetEntityFuture<'_, E, InMemoryBackendError> {
         future::ok(E::map(&self.0).get(&entity_id).map(|r| r.value().clone())).boxed()
     }
 
-    fn list(&self) -> ListEntitiesFuture<'_, E, <InMemoryBackend as Backend>::Error> {
+    fn list(&self) -> ListEntitiesFuture<'_, E, InMemoryBackendError> {
         let values = E::map(&self.0)
             .into_iter()
             .map(|r| *r.key())
@@ -245,16 +248,13 @@ impl<E: EntityExt> Repository<E, InMemoryBackend> for InMemoryRepository<E> {
         future::ok(stream).boxed()
     }
 
-    fn remove(
-        &self,
-        entity_id: E::Id,
-    ) -> RemoveEntityFuture<'_, <InMemoryBackend as Backend>::Error> {
+    fn remove(&self, entity_id: E::Id) -> RemoveEntityFuture<'_, InMemoryBackendError> {
         E::map(&self.0).remove(&entity_id);
 
         future::ok(()).boxed()
     }
 
-    fn upsert(&self, entity: E) -> UpsertEntityFuture<'_, <InMemoryBackend as Backend>::Error> {
+    fn upsert(&self, entity: E) -> UpsertEntityFuture<'_, InMemoryBackendError> {
         if !self.0.config().entity_types().contains(E::TYPE) {
             return future::ok(()).boxed();
         }
@@ -272,7 +272,7 @@ impl SingleEntityRepository<CurrentUserEntity, InMemoryBackend>
         self.0.clone()
     }
 
-    fn get(&self) -> GetEntityFuture<'_, CurrentUserEntity, <InMemoryBackend as Backend>::Error> {
+    fn get(&self) -> GetEntityFuture<'_, CurrentUserEntity, InMemoryBackendError> {
         future::ok(
             CurrentUserEntity::lock(&self.0)
                 .lock()
@@ -282,7 +282,7 @@ impl SingleEntityRepository<CurrentUserEntity, InMemoryBackend>
         .boxed()
     }
 
-    fn remove(&self) -> RemoveEntityFuture<'_, <InMemoryBackend as Backend>::Error> {
+    fn remove(&self) -> RemoveEntityFuture<'_, InMemoryBackendError> {
         CurrentUserEntity::lock(&self.0)
             .lock()
             .expect("current user poisoned")
@@ -291,10 +291,7 @@ impl SingleEntityRepository<CurrentUserEntity, InMemoryBackend>
         future::ok(()).boxed()
     }
 
-    fn upsert(
-        &self,
-        entity: CurrentUserEntity,
-    ) -> UpsertEntityFuture<'_, <InMemoryBackend as Backend>::Error> {
+    fn upsert(&self, entity: CurrentUserEntity) -> UpsertEntityFuture<'_, InMemoryBackendError> {
         if !self
             .0
             .config()
@@ -317,7 +314,7 @@ impl AttachmentRepository<InMemoryBackend> for InMemoryAttachmentRepository {
     fn message(
         &self,
         attachment_id: AttachmentId,
-    ) -> GetEntityFuture<'_, MessageEntity, InMemoryBackend::Error> {
+    ) -> GetEntityFuture<'_, MessageEntity, InMemoryBackendError> {
         let message = self
             .0
              .0
@@ -335,7 +332,7 @@ impl CategoryChannelRepository<InMemoryBackend> for InMemoryCategoryChannelRepos
     fn guild(
         &self,
         channel_id: ChannelId,
-    ) -> GetEntityFuture<'_, GuildEntity, InMemoryBackend::Error> {
+    ) -> GetEntityFuture<'_, GuildEntity, InMemoryBackendError> {
         let guild = self
             .0
              .0
@@ -350,7 +347,7 @@ impl CategoryChannelRepository<InMemoryBackend> for InMemoryCategoryChannelRepos
 }
 
 impl CurrentUserRepository<InMemoryBackend> for InMemoryCurrentUserRepository {
-    fn guild_ids(&self) -> ListEntityIdsFuture<'_, GuildId, InMemoryBackend::Error> {
+    fn guild_ids(&self) -> ListEntityIdsFuture<'_, GuildId, InMemoryBackendError> {
         let current_user_fut = self.get();
 
         Box::pin(async move {
@@ -361,7 +358,7 @@ impl CurrentUserRepository<InMemoryBackend> for InMemoryCurrentUserRepository {
             };
 
             let stream = (self.0).0.user_guilds.get(&user.id).map_or_else(
-                || stream::empty(),
+                || stream::empty().boxed(),
                 |r| stream::iter(r.value().iter().map(|x| Ok(*x)).collect::<Vec<_>>()).boxed(),
             );
 
@@ -369,7 +366,7 @@ impl CurrentUserRepository<InMemoryBackend> for InMemoryCurrentUserRepository {
         })
     }
 
-    fn guilds(&self) -> ListEntitiesFuture<'_, GuildEntity, InMemoryBackend::Error> {
+    fn guilds(&self) -> ListEntitiesFuture<'_, GuildEntity, InMemoryBackendError> {
         Box::pin(async move {
             let user = if let Some(user) = self.get().await? {
                 user
@@ -394,7 +391,7 @@ impl CurrentUserRepository<InMemoryBackend> for InMemoryCurrentUserRepository {
 }
 
 impl EmojiRepository<InMemoryBackend> for InMemoryEmojiRepository {
-    fn guild(&self, emoji_id: EmojiId) -> GetEntityFuture<'_, GuildEntity, InMemoryBackend::Error> {
+    fn guild(&self, emoji_id: EmojiId) -> GetEntityFuture<'_, GuildEntity, InMemoryBackendError> {
         let guild = self
             .0
              .0
@@ -407,10 +404,7 @@ impl EmojiRepository<InMemoryBackend> for InMemoryEmojiRepository {
         future::ok(guild).boxed()
     }
 
-    fn roles(
-        &self,
-        emoji_id: EmojiId,
-    ) -> ListEntitiesFuture<'_, RoleEntity, InMemoryBackend::Error> {
+    fn roles(&self, emoji_id: EmojiId) -> ListEntitiesFuture<'_, RoleEntity, InMemoryBackendError> {
         let role_ids = match (self.0).0.emojis.get(&emoji_id) {
             Some(emoji) => emoji.role_ids.clone(),
             None => return future::ok(stream::empty().boxed()).boxed(),
@@ -425,7 +419,7 @@ impl EmojiRepository<InMemoryBackend> for InMemoryEmojiRepository {
         future::ok(stream).boxed()
     }
 
-    fn user(&self, emoji_id: EmojiId) -> GetEntityFuture<'_, UserEntity, InMemoryBackend::Error> {
+    fn user(&self, emoji_id: EmojiId) -> GetEntityFuture<'_, UserEntity, InMemoryBackendError> {
         let user = self
             .0
              .0
@@ -443,7 +437,7 @@ impl GroupRepository<InMemoryBackend> for InMemoryGroupRepository {
     fn last_message(
         &self,
         group_id: ChannelId,
-    ) -> GetEntityFuture<'_, MessageEntity, InMemoryBackend::Error> {
+    ) -> GetEntityFuture<'_, MessageEntity, InMemoryBackendError> {
         let message = self
             .0
              .0
@@ -456,10 +450,7 @@ impl GroupRepository<InMemoryBackend> for InMemoryGroupRepository {
         future::ok(message).boxed()
     }
 
-    fn owner(
-        &self,
-        group_id: ChannelId,
-    ) -> GetEntityFuture<'_, UserEntity, InMemoryBackend::Error> {
+    fn owner(&self, group_id: ChannelId) -> GetEntityFuture<'_, UserEntity, InMemoryBackendError> {
         let guild = self
             .0
              .0
@@ -470,5 +461,342 @@ impl GroupRepository<InMemoryBackend> for InMemoryGroupRepository {
             .map(|r| r.value().clone());
 
         future::ok(guild).boxed()
+    }
+
+    fn recipients(
+        &self,
+        group_id: ChannelId,
+    ) -> ListEntitiesFuture<'_, UserEntity, InMemoryBackendError> {
+        let recipient_ids = match (self.0).0.groups.get(&group_id) {
+            Some(group) => group.recipient_ids.clone(),
+            None => return future::ok(stream::empty().boxed()).boxed(),
+        };
+
+        let iter = recipient_ids
+            .into_iter()
+            .filter_map(move |id| (self.0).0.users.get(&id).map(|r| Ok(r.value().clone())));
+
+        let stream = stream::iter(iter).boxed();
+        future::ok(stream).boxed()
+    }
+}
+
+impl GuildRepository<InMemoryBackend> for InMemoryGuildRepository {
+    fn afk_channel(
+        &self,
+        guild_id: GuildId,
+    ) -> GetEntityFuture<'_, VoiceChannelEntity, InMemoryBackendError> {
+        let guild = self
+            .0
+             .0
+            .guilds
+            .get(&guild_id)
+            .and_then(|guild| guild.afk_channel_id)
+            .and_then(|id| (self.0).0.channels_voice.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(guild).boxed()
+    }
+
+    fn channel_ids(
+        &self,
+        guild_id: GuildId,
+    ) -> ListEntitiesFuture<'_, ChannelId, InMemoryBackendError> {
+        let stream = (self.0).0.guild_channels.get(&guild_id).map_or_else(
+            || stream::empty().boxed(),
+            |set| stream::iter(set.iter().map(|x| Ok(*x)).collect::<Vec<_>>()).boxed(),
+        );
+
+        future::ok(stream).boxed()
+    }
+
+    fn channels(
+        &self,
+        guild_id: GuildId,
+    ) -> ListEntitiesFuture<'_, GuildChannelEntity, InMemoryBackendError> {
+        let channel_ids = match (self.0).0.guild_channels.get(&guild_id) {
+            Some(guild_channels) => guild_channels.clone(),
+            None => return future::ok(stream::empty().boxed()).boxed(),
+        };
+
+        let iter = channel_ids.into_iter().filter_map(move |id| {
+            if let Some(r) = (self.0).0.channels_text.get(&id) {
+                return Some(Ok(GuildChannelEntity::Text(r.value().clone())));
+            }
+
+            if let Some(r) = (self.0).0.channels_voice.get(&id) {
+                return Some(Ok(GuildChannelEntity::Voice(r.value().clone())));
+            }
+
+            if let Some(r) = (self.0).0.channels_category.get(&id) {
+                return Some(Ok(GuildChannelEntity::Category(r.value().clone())));
+            }
+
+            None
+        });
+
+        let stream = stream::iter(iter).boxed();
+
+        future::ok(stream).boxed()
+    }
+
+    fn emoji_ids(
+        &self,
+        guild_id: GuildId,
+    ) -> ListEntityIdsFuture<'_, EmojiId, InMemoryBackendError> {
+        let stream = (self.0).0.guild_emojis.get(&guild_id).map_or_else(
+            || stream::empty().boxed(),
+            |set| stream::iter(set.iter().map(|x| Ok(*x)).collect::<Vec<_>>()).boxed(),
+        );
+
+        future::ok(stream).boxed()
+    }
+
+    fn emojis(
+        &self,
+        guild_id: GuildId,
+    ) -> ListEntitiesFuture<'_, EmojiEntity, InMemoryBackendError> {
+        let emoji_ids = match (self.0).0.guild_emojis.get(&guild_id) {
+            Some(guild_emojis) => guild_emojis.clone(),
+            None => return future::ok(stream::empty().boxed()).boxed(),
+        };
+
+        let iter = emoji_ids
+            .into_iter()
+            .filter_map(move |id| (self.0).0.emojis.get(&id).map(|r| Ok(r.value().clone())));
+        let stream = stream::iter(iter).boxed();
+
+        future::ok(stream).boxed()
+    }
+
+    fn member_ids(
+        &self,
+        guild_id: GuildId,
+    ) -> ListEntityIdsFuture<'_, UserId, InMemoryBackendError> {
+        let stream = (self.0).0.guild_members.get(&guild_id).map_or_else(
+            || stream::empty().boxed(),
+            |set| stream::iter(set.iter().map(|x| Ok(*x)).collect::<Vec<_>>()).boxed(),
+        );
+
+        future::ok(stream).boxed()
+    }
+
+    fn members(
+        &self,
+        guild_id: GuildId,
+    ) -> ListEntitiesFuture<'_, MemberEntity, InMemoryBackendError> {
+        let user_ids = match (self.0).0.guild_members.get(&guild_id) {
+            Some(guild_members) => guild_members.clone(),
+            None => return future::ok(stream::empty().boxed()).boxed(),
+        };
+
+        let iter = user_ids.into_iter().filter_map(move |id| {
+            self.0
+                 .0
+                .members
+                .get(&(guild_id, id))
+                .map(|r| Ok(r.value().clone()))
+        });
+
+        let stream = stream::iter(iter).boxed();
+
+        future::ok(stream).boxed()
+    }
+
+    fn owner(&self, guild_id: GuildId) -> GetEntityFuture<'_, UserEntity, InMemoryBackendError> {
+        let guild = self
+            .0
+             .0
+            .guilds
+            .get(&guild_id)
+            .map(|guild| guild.owner_id)
+            .and_then(|id| (self.0).0.users.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(guild).boxed()
+    }
+
+    fn presence_ids(
+        &self,
+        guild_id: GuildId,
+    ) -> ListEntityIdsFuture<'_, UserId, InMemoryBackendError> {
+        let stream = (self.0).0.guild_presences.get(&guild_id).map_or_else(
+            || stream::empty().boxed(),
+            |set| stream::iter(set.iter().map(|x| Ok(*x)).collect::<Vec<_>>()).boxed(),
+        );
+
+        future::ok(stream).boxed()
+    }
+
+    fn presences(
+        &self,
+        guild_id: GuildId,
+    ) -> ListEntitiesFuture<'_, PresenceEntity, InMemoryBackendError> {
+        let user_ids = match (self.0).0.guild_presences.get(&guild_id) {
+            Some(guild_presences) => guild_presences.clone(),
+            None => return future::ok(stream::empty().boxed()).boxed(),
+        };
+
+        let iter = user_ids.into_iter().filter_map(move |id| {
+            self.0
+                 .0
+                .presences
+                .get(&(guild_id, id))
+                .map(|r| Ok(r.value().clone()))
+        });
+
+        let stream = stream::iter(iter).boxed();
+
+        future::ok(stream).boxed()
+    }
+
+    fn role_ids(&self, guild_id: GuildId) -> ListEntityIdsFuture<'_, RoleId, InMemoryBackendError> {
+        let stream = (self.0).0.guild_roles.get(&guild_id).map_or_else(
+            || stream::empty().boxed(),
+            |set| stream::iter(set.iter().map(|x| Ok(*x)).collect::<Vec<_>>()).boxed(),
+        );
+
+        future::ok(stream).boxed()
+    }
+
+    fn roles(&self, guild_id: GuildId) -> ListEntitiesFuture<'_, RoleEntity, InMemoryBackendError> {
+        let role_ids = match (self.0).0.guild_roles.get(&guild_id) {
+            Some(guild_roles) => guild_roles.clone(),
+            None => return future::ok(stream::empty().boxed()).boxed(),
+        };
+
+        let iter = role_ids
+            .into_iter()
+            .filter_map(move |id| (self.0).0.roles.get(&id).map(|r| Ok(r.value().clone())));
+
+        let stream = stream::iter(iter).boxed();
+
+        future::ok(stream).boxed()
+    }
+
+    fn rules_channel(
+        &self,
+        guild_id: GuildId,
+    ) -> GetEntityFuture<'_, TextChannelEntity, InMemoryBackendError> {
+        let guild = self
+            .0
+             .0
+            .guilds
+            .get(&guild_id)
+            .and_then(|guild| guild.rules_channel_id)
+            .and_then(|id| (self.0).0.channels_text.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(guild).boxed()
+    }
+
+    fn system_channel(
+        &self,
+        guild_id: GuildId,
+    ) -> GetEntityFuture<'_, TextChannelEntity, InMemoryBackendError> {
+        let guild = self
+            .0
+             .0
+            .guilds
+            .get(&guild_id)
+            .and_then(|guild| guild.system_channel_id)
+            .and_then(|id| (self.0).0.channels_text.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(guild).boxed()
+    }
+
+    fn voice_state_ids(
+        &self,
+        guild_id: GuildId,
+    ) -> ListEntityIdsFuture<'_, UserId, InMemoryBackendError> {
+        let stream = (self.0).0.guild_voice_states.get(&guild_id).map_or_else(
+            || stream::empty().boxed(),
+            |set| stream::iter(set.iter().map(|x| Ok(*x)).collect::<Vec<_>>()).boxed(),
+        );
+
+        future::ok(stream).boxed()
+    }
+
+    fn voice_states(
+        &self,
+        guild_id: GuildId,
+    ) -> ListEntitiesFuture<'_, VoiceStateEntity, InMemoryBackendError> {
+        let user_ids = match (self.0).0.guild_voice_states.get(&guild_id) {
+            Some(guild_voice_states) => guild_voice_states.clone(),
+            None => return future::ok(stream::empty().boxed()).boxed(),
+        };
+
+        let iter = user_ids.into_iter().filter_map(move |id| {
+            self.0
+                 .0
+                .voice_states
+                .get(&(guild_id, id))
+                .map(|r| Ok(r.value().clone()))
+        });
+
+        let stream = stream::iter(iter).boxed();
+
+        future::ok(stream).boxed()
+    }
+
+    fn widget_channel(
+        &self,
+        guild_id: GuildId,
+    ) -> GetEntityFuture<'_, GuildChannelEntity, InMemoryBackendError> {
+        let id = match (self.0).0.guilds.get(&guild_id) {
+            Some(guild) if guild.widget_channel_id.is_some() => guild.widget_channel_id.unwrap(),
+            _ => return future::ok(None).boxed(),
+        };
+
+        if let Some(r) = (self.0).0.channels_text.get(&id) {
+            let entity = GuildChannelEntity::Text(r.value().clone());
+
+            return future::ok(Some(entity)).boxed();
+        }
+
+        if let Some(r) = (self.0).0.channels_voice.get(&id) {
+            let entity = GuildChannelEntity::Voice(r.value().clone());
+
+            return future::ok(Some(entity)).boxed();
+        }
+
+        if let Some(r) = (self.0).0.channels_category.get(&id) {
+            let entity = GuildChannelEntity::Category(r.value().clone());
+
+            return future::ok(Some(entity)).boxed();
+        }
+
+        future::ok(None).boxed()
+    }
+}
+
+impl MemberRepository<InMemoryBackend> for InMemoryMemberRepository {
+    fn hoisted_role(
+        &self,
+        guild_id: GuildId,
+        user_id: UserId,
+    ) -> GetEntityFuture<'_, RoleEntity, InMemoryBackendError> {
+        let role = self
+            .0
+             .0
+            .members
+            .get(&(guild_id, user_id))
+            .and_then(|member| member.hoisted_role_id)
+            .and_then(|id| (self.0).0.roles.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(role).boxed()
+    }
+
+    fn roles(
+        &self,
+        guild_id: GuildId,
+        user_id: UserId,
+    ) -> ListEntitiesFuture<'_, RoleEntity, InMemoryBackendError> {
+        let role_ids = match (self.0).0.members.get(&(guild_id, user_id)) {
+            Some(member) => member.role_ids.clone(),
+            None => return future::ok(stream::empty().boxed()).boxed(),
+        };
     }
 }

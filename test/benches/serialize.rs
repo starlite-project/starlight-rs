@@ -1,8 +1,8 @@
+use bincode::serialize;
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use serde::{Deserialize, Serialize};
-use std::{
-    error::Error,
-    fmt::{Display, Formatter, Result as FmtResult},
-};
+use serde_cbor::to_vec;
+use std::fmt::{Display, Formatter, Result as FmtResult};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Serialize, Deserialize)]
 struct Coordinate(f64);
@@ -43,16 +43,18 @@ impl Display for Grid {
         write!(f, "{}..{}", self.0.first().unwrap(), self.0.last().unwrap())
     }
 }
-fn main() -> Result<(), Box<dyn Error>> {
+
+fn bench_serde(c: &mut Criterion) {
+    let mut group = c.benchmark_group("Serializers");
     let grid = Grid::default();
-
-    let bincode_grid = bincode::serialize(&grid).unwrap();
-    let cbor_grid = serde_cbor::to_vec(&grid).unwrap();
-
-    let bincode_deserialized: Grid = bincode::deserialize(&bincode_grid[..]).unwrap();
-    let cbor_deserialized: Grid = serde_cbor::from_slice(&cbor_grid[..]).unwrap();
-
-    dbg!(bincode_deserialized == cbor_deserialized);
-
-    Ok(())
+    group.bench_with_input(BenchmarkId::new("Cbor", &grid), &grid, |b, i| {
+        b.iter(|| to_vec(i).unwrap())
+    });
+    group.bench_with_input(BenchmarkId::new("Bincode", &grid), &grid, |b, i| {
+        b.iter(|| serialize(i).unwrap())
+    });
+    group.finish();
 }
+
+criterion_group!(benches, bench_serde);
+criterion_main!(benches);
