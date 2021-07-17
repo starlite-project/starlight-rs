@@ -1,0 +1,21 @@
+[package]
+name = "star-cache-unqlite"
+version = "0.1.0"
+edition = "2018"
+authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
+
+[dependencies]
+bincode = "1"
+serde = "1"
+
+[dependencies.futures-util]
+version = "0.3"
+default-features = false
+features = ["std"]
+
+[dependencies.star-cache-base]
+path = "../base"
+
+[dependencies.unqlite]
+default-features = false
+version = "1"

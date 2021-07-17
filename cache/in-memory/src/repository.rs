@@ -4,13 +4,29 @@ use futures_util::{
     future::{self, FutureExt},
     stream::{self, StreamExt},
 };
-use star_cache_base::{Entity, Repository, entity::{channel::{AttachmentEntity, AttachmentRepository, CategoryChannelEntity, CategoryChannelRepository, ChannelEntity, GroupEntity, GroupRepository, GuildChannelEntity, MessageEntity, MessageRepository, PrivateChannelEntity, TextChannelEntity, VoiceChannelEntity}, gateway::PresenceEntity, guild::{
+use star_cache_base::{
+    entity::{
+        channel::{
+            AttachmentEntity, AttachmentRepository, CategoryChannelEntity,
+            CategoryChannelRepository, ChannelEntity, GroupEntity, GroupRepository,
+            GuildChannelEntity, MessageEntity, MessageRepository, PrivateChannelEntity,
+            PrivateChannelRepository, TextChannelEntity, TextChannelRepository, VoiceChannelEntity,
+            VoiceChannelRepository,
+        },
+        gateway::{PresenceEntity, PresenceRepository},
+        guild::{
             EmojiEntity, EmojiRepository, GuildEntity, GuildRepository, MemberEntity,
-            MemberRepository, RoleEntity,
-        }, user::{CurrentUserEntity, CurrentUserRepository, UserEntity}, voice::VoiceStateEntity}, repository::{
+            MemberRepository, RoleEntity, RoleRepository,
+        },
+        user::{CurrentUserEntity, CurrentUserRepository, UserEntity, UserRepository},
+        voice::{VoiceStateEntity, VoiceStateRepository},
+    },
+    repository::{
         GetEntityFuture, ListEntitiesFuture, ListEntityIdsFuture, RemoveEntityFuture,
         SingleEntityRepository, UpsertEntityFuture,
-    }};
+    },
+    Entity, Repository,
+};
 use std::{marker::PhantomData, sync::Mutex};
 use twilight_model::id::{AttachmentId, ChannelId, EmojiId, GuildId, MessageId, RoleId, UserId};
 
@@ -832,7 +848,286 @@ impl MessageRepository<InMemoryBackend> for InMemoryMessageRepository {
         future::ok(author).boxed()
     }
 
-    fn channel(&self, message_id: MessageId) -> GetEntityFuture<'_, ChannelEntity, InMemoryBackendError> {
-        
+    fn channel(
+        &self,
+        message_id: MessageId,
+    ) -> GetEntityFuture<'_, ChannelEntity, InMemoryBackendError> {
+        let id = match (self.0).0.messages.get(&message_id) {
+            Some(message) => message.channel_id,
+            None => return future::ok(None).boxed(),
+        };
+
+        if let Some(r) = (self.0).0.channels_text.get(&id) {
+            let entity = ChannelEntity::Guild(GuildChannelEntity::Text(r.value().clone()));
+
+            return future::ok(Some(entity)).boxed();
+        }
+
+        if let Some(r) = (self.0).0.channels_private.get(&id) {
+            let entity = ChannelEntity::Private(r.value().clone());
+
+            return future::ok(Some(entity)).boxed();
+        }
+
+        if let Some(r) = (self.0).0.groups.get(&id) {
+            let entity = ChannelEntity::Group(r.value().clone());
+
+            return future::ok(Some(entity)).boxed();
+        }
+
+        future::ok(None).boxed()
+    }
+
+    fn guild(
+        &self,
+        message_id: MessageId,
+    ) -> GetEntityFuture<'_, GuildEntity, InMemoryBackendError> {
+        let guild = self
+            .0
+             .0
+            .messages
+            .get(&message_id)
+            .and_then(|message| message.guild_id)
+            .and_then(|id| (self.0).0.guilds.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(guild).boxed()
+    }
+
+    fn mention_channels(
+        &self,
+        message_id: MessageId,
+    ) -> ListEntitiesFuture<'_, TextChannelEntity, InMemoryBackendError> {
+        let channel_ids = match (self.0).0.messages.get(&message_id) {
+            Some(member) => member.mention_channels.clone(),
+            None => return future::ok(stream::empty().boxed()).boxed(),
+        };
+
+        let iter = channel_ids.into_iter().filter_map(move |id| {
+            (self.0)
+                .0
+                .channels_text
+                .get(&id)
+                .map(|r| Ok(r.value().clone()))
+        });
+
+        let stream = stream::iter(iter).boxed();
+
+        future::ok(stream).boxed()
+    }
+
+    fn mention_roles(
+        &self,
+        message_id: MessageId,
+    ) -> ListEntitiesFuture<'_, RoleEntity, InMemoryBackendError> {
+        let role_ids = match (self.0).0.messages.get(&message_id) {
+            Some(member) => member.mention_roles.clone(),
+            None => return future::ok(stream::empty().boxed()).boxed(),
+        };
+
+        let iter = role_ids
+            .into_iter()
+            .filter_map(move |id| (self.0).0.roles.get(&id).map(|r| Ok(r.value().clone())));
+        let stream = stream::iter(iter).boxed();
+
+        future::ok(stream).boxed()
+    }
+
+    fn mentions(
+        &self,
+        message_id: MessageId,
+    ) -> ListEntitiesFuture<'_, UserEntity, InMemoryBackendError> {
+        let user_ids = match (self.0).0.messages.get(&message_id) {
+            Some(member) => member.mentions.clone(),
+            None => return future::ok(stream::empty().boxed()).boxed(),
+        };
+
+        let iter = user_ids
+            .into_iter()
+            .filter_map(move |id| (self.0).0.users.get(&id).map(|r| Ok(r.value().clone())));
+
+        let stream = stream::iter(iter).boxed();
+
+        future::ok(stream).boxed()
+    }
+}
+
+impl PresenceRepository<InMemoryBackend> for InMemoryPresenceRepository {}
+
+impl PrivateChannelRepository<InMemoryBackend> for InMemoryPrivateChannelRepository {
+    fn last_message(
+        &self,
+        channel_id: ChannelId,
+    ) -> GetEntityFuture<'_, MessageEntity, InMemoryBackendError> {
+        let message = self
+            .0
+             .0
+            .channels_private
+            .get(&channel_id)
+            .and_then(|channel| channel.last_message_id)
+            .and_then(|id| (self.0).0.messages.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(message).boxed()
+    }
+
+    fn recipient(
+        &self,
+        channel_id: ChannelId,
+    ) -> GetEntityFuture<'_, UserEntity, InMemoryBackendError> {
+        let user = self
+            .0
+             .0
+            .channels_private
+            .get(&channel_id)
+            .and_then(|channel| channel.recipient_id)
+            .and_then(|id| (self.0).0.users.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(user).boxed()
+    }
+}
+
+impl RoleRepository<InMemoryBackend> for InMemoryRoleRepository {
+    fn guild(&self, role_id: RoleId) -> GetEntityFuture<'_, GuildEntity, InMemoryBackendError> {
+        let guild = self
+            .0
+             .0
+            .roles
+            .get(&role_id)
+            .map(|role| role.guild_id)
+            .and_then(|id| (self.0).0.guilds.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(guild).boxed()
+    }
+}
+
+impl TextChannelRepository<InMemoryBackend> for InMemoryTextChannelRepository {
+    fn guild(
+        &self,
+        channel_id: ChannelId,
+    ) -> GetEntityFuture<'_, GuildEntity, InMemoryBackendError> {
+        let guild = self
+            .0
+             .0
+            .channels_text
+            .get(&channel_id)
+            .and_then(|channel| channel.guild_id)
+            .and_then(|id| (self.0).0.guilds.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(guild).boxed()
+    }
+
+    fn last_message(
+        &self,
+        channel_id: ChannelId,
+    ) -> GetEntityFuture<'_, MessageEntity, InMemoryBackendError> {
+        let message = self
+            .0
+             .0
+            .channels_text
+            .get(&channel_id)
+            .and_then(|channel| channel.last_message_id)
+            .and_then(|id| (self.0).0.messages.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(message).boxed()
+    }
+
+    fn parent(
+        &self,
+        channel_id: ChannelId,
+    ) -> GetEntityFuture<'_, CategoryChannelEntity, InMemoryBackendError> {
+        let parent = self
+            .0
+             .0
+            .channels_text
+            .get(&channel_id)
+            .and_then(|channel| channel.parent_id)
+            .and_then(|id| (self.0).0.channels_category.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(parent).boxed()
+    }
+}
+
+impl UserRepository<InMemoryBackend> for InMemoryUserRepository {
+    fn guild_ids(&self, user_id: UserId) -> ListEntitiesFuture<'_, GuildId, InMemoryBackendError> {
+        let stream = (self.0).0.user_guilds.get(&user_id).map_or_else(
+            || stream::empty().boxed(),
+            |r| stream::iter(r.value().iter().map(|x| Ok(*x)).collect::<Vec<_>>()).boxed(),
+        );
+
+        future::ok(stream).boxed()
+    }
+
+    fn guilds(&self, user_id: UserId) -> ListEntitiesFuture<'_, GuildEntity, InMemoryBackendError> {
+        let guild_ids = match (self.0).0.user_guilds.get(&user_id) {
+            Some(user_guilds) => user_guilds.clone(),
+            None => return future::ok(stream::empty().boxed()).boxed(),
+        };
+
+        let iter = guild_ids
+            .into_iter()
+            .filter_map(move |id| (self.0).0.guilds.get(&id).map(|r| Ok(r.value().clone())));
+
+        let stream = stream::iter(iter).boxed();
+
+        future::ok(stream).boxed()
+    }
+}
+
+impl VoiceChannelRepository<InMemoryBackend> for InMemoryVoiceChannelRepository {
+    fn guild(
+        &self,
+        channel_id: ChannelId,
+    ) -> GetEntityFuture<'_, GuildEntity, InMemoryBackendError> {
+        let guild = self
+            .0
+             .0
+            .channels_voice
+            .get(&channel_id)
+            .and_then(|channel| channel.guild_id)
+            .and_then(|id| (self.0).0.guilds.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(guild).boxed()
+    }
+
+    fn parent(
+        &self,
+        channel_id: ChannelId,
+    ) -> GetEntityFuture<'_, CategoryChannelEntity, InMemoryBackendError> {
+        let parent = self
+            .0
+             .0
+            .channels_voice
+            .get(&channel_id)
+            .and_then(|channel| channel.parent_id)
+            .and_then(|id| (self.0).0.channels_category.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(parent).boxed()
+    }
+}
+
+impl VoiceStateRepository<InMemoryBackend> for InMemoryVoiceStateRepository {
+    fn channel(
+        &self,
+        guild_id: GuildId,
+        user_id: UserId,
+    ) -> GetEntityFuture<'_, VoiceChannelEntity, InMemoryBackendError> {
+        let channel = self
+            .0
+             .0
+            .voice_states
+            .get(&(guild_id, user_id))
+            .and_then(|state| state.channel_id)
+            .and_then(|id| (self.0).0.channels_voice.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(channel).boxed()
     }
 }

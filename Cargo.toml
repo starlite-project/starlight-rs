@@ -69,6 +69,7 @@ members = [
     "./args",
     "./cache/base",
     "./cache/in-memory",
+    "./cache/unqlite",
     "./error",
     "./lang",
     "./test"
