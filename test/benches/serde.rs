@@ -1,7 +1,7 @@
-use bincode::serialize;
+use bincode::{serialize, deserialize};
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use serde::{Deserialize, Serialize};
-use serde_cbor::to_vec;
+use serde_cbor::{to_vec, from_slice};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -44,7 +44,7 @@ impl Display for Grid {
     }
 }
 
-fn bench_serde(c: &mut Criterion) {
+fn bench_serialize(c: &mut Criterion) {
     let mut group = c.benchmark_group("Serializers");
     let grid = Grid::default();
     group.bench_with_input(BenchmarkId::new("Cbor", &grid), &grid, |b, i| {
@@ -56,5 +56,19 @@ fn bench_serde(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, bench_serde);
+fn bench_deserialize(c: &mut Criterion) {
+    let mut group = c.benchmark_group("Deserializers");
+    let grid = Grid::default();
+    let bincode_input = serialize(&grid).unwrap();
+    let cbor_input = to_vec(&grid).unwrap();
+    group.bench_with_input(BenchmarkId::new("Cbor", &grid), &cbor_input[..], |b, i| {
+        b.iter(|| from_slice::<Grid>(i).unwrap())
+    });
+    group.bench_with_input(BenchmarkId::new("Bincode", &grid), &bincode_input[..], |b, i| {
+        b.iter(|| deserialize::<Grid>(i).unwrap())
+    });
+    group.finish();
+}
+
+criterion_group!(benches, bench_serialize, bench_deserialize);
 criterion_main!(benches);

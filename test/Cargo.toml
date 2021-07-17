@@ -14,5 +14,5 @@ bincode = "*"
 criterion = "0.3"
 
 [[bench]]
-name = "serialize"
+name = "serde"
 harness = false

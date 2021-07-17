@@ -4,29 +4,15 @@ use futures_util::{
     future::{self, FutureExt},
     stream::{self, StreamExt},
 };
-use star_cache_base::{
-    entity::{
-        channel::{
-            AttachmentEntity, AttachmentRepository, CategoryChannelEntity,
-            CategoryChannelRepository, GroupEntity, GroupRepository, GuildChannelEntity,
-            MessageEntity, PrivateChannelEntity, TextChannelEntity, VoiceChannelEntity,
-        },
-        gateway::PresenceEntity,
-        guild::{
+use star_cache_base::{Entity, Repository, entity::{channel::{AttachmentEntity, AttachmentRepository, CategoryChannelEntity, CategoryChannelRepository, ChannelEntity, GroupEntity, GroupRepository, GuildChannelEntity, MessageEntity, MessageRepository, PrivateChannelEntity, TextChannelEntity, VoiceChannelEntity}, gateway::PresenceEntity, guild::{
             EmojiEntity, EmojiRepository, GuildEntity, GuildRepository, MemberEntity,
             MemberRepository, RoleEntity,
-        },
-        user::{CurrentUserEntity, CurrentUserRepository, UserEntity},
-        voice::VoiceStateEntity,
-    },
-    repository::{
+        }, user::{CurrentUserEntity, CurrentUserRepository, UserEntity}, voice::VoiceStateEntity}, repository::{
         GetEntityFuture, ListEntitiesFuture, ListEntityIdsFuture, RemoveEntityFuture,
         SingleEntityRepository, UpsertEntityFuture,
-    },
-    Entity, Repository,
-};
+    }};
 use std::{marker::PhantomData, sync::Mutex};
-use twilight_model::id::{AttachmentId, ChannelId, EmojiId, GuildId, RoleId, UserId};
+use twilight_model::id::{AttachmentId, ChannelId, EmojiId, GuildId, MessageId, RoleId, UserId};
 
 pub type InMemoryAttachmentRepository = InMemoryRepository<AttachmentEntity>;
 pub type InMemoryCategoryChannelRepository = InMemoryRepository<CategoryChannelEntity>;
@@ -798,5 +784,55 @@ impl MemberRepository<InMemoryBackend> for InMemoryMemberRepository {
             Some(member) => member.role_ids.clone(),
             None => return future::ok(stream::empty().boxed()).boxed(),
         };
+
+        let iter = role_ids
+            .into_iter()
+            .filter_map(move |id| (self.0).0.roles.get(&id).map(|r| Ok(r.value().clone())));
+        let stream = stream::iter(iter).boxed();
+
+        future::ok(stream).boxed()
+    }
+}
+
+impl MessageRepository<InMemoryBackend> for InMemoryMessageRepository {
+    fn attachments(
+        &self,
+        message_id: MessageId,
+    ) -> ListEntitiesFuture<'_, AttachmentEntity, InMemoryBackendError> {
+        let attachment_ids = match (self.0).0.messages.get(&message_id) {
+            Some(message) => message.attachments.clone(),
+            None => return future::ok(stream::empty().boxed()).boxed(),
+        };
+
+        let iter = attachment_ids.into_iter().filter_map(move |id| {
+            (self.0)
+                .0
+                .attachments
+                .get(&id)
+                .map(|r| Ok(r.value().clone()))
+        });
+        let stream = stream::iter(iter).boxed();
+
+        future::ok(stream).boxed()
+    }
+
+    fn author(
+        &self,
+        message_id: MessageId,
+    ) -> GetEntityFuture<'_, UserEntity, InMemoryBackendError> {
+        let author = self
+            .0
+             .0
+            .messages
+            .get(&message_id)
+            .map(|message| message.author_id)
+            .and_then(|id| (self.0).0.users.get(&id))
+            .map(|r| r.value().clone());
+
+        future::ok(author).boxed()
+    }
+
+    fn channel(&self, message_id: MessageId) -> GetEntityFuture<'_, ChannelEntity, InMemoryBackendError> {
+        
     }
 }
