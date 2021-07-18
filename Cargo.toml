@@ -21,9 +21,6 @@ version = "1"
 [dependencies.star-args]
 path = "./args"
 
-[dependencies.star-cache-unqlite]
-path = "./cache/unqlite"
-
 [dependencies.star-error]
 path = "./error"
 
@@ -72,7 +69,6 @@ members = [
     "./args",
     "./cache/base",
     "./cache/in-memory",
-    "./cache/unqlite",
     "./error",
     "./lang",
     "./test"
