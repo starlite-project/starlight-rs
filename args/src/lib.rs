@@ -5,6 +5,10 @@ use std::{borrow::Cow, error::Error as StdError, fmt, marker::PhantomData, str::
 use twilight_command_parser::Arguments;
 use uwl::Stream;
 
+mod id;
+
+pub use self::id::Id;
+
 #[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
 pub enum ArgError<E> {

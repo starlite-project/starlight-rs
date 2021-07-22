@@ -2,3 +2,4 @@
 expanded.rs
 .env
 !.example.env
+test/db/*
