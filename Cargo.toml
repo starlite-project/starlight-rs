@@ -21,9 +21,6 @@ version = "1"
 [dependencies.star-args]
 path = "./args"
 
-[dependencies.star-cache-inmemory]
-path = "./cache/in-memory"
-
 [dependencies.star-error]
 path = "./error"
 
@@ -70,8 +67,6 @@ lto = "fat"
 [workspace]
 members = [
     "./args",
-    "./cache/base",
-    "./cache/in-memory",
     "./error",
     "./lang",
     "./test"

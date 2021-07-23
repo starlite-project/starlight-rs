@@ -1151,27 +1151,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "star-cache-base"
-version = "0.1.0"
-dependencies = [
- "futures-util",
- "serde",
- "tokio",
- "twilight-model",
-]
-
-[[package]]
-name = "star-cache-inmemory"
-version = "0.1.0"
-dependencies = [
- "bitflags",
- "dashmap",
- "futures-util",
- "star-cache-base",
- "twilight-model",
-]
-
-[[package]]
 name = "star-error"
 version = "0.1.0"
 dependencies = [
@@ -1209,7 +1188,6 @@ dependencies = [
  "serde",
  "serde_json",
  "star-args",
- "star-cache-inmemory",
  "star-error",
  "star-lang",
  "static_assertions",
