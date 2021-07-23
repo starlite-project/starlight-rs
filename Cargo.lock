@@ -1211,6 +1211,7 @@ dependencies = [
  "bincode",
  "serde",
  "serde_json",
+ "twilight-model",
 ]
 
 [[package]]
