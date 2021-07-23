@@ -1,16 +1,14 @@
-use serde::{Deserialize, Serialize};
+use super::category_channel::CategoryChannelEntity;
+use crate::{
+    entity::guild::GuildEntity, repository::GetEntityFuture, utils, Backend, Entity, Repository,
+};
 use twilight_model::{
     channel::{permission_overwrite::PermissionOverwrite, ChannelType, VoiceChannel},
     id::{ChannelId, GuildId},
 };
 
-use crate::{
-    entity::guild::GuildEntity, repository::GetEntityFuture, utils, Backend, Entity, Repository,
-};
-
-use super::category_channel::CategoryChannelEntity;
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VoiceChannelEntity {
     pub bitrate: u64,
     pub guild_id: Option<GuildId>,

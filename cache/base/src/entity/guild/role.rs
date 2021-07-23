@@ -1,13 +1,12 @@
+use super::GuildEntity;
 use crate::{repository::GetEntityFuture, utils, Backend, Entity, Repository};
-use serde::{Deserialize, Serialize};
 use twilight_model::{
     guild::{Permissions, Role},
     id::{GuildId, RoleId},
 };
 
-use super::GuildEntity;
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RoleEntity {
     pub color: u32,
     pub guild_id: GuildId,

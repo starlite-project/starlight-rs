@@ -1,18 +1,16 @@
-use serde::{Deserialize, Serialize};
-use twilight_model::{
-    guild::Emoji,
-    id::{EmojiId, GuildId, RoleId, UserId},
-};
-
+use super::{role::RoleEntity, GuildEntity};
 use crate::{
     entity::user::UserEntity,
     repository::{GetEntityFuture, ListEntitiesFuture},
     utils, Backend, Entity, Repository,
 };
+use twilight_model::{
+    guild::Emoji,
+    id::{EmojiId, GuildId, RoleId, UserId},
+};
 
-use super::{role::RoleEntity, GuildEntity};
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EmojiEntity {
     pub animated: bool,
     pub available: bool,
@@ -40,6 +38,18 @@ impl From<(GuildId, Emoji)> for EmojiEntity {
             role_ids: emoji.roles,
             user_id,
         }
+    }
+}
+
+impl PartialEq<Emoji> for EmojiEntity {
+    fn eq(&self, other: &Emoji) -> bool {
+        self.id == other.id
+            && self.animated == other.animated
+            && self.name == other.name
+            && self.require_colons == other.require_colons
+            && self.role_ids == other.roles
+            && self.user_id == other.user.as_ref().map(|user| user.id)
+            && self.available == other.available
     }
 }
 

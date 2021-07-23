@@ -1,16 +1,14 @@
-use serde::{Deserialize, Serialize};
+use super::message::MessageEntity;
+use crate::{
+    entity::user::UserEntity, repository::GetEntityFuture, utils, Backend, Entity, Repository,
+};
 use twilight_model::{
     channel::{ChannelType, PrivateChannel},
     id::{ChannelId, MessageId, UserId},
 };
 
-use crate::{
-    entity::user::UserEntity, repository::GetEntityFuture, utils, Backend, Entity, Repository,
-};
-
-use super::message::MessageEntity;
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrivateChannelEntity {
     pub id: ChannelId,
     pub last_message_id: Option<MessageId>,

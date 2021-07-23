@@ -1,17 +1,16 @@
+use super::MessageEntity;
 use crate::{
     entity::user::UserEntity,
     repository::{GetEntityFuture, ListEntitiesFuture, Repository},
     utils, Backend, Entity,
 };
-use serde::{Deserialize, Serialize};
 use twilight_model::{
     channel::{ChannelType, Group},
     id::{ApplicationId, ChannelId, MessageId, UserId},
 };
 
-use super::MessageEntity;
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GroupEntity {
     pub application_id: Option<ApplicationId>,
     pub icon: Option<String>,

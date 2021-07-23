@@ -1,18 +1,15 @@
-use std::u64;
-
+use super::MessageEntity;
 use crate::{
     repository::{GetEntityFuture, Repository},
     utils, Backend, Entity,
 };
-use serde::{Deserialize, Serialize};
 use twilight_model::{
     channel::Attachment,
     id::{AttachmentId, MessageId},
 };
 
-use super::MessageEntity;
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AttachmentEntity {
     pub filename: String,
     pub height: Option<u64>,

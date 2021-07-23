@@ -3,13 +3,13 @@ use crate::{
     repository::{GetEntityFuture, Repository},
     utils, Backend, Entity,
 };
-use serde::{Deserialize, Serialize};
 use twilight_model::{
     channel::{permission_overwrite::PermissionOverwrite, CategoryChannel, ChannelType},
     id::{ChannelId, GuildId},
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CategoryChannelEntity {
     pub guild_id: Option<GuildId>,
     pub id: ChannelId,

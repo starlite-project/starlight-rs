@@ -32,6 +32,12 @@ impl<T: Sealed + From<u64>> From<u64> for Id<T> {
     }
 }
 
+impl<T: Sealed> From<T> for Id<T> {
+    fn from(value: T) -> Self {
+        Self(value)
+    }
+}
+
 impl<T: Sealed + From<u64>> FromStr for Id<T> {
     type Err = ParseIntError;
 

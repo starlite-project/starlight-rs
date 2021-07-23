@@ -1,16 +1,14 @@
-use serde::{Deserialize, Serialize};
+use super::{category_channel::CategoryChannelEntity, message::MessageEntity};
+use crate::{
+    entity::guild::GuildEntity, repository::GetEntityFuture, utils, Backend, Entity, Repository,
+};
 use twilight_model::{
     channel::{permission_overwrite::PermissionOverwrite, ChannelType, TextChannel},
     id::{ChannelId, GuildId, MessageId},
 };
 
-use crate::{
-    entity::guild::GuildEntity, repository::GetEntityFuture, utils, Backend, Entity, Repository,
-};
-
-use super::{category_channel::CategoryChannelEntity, message::MessageEntity};
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TextChannelEntity {
     pub guild_id: Option<GuildId>,
     pub id: ChannelId,

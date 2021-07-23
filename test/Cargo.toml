@@ -7,13 +7,4 @@ authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
 [dependencies]
 serde = { features = ["derive"], version = "1" }
 serde_json = "1"
-serde_cbor = "0.11"
-bincode = "*"
-sled = "0.34.6"
-
-[dev-dependencies]
-criterion = "0.3"
-
-[[bench]]
-name = "serde"
-harness = false
+bincode = "1"

@@ -21,6 +21,9 @@ version = "1"
 [dependencies.star-args]
 path = "./args"
 
+[dependencies.star-cache-inmemory]
+path = "./cache/in-memory"
+
 [dependencies.star-error]
 path = "./error"
 

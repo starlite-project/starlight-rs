@@ -1,18 +1,16 @@
-use serde::{Deserialize, Serialize};
+use super::role::RoleEntity;
+use crate::{
+    repository::{GetEntityFuture, ListEntitiesFuture},
+    utils, Backend, Entity, Repository,
+};
 use twilight_model::{
     gateway::payload::MemberUpdate,
     guild::Member,
     id::{GuildId, RoleId, UserId},
 };
 
-use crate::{
-    repository::{GetEntityFuture, ListEntitiesFuture},
-    utils, Backend, Entity, Repository,
-};
-
-use super::role::RoleEntity;
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MemberEntity {
     pub deaf: bool,
     pub guild_id: GuildId,
@@ -40,6 +38,30 @@ impl From<Member> for MemberEntity {
             role_ids: member.roles,
             user_id: member.user.id,
         }
+    }
+}
+
+impl PartialEq<Member> for MemberEntity {
+    fn eq(&self, other: &Member) -> bool {
+        (
+            self.deaf,
+            self.joined_at.as_ref(),
+            self.mute,
+            &self.nick,
+            self.pending,
+            self.premium_since.as_ref(),
+            &self.role_ids,
+            self.user_id,
+        ) == (
+            other.deaf,
+            other.joined_at.as_ref(),
+            other.mute,
+            &other.nick,
+            other.pending,
+            other.premium_since.as_ref(),
+            &other.roles,
+            self.user_id,
+        )
     }
 }
 

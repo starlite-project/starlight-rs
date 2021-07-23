@@ -2,20 +2,19 @@ pub mod current_user;
 
 pub use self::current_user::{CurrentUserEntity, CurrentUserRepository};
 
+use super::guild::GuildEntity;
 use crate::{
     entity::Entity,
     repository::{ListEntitiesFuture, Repository},
     utils, Backend,
 };
-use serde::{Deserialize, Serialize};
 use twilight_model::{
     id::{GuildId, UserId},
     user::{PremiumType, User, UserFlags},
 };
 
-use super::guild::GuildEntity;
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 
 pub struct UserEntity {
     pub avatar: Option<String>,

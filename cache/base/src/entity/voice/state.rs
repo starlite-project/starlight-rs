@@ -1,15 +1,14 @@
-use serde::{Deserialize, Serialize};
+use crate::{
+    entity::channel::VoiceChannelEntity, repository::GetEntityFuture, utils, Backend, Entity,
+    Repository,
+};
 use twilight_model::{
     id::{ChannelId, GuildId, UserId},
     voice::VoiceState,
 };
 
-use crate::{
-    entity::channel::VoiceChannelEntity, repository::GetEntityFuture, utils, Backend, Entity,
-    Repository,
-};
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VoiceStateEntity {
     pub channel_id: Option<ChannelId>,
     pub deaf: bool,
@@ -39,6 +38,22 @@ impl From<(VoiceState, GuildId)> for VoiceStateEntity {
             token: voice_state.token,
             user_id: voice_state.user_id,
         }
+    }
+}
+
+impl PartialEq<VoiceState> for VoiceStateEntity {
+    fn eq(&self, other: &VoiceState) -> bool {
+        self.channel_id == other.channel_id
+            && self.deaf == other.deaf
+            && Some(self.guild_id) == other.guild_id
+            && self.mute == other.mute
+            && self.self_deaf == other.self_deaf
+            && self.self_mute == other.self_mute
+            && self.self_stream == other.self_stream
+            && self.session_id == other.session_id
+            && self.suppress == other.suppress
+            && self.token == other.token
+            && self.user_id == other.user_id
     }
 }
 

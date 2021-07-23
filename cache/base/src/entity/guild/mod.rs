@@ -1,4 +1,13 @@
-use serde::{Deserialize, Serialize};
+use super::{
+    channel::{GuildChannelEntity, TextChannelEntity, VoiceChannelEntity},
+    gateway::PresenceEntity,
+    user::UserEntity,
+    voice::VoiceStateEntity,
+};
+use crate::{
+    repository::{GetEntityFuture, ListEntitiesFuture, ListEntityIdsFuture},
+    utils, Backend, Entity, Repository,
+};
 use twilight_model::{
     guild::{
         DefaultMessageNotificationLevel, ExplicitContentFilter, Guild, MfaLevel, PartialGuild,
@@ -11,25 +20,14 @@ pub mod emoji;
 pub mod member;
 pub mod role;
 
-use crate::{
-    repository::{GetEntityFuture, ListEntitiesFuture, ListEntityIdsFuture},
-    utils, Backend, Entity, Repository,
-};
-
 pub use self::{
     emoji::{EmojiEntity, EmojiRepository},
     member::{MemberEntity, MemberRepository},
     role::{RoleEntity, RoleRepository},
 };
 
-use super::{
-    channel::{GuildChannelEntity, TextChannelEntity, VoiceChannelEntity},
-    gateway::PresenceEntity,
-    user::UserEntity,
-    voice::VoiceStateEntity,
-};
-
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct GuildEntity {
     pub afk_channel_id: Option<ChannelId>,
     pub afk_timeout: u64,
@@ -45,7 +43,7 @@ pub struct GuildEntity {
     pub icon: Option<String>,
     pub id: GuildId,
     pub joined_at: Option<String>,
-    #[serde(default)]
+    #[cfg_attr(feature = "serde", serde(default))]
     pub large: bool,
     pub max_members: Option<u64>,
     pub max_presences: Option<u64>,
@@ -58,13 +56,13 @@ pub struct GuildEntity {
     pub permissions: Option<Permissions>,
     pub preferred_locale: String,
     pub premium_subscription_count: Option<u64>,
-    #[serde(default)]
+    #[cfg_attr(feature = "serde", serde(default))]
     pub premium_tier: PremiumTier,
     pub rules_channel_id: Option<ChannelId>,
     pub splash: Option<String>,
     pub system_channel_flags: SystemChannelFlags,
     pub system_channel_id: Option<ChannelId>,
-    #[serde(default)]
+    #[cfg_attr(feature = "serde", serde(default))]
     pub unavailable: bool,
     pub vanity_url_code: Option<String>,
     pub verification_level: VerificationLevel,

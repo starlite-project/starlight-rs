@@ -1,5 +1,4 @@
 use crate::{Backend, Entity, Repository};
-use serde::{Deserialize, Serialize};
 use twilight_model::{
     gateway::{
         payload::PresenceUpdate,
@@ -8,7 +7,8 @@ use twilight_model::{
     id::{GuildId, UserId},
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PresenceEntity {
     pub activities: Vec<Activity>,
     pub client_status: ClientStatus,
@@ -46,6 +46,24 @@ impl From<PresenceUpdate> for PresenceEntity {
             status: presence.status,
             user_id: get_user_id(&presence.user),
         }
+    }
+}
+
+impl PartialEq<Presence> for PresenceEntity {
+    fn eq(&self, other: &Presence) -> bool {
+        (
+            &self.activities,
+            &self.client_status,
+            self.guild_id,
+            self.status,
+            self.user_id,
+        ) == (
+            &other.activities,
+            &other.client_status,
+            other.guild_id,
+            other.status,
+            get_user_id(&other.user),
+        )
     }
 }
 

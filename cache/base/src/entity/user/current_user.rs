@@ -3,13 +3,13 @@ use crate::{
     repository::{ListEntitiesFuture, ListEntityIdsFuture, SingleEntityRepository},
     utils, Backend, Entity,
 };
-use serde::{Deserialize, Serialize};
 use twilight_model::{
     id::{GuildId, UserId},
     user::{CurrentUser, PremiumType, UserFlags},
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CurrentUserEntity {
     pub avatar: Option<String>,
     pub bot: bool,

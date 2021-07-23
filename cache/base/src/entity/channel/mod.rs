@@ -1,5 +1,3 @@
-use serde::{Deserialize, Serialize};
-
 pub mod attachment;
 pub mod category_channel;
 pub mod group;
@@ -18,16 +16,24 @@ pub use self::{
     voice_channel::{VoiceChannelEntity, VoiceChannelRepository},
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(untagged)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(untagged)
+)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ChannelEntity {
     Group(GroupEntity),
     Guild(GuildChannelEntity),
     Private(PrivateChannelEntity),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(untagged)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(untagged)
+)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GuildChannelEntity {
     Category(CategoryChannelEntity),
     Text(TextChannelEntity),

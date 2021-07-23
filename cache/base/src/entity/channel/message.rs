@@ -1,3 +1,4 @@
+use super::{attachment::AttachmentEntity, ChannelEntity, GuildChannelEntity, TextChannelEntity};
 use crate::{
     entity::{
         guild::{GuildEntity, RoleEntity},
@@ -6,7 +7,6 @@ use crate::{
     repository::{GetEntityFuture, ListEntitiesFuture, Repository},
     utils, Backend, Entity,
 };
-use serde::{Deserialize, Serialize};
 use twilight_model::{
     channel::{
         embed::Embed,
@@ -17,9 +17,8 @@ use twilight_model::{
     id::{ApplicationId, AttachmentId, ChannelId, GuildId, MessageId, RoleId, UserId, WebhookId},
 };
 
-use super::{attachment::AttachmentEntity, ChannelEntity, GuildChannelEntity, TextChannelEntity};
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MessageEntity {
     pub activity: Option<MessageActivity>,
     pub application_id: Option<ApplicationId>,
