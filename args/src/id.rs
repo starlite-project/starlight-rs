@@ -1,6 +1,11 @@
 use self::private::Sealed;
 use serde::{Deserialize, Serialize};
-use std::{fmt::{Display, Formatter, Result as FmtResult}, num::ParseIntError, ops::Deref, str::FromStr};
+use std::{
+    fmt::{Display, Formatter, Result as FmtResult},
+    num::ParseIntError,
+    ops::Deref,
+    str::FromStr,
+};
 
 #[derive(
     Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
@@ -18,6 +23,12 @@ impl<T: Sealed> Deref for Id<T> {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl<T: Sealed + From<u64>> From<u64> for Id<T> {
+    fn from(val: u64) -> Self {
+        Self(T::from(val))
     }
 }
 
@@ -68,8 +79,8 @@ mod private {
 #[cfg(test)]
 mod tests {
     use super::Id;
-    use twilight_model::id::GenericId;
     use std::num::ParseIntError;
+    use twilight_model::id::GenericId;
 
     #[test]
     fn test_default() {

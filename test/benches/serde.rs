@@ -1,7 +1,7 @@
-use bincode::{serialize, deserialize};
+use bincode::{deserialize, serialize};
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use serde::{Deserialize, Serialize};
-use serde_cbor::{to_vec, from_slice};
+use serde_cbor::{from_slice, to_vec};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -64,9 +64,11 @@ fn bench_deserialize(c: &mut Criterion) {
     group.bench_with_input(BenchmarkId::new("Cbor", &grid), &cbor_input[..], |b, i| {
         b.iter(|| from_slice::<Grid>(i).unwrap())
     });
-    group.bench_with_input(BenchmarkId::new("Bincode", &grid), &bincode_input[..], |b, i| {
-        b.iter(|| deserialize::<Grid>(i).unwrap())
-    });
+    group.bench_with_input(
+        BenchmarkId::new("Bincode", &grid),
+        &bincode_input[..],
+        |b, i| b.iter(|| deserialize::<Grid>(i).unwrap()),
+    );
     group.finish();
 }
 
