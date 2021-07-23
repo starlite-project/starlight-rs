@@ -1,7 +1,5 @@
 #![allow(dead_code)]
-use super::util::TypeMap;
 use star_lang::I18nMap;
-use std::sync::{Arc, RwLock};
 use twilight_cache_inmemory::InMemoryCache as Cache;
 use twilight_gateway::{Cluster, Event};
 use twilight_http::Client as HttpClient;
@@ -18,7 +16,6 @@ pub struct State {
     pub cluster: Cluster,
     pub http: HttpClient,
     pub standby: Standby,
-    pub data: Arc<RwLock<TypeMap>>,
     pub i18n: I18nMap,
 }
 

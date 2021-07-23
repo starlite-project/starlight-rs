@@ -161,12 +161,7 @@ mod internal {
         let username = user.name;
         let discriminator = user.discriminator;
         let id = user.id;
-        crate::log!(
-            "Ready as user {username}#{discriminator} ({id})",
-            username = username,
-            discriminator = discriminator,
-            id = id
-        );
+        tracing::info!("ready as user {}#{} ({})", username, discriminator, id);
         Ok(())
     }
 }

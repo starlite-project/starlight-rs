@@ -1,7 +1,3 @@
-use std::sync::{Arc, RwLock};
-
-use crate::lib::util::{Key, TypeMap};
-
 use super::State;
 use futures::Stream;
 use star_lang::{I18nMap, LanguageResult};
@@ -20,7 +16,6 @@ pub struct StateBuilder {
     http: Option<HttpBuilder>,
     token: Option<String>,
     intents: Option<Intents>,
-    data: Option<TypeMap>,
     i18n: Option<I18nMap>,
 }
 
@@ -32,7 +27,6 @@ impl StateBuilder {
             http: None,
             token: None,
             intents: None,
-            data: None,
             i18n: None,
         }
     }
@@ -95,7 +89,7 @@ impl StateBuilder {
         let lang_result = lang_fn();
         match lang_result {
             Ok(lang) => self.i18n = Some(lang),
-            Err(err) => crate::error!("failed to create lang: {:?}", err),
+            Err(err) => tracing::error!("failed to create lang: {:?}", err),
         }
 
         self
@@ -116,22 +110,6 @@ impl StateBuilder {
         self
     }
 
-    pub fn insert_data<T>(mut self, value: T::Value) -> Self
-    where
-        T: Key,
-    {
-        if let Some(ref mut data) = self.data {
-            data.insert::<T>(value);
-        } else {
-            let mut type_map = TypeMap::new();
-            type_map.insert::<T>(value);
-
-            self.data = Some(type_map);
-        }
-
-        self
-    }
-
     pub async fn build(
         self,
     ) -> Result<(State, impl Stream<Item = (u64, Event)>), ClusterStartError> {
@@ -144,10 +122,6 @@ impl StateBuilder {
         let cache = cache_builder.build();
         let cluster = cluster_builder.http_client(http.clone()).build().await?;
         let standby = Standby::new();
-        let data = self
-            .data
-            .map(|val| Arc::new(RwLock::new(val)))
-            .unwrap_or_default();
 
         Ok((
             State {
@@ -155,7 +129,6 @@ impl StateBuilder {
                 cluster: cluster.0,
                 http,
                 standby,
-                data,
                 i18n: self.i18n.unwrap_or_default(),
             },
             cluster.1,
