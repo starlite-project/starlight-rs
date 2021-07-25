@@ -1,0 +1,10 @@
+[
+    {
+        "name": "ping",
+        "description": "Pings the bot"
+    },
+    {
+        "name": "time",
+        "description": "Gets the current time"
+    }
+]

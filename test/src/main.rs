@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use twilight_model::application::command::{Command, CommandOption};
 
+pub type StarSlashies = Vec<StarCommand>;
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct StarCommand {
     pub name: String,
@@ -28,7 +30,7 @@ impl PartialEq<Command> for StarCommand {
 }
 
 impl From<StarCommand> for Command {
-    fn from(value: StarCommand) -> Command {
+    fn from(value: StarCommand) -> Self {
         Self {
             application_id: None,
             guild_id: None,
@@ -41,25 +43,30 @@ impl From<StarCommand> for Command {
     }
 }
 
+impl From<&StarCommand> for Command {
+    fn from(value: &StarCommand) -> Self {
+        Self {
+            application_id: None,
+            guild_id: None,
+            name: value.name.clone(),
+            default_permission: value.default_permissions,
+            description: value.description.clone(),
+            id: None,
+            options: value.options.clone(),
+        }
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let val = StarCommand {
-        name: "ping".to_owned(),
-        default_permissions: None,
-        description: "Pings the bot".to_owned(),
-        options: vec![],
-    };
+    let path = std::path::Path::new("./commands.json");
 
-    let json = serde_json::to_string_pretty(&val)?;
+    let json = std::fs::read_to_string(path)?;
 
-    eprintln!("{}", &json);
+    let val: StarSlashies = serde_json::from_str(&json)?;
 
-    let val: StarCommand = serde_json::from_str(&json)?;
+    dbg!(&val);
 
-    let cmd: Command = val.clone().into();
-
-    dbg!(val);
-
-    dbg!(cmd);
+    dbg!(&val.iter().map(Command::from).collect::<Vec<_>>());
 
     Ok(())
 }
