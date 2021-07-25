@@ -13,6 +13,8 @@ mod lib;
 
 #[tokio::main]
 async fn main() -> GenericResult<()> {
+    dbg!(clap::crate_authors!());
+
     let mut fmt_builder = FmtSubscriber::builder().with_span_events(FmtSpan::FULL);
 
     fmt_builder = if cfg!(debug_assertions) {
@@ -26,7 +28,7 @@ async fn main() -> GenericResult<()> {
     dotenv::dotenv()?;
 
     let (client, mut events) = StateBuilder::new()
-        .token(env::var("DISCORD_TOKEN")?)
+        .token(lib::token()?)
         .intents(Intents::all())
         .cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))
         .cache_builder(|builder| builder.resource_types(ResourceType::MESSAGE))
