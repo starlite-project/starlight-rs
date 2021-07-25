@@ -1,20 +1,19 @@
 #![warn(clippy::nursery, clippy::pedantic)]
 #![allow(clippy::from_iter_instead_of_collect, clippy::module_name_repetitions)]
 
+use anyhow::Result;
 use futures::StreamExt;
-use lib::{state::StateBuilder, GenericResult};
+use lib::{state::StateBuilder, Config};
 use std::sync::Arc;
 use tracing_subscriber::{fmt::format::FmtSpan, FmtSubscriber};
 use twilight_cache_inmemory::ResourceType;
 use twilight_gateway::cluster::ShardScheme;
 use twilight_model::gateway::Intents;
 
-use crate::lib::Config;
-
 mod lib;
 
 #[tokio::main]
-async fn main() -> GenericResult<()> {
+async fn main() -> Result<()> {
     let mut fmt_builder = FmtSubscriber::builder().with_span_events(FmtSpan::FULL);
 
     fmt_builder = if cfg!(debug_assertions) {
@@ -23,7 +22,9 @@ async fn main() -> GenericResult<()> {
         fmt_builder
     };
 
-    fmt_builder.try_init()?;
+    fmt_builder
+        .try_init()
+        .expect("failed to init fmt subscriber");
 
     dotenv::dotenv()?;
 

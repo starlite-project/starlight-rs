@@ -1,13 +1,10 @@
 use super::State;
+use anyhow::Result;
 use std::sync::Arc;
 use twilight_gateway::Event;
 
-mod error;
-
-pub type EventResult = Result<(), error::EventError>;
-
 #[allow(clippy::enum_glob_use, clippy::match_wildcard_for_single_variants)]
-pub async fn handle(event: Event, state: Arc<State>) -> EventResult {
+pub async fn handle(event: Event, state: Arc<State>) -> Result<()> {
     use Event::*;
     let state = &*state;
     match event {
@@ -82,8 +79,8 @@ pub async fn handle(event: Event, state: Arc<State>) -> EventResult {
 
 mod internal {
     #![allow(unused_variables, dead_code, clippy::wildcard_imports)]
-    use super::EventResult;
     use crate::lib::{slashies, state::State};
+    use anyhow::Result;
     use tracing::{event, Level};
     use twilight_model::{
         application::interaction::Interaction,
@@ -93,7 +90,7 @@ mod internal {
     macro_rules! gen_empty_handlers {
         ($($fn_names:ident: [$($fn_args:ty),*];)*) => {
             $(
-                pub(super) async fn $fn_names(state: &State, $(_: $fn_args),*) -> EventResult {
+                pub(super) async fn $fn_names(state: &State, $(_: $fn_args),*) -> Result<()> {
                     Ok(())
                 }
             )*
@@ -158,21 +155,16 @@ mod internal {
         webhooks_update: [WebhooksUpdate];
     }
 
-    pub(super) async fn ready(state: &State, ready: Ready) -> EventResult {
-        // Get the application id, and set it
-        let user = ready.user;
-        let username = user.name;
-        let discriminator = user.discriminator;
-        let id = user.id;
-        tracing::info!("ready as user {}#{} ({})", username, discriminator, id);
+    pub(super) async fn ready(state: &State, ready: Ready) -> Result<()> {
+        event!(Level::INFO, user_name = %ready.user.name);
+        event!(Level::INFO, guilds = %ready.guilds.len());
         Ok(())
     }
 
     pub(super) async fn interaction_create(
         state: &State,
         interaction: InteractionCreate,
-    ) -> EventResult {
-        println!("got to interaction_create");
+    ) -> Result<()> {
         match interaction.0 {
             Interaction::Ping(_) => (),
             Interaction::ApplicationCommand(cmd) => slashies::act(state, *cmd).await,

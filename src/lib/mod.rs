@@ -1,3 +1,4 @@
+use anyhow::Result;
 use clap::{crate_authors, crate_description, crate_license, crate_name, crate_version, App, Arg};
 use std::{env, ffi::OsStr, fs, path::PathBuf};
 use tracing::{event, instrument, Level};
@@ -5,8 +6,6 @@ use twilight_model::id::GuildId;
 
 pub mod slashies;
 pub mod state;
-
-pub type GenericResult<T> = Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
 #[derive(Debug, Default, Clone)]
 pub struct Config {
@@ -16,7 +15,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new() -> GenericResult<Config> {
+    pub fn new() -> Result<Config> {
         let matches = App::new(crate_name!())
             .about(crate_description!())
             .author(crate_authors!())
@@ -41,7 +40,7 @@ impl Config {
             Err(e) => e.exit(),
         };
 
-        let remove_slash_commands = matches.is_present("remove-slash-command");
+        let remove_slash_commands = matches.is_present("remove-slash-commands");
         let token = Self::get_token()?;
 
         Ok(Self {
@@ -52,7 +51,7 @@ impl Config {
     }
 
     #[instrument]
-    fn get_token() -> GenericResult<String> {
+    fn get_token() -> Result<String> {
         let token = if let Some(credential_dir) = env::var_os("CREDENTIALS_DIRECTORY") {
             event!(Level::INFO, "using systemd credential storage");
             let path: PathBuf = [&credential_dir, OsStr::new("token")].iter().collect();
@@ -61,7 +60,7 @@ impl Config {
             event!(Level::WARN, "falling back to `TOKEN` environment variable");
             env::var("DISCORD_TOKEN")?
         };
-    
+
         Ok(token)
     }
 }

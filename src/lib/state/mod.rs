@@ -1,6 +1,7 @@
 #![allow(dead_code)]
-use super::{Config, GenericResult};
+use super::Config;
 use crate::lib::slashies::commands::commands;
+use anyhow::Result;
 use star_lang::I18nMap;
 use tracing::{event, Level};
 use twilight_cache_inmemory::InMemoryCache as Cache;
@@ -24,11 +25,11 @@ pub struct State {
 }
 
 impl State {
-    pub async fn connect(&self) -> GenericResult<()> {
+    pub async fn connect(&self) -> Result<()> {
         let cluster_spawn = self.cluster.clone();
 
-        let id = self.http.current_user().await?.id;
-        self.http.set_application_id(id.0.into());
+        let id = self.http.current_user_application().await?.id;
+        self.http.set_application_id(id);
 
         if self.config.remove_slash_commands {
             event!(Level::INFO, "removing all slash commands");

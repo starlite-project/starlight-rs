@@ -30,13 +30,13 @@ impl Commands {
 
     pub async fn run(&self, state: &State) -> Result<InteractionResponse, ()> {
         match self {
-            Self::Ping(c) => c.run(state).await
+            Self::Ping(c) => c.run(state).await,
         }
     }
 
     pub const fn is_long(&self) -> bool {
         match self {
-            Self::Ping(_) => false
+            Self::Ping(_) => false,
         }
     }
 }
