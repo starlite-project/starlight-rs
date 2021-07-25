@@ -155,8 +155,6 @@ mod internal {
 
     pub(super) async fn ready(state: &State, ready: Ready) -> EventResult {
         // Get the application id, and set it
-        let current_application = state.http.current_user_application().await?;
-        state.http.set_application_id(current_application.id);
         let user = ready.user;
         let username = user.name;
         let discriminator = user.discriminator;

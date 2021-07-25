@@ -26,6 +26,18 @@ impl Commands {
             _ => None,
         }
     }
+
+    pub async fn run(&self, state: &State) -> Result<InteractionResponse, ()> {
+        match self {
+            Self::Ping(c) => c.run(state).await
+        }
+    }
+
+    pub const fn is_long(&self) -> bool {
+        match self {
+            Self::Ping(_) => false
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -50,4 +62,8 @@ impl Command for Ping {
     async fn run(&self, _: &State) -> Result<InteractionResponse, ()> {
         Ok(Response::message("Pong!"))
     }
+}
+
+pub fn commands() -> Vec<SlashCommand> {
+    vec![Ping::define()]
 }

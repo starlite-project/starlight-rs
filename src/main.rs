@@ -33,7 +33,7 @@ async fn main() -> GenericResult<()> {
         .build()
         .await?;
 
-    client.connect().await;
+    client.connect().await?;
 
     let state = Arc::new(client);
 
