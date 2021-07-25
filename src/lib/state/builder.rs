@@ -1,3 +1,5 @@
+use crate::lib::Config;
+
 use super::State;
 use futures::Stream;
 use star_lang::{I18nMap, LanguageResult};
@@ -14,9 +16,9 @@ pub struct StateBuilder {
     cluster: Option<ClusterBuilder>,
     cache: Option<CacheBuilder>,
     http: Option<HttpBuilder>,
-    token: Option<String>,
     intents: Option<Intents>,
     i18n: Option<I18nMap>,
+    config: Option<Config>,
 }
 
 impl StateBuilder {
@@ -25,28 +27,14 @@ impl StateBuilder {
             cluster: None,
             cache: None,
             http: None,
-            token: None,
             intents: None,
             i18n: None,
+            config: None,
         }
     }
 
-    pub fn token(mut self, token: impl AsRef<str>) -> Self {
-        let token = token.as_ref().trim();
-
-        let token = if token.starts_with("Bot ") {
-            token.to_string()
-        } else {
-            format!("Bot {}", token)
-        };
-
-        self.token = Some(token.clone());
-
-        self.http = if self.http.is_none() {
-            Some(HttpBuilder::new().token(token))
-        } else {
-            self.http
-        };
+    pub fn config(mut self, config: Config) -> Self {
+        self.config = Some(config);
 
         self
     }
@@ -61,8 +49,12 @@ impl StateBuilder {
     where
         F: FnOnce(ClusterBuilder) -> ClusterBuilder,
     {
-        let intents = self.intents.expect("Need intents to build cluster");
-        let token = self.token.clone().expect("Need token to build cluster");
+        let intents = self.intents.expect("need intents to build cluster");
+        let token = self
+            .config
+            .clone()
+            .expect("need config to build cluster")
+            .token;
 
         let cluster = cluster_fn((token, intents).into());
 
@@ -99,7 +91,11 @@ impl StateBuilder {
     where
         F: FnOnce(HttpBuilder) -> HttpBuilder,
     {
-        let token = self.token.clone().expect("Need token to build http");
+        let token = self
+            .config
+            .clone()
+            .expect("need config to build http")
+            .token;
         let http_builder = self
             .http
             .map_or_else(move || HttpBuilder::new().token(token), |builder| builder);
@@ -113,7 +109,7 @@ impl StateBuilder {
     pub async fn build(
         self,
     ) -> Result<(State, impl Stream<Item = (u64, Event)>), ClusterStartError> {
-        let token = self.token.unwrap_or_default();
+        let token = self.config.clone().unwrap_or_default().token;
         let http_builder = self.http.unwrap_or_default();
         let cluster_builder = self.cluster.expect("Need cluster to build state");
         let cache_builder = self.cache.unwrap_or_default();
@@ -130,6 +126,7 @@ impl StateBuilder {
                 http,
                 standby,
                 i18n: self.i18n.unwrap_or_default(),
+                config: self.config.unwrap_or_default(),
             },
             cluster.1,
         ))

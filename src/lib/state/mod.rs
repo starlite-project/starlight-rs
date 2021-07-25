@@ -1,5 +1,8 @@
 #![allow(dead_code)]
+use super::{Config, GenericResult};
+use crate::lib::slashies::commands::commands;
 use star_lang::I18nMap;
+use tracing::{event, Level};
 use twilight_cache_inmemory::InMemoryCache as Cache;
 use twilight_gateway::{Cluster, Event};
 use twilight_http::Client as HttpClient;
@@ -8,11 +11,7 @@ use twilight_standby::Standby;
 mod builder;
 pub mod events;
 
-use crate::lib::slashies::commands::commands;
-
 pub use self::builder::StateBuilder;
-
-use super::GenericResult;
 
 #[derive(Debug, Clone)]
 pub struct State {
@@ -21,6 +20,7 @@ pub struct State {
     pub http: HttpClient,
     pub standby: Standby,
     pub i18n: I18nMap,
+    config: Config,
 }
 
 impl State {
@@ -30,15 +30,23 @@ impl State {
         let id = self.http.current_user().await?.id;
         self.http.set_application_id(id.0.into());
 
-        tracing::event!(tracing::Level::INFO, "setting slash commands");
+        if self.config.remove_slash_commands {
+            event!(Level::INFO, "removing all slash commands");
+            if let Some(guild_id) = self.config.guild_id {
+                self.http.set_guild_commands(guild_id, vec![])?.await
+            } else {
+                self.http.set_global_commands(vec![])?.await
+            }?;
 
-        let guild_id = std::env::var("TEST_GUILD_ID").unwrap_or(String::from("0")).parse::<u64>()?;
+            std::process::exit(0);
+        };
 
-        if guild_id == 0 {
-            self.http.set_global_commands(commands())?.await?;
+        event!(Level::INFO, "setting slash commands");
+        if let Some(guild_id) = self.config.guild_id {
+            self.http.set_guild_commands(guild_id, commands())?.await
         } else {
-            self.http.set_guild_commands(guild_id.into(), commands())?.await?;
-        }
+            self.http.set_global_commands(commands())?.await
+        }?;
 
         tokio::spawn(async move {
             cluster_spawn.up().await;
