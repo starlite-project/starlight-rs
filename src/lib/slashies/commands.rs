@@ -73,8 +73,12 @@ impl Command for Ping {
 
         let shard_length = info.len();
 
-        let ping =
-            info.iter().cloned().reduce(|acc, val| acc + val).unwrap_or_default() / shard_length.try_into()?;
+        let ping = info
+            .iter()
+            .cloned()
+            .reduce(|acc, val| acc + val)
+            .unwrap_or_default()
+            / shard_length.try_into()?;
 
         Ok(Response::message(format!(
             "Pong! Average latency is {} milliseconds",

@@ -2,7 +2,6 @@ use crate::lib::Config;
 
 use super::State;
 use futures::Stream;
-use star_lang::{I18nMap, LanguageResult};
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
 use twilight_gateway::{
     cluster::{ClusterBuilder, ClusterStartError},
@@ -17,7 +16,6 @@ pub struct StateBuilder {
     cache: Option<CacheBuilder>,
     http: Option<HttpBuilder>,
     intents: Option<Intents>,
-    i18n: Option<I18nMap>,
     config: Option<Config>,
 }
 
@@ -28,7 +26,6 @@ impl StateBuilder {
             cache: None,
             http: None,
             intents: None,
-            i18n: None,
             config: None,
         }
     }
@@ -74,19 +71,6 @@ impl StateBuilder {
         self
     }
 
-    pub fn lang_builder<F>(mut self, lang_fn: F) -> Self
-    where
-        F: FnOnce() -> LanguageResult<I18nMap>,
-    {
-        let lang_result = lang_fn();
-        match lang_result {
-            Ok(lang) => self.i18n = Some(lang),
-            Err(err) => tracing::error!("failed to create lang: {:?}", err),
-        }
-
-        self
-    }
-
     pub fn http_builder<F>(mut self, http_fn: F) -> Self
     where
         F: FnOnce(HttpBuilder) -> HttpBuilder,
@@ -125,7 +109,6 @@ impl StateBuilder {
                 cluster: cluster.0,
                 http,
                 standby,
-                i18n: self.i18n.unwrap_or_default(),
                 config: self.config.unwrap_or_default(),
             },
             cluster.1,

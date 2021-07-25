@@ -2,7 +2,6 @@
 use super::Config;
 use crate::lib::slashies::commands::commands;
 use anyhow::Result;
-use star_lang::I18nMap;
 use tracing::{event, Level};
 use twilight_cache_inmemory::InMemoryCache as Cache;
 use twilight_gateway::{Cluster, Event};
@@ -20,7 +19,6 @@ pub struct State {
     pub cluster: Cluster,
     pub http: HttpClient,
     pub standby: Standby,
-    pub i18n: I18nMap,
     config: Config,
 }
 

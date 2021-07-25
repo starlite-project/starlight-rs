@@ -27,9 +27,6 @@ version = "1"
 [dependencies.star-error]
 path = "./error"
 
-[dependencies.star-lang]
-path = "./lang"
-
 [dependencies.tokio]
 version = "1"
 features = ["macros", "rt-multi-thread"]
@@ -67,9 +64,6 @@ features = ["snowflake"]
 [dev-dependencies]
 static_assertions = "1"
 
-[profile.dev]
-panic = "abort"
-
 [profile.release]
 lto = "fat"
 
@@ -79,6 +73,5 @@ lto = "fat"
 [workspace]
 members = [
     "./error",
-    "./lang",
     "./test"
 ]
