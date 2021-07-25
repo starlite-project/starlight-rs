@@ -5,9 +5,8 @@ edition = "2018"
 authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
 
 [dependencies]
-serde = { features = ["derive"], version = "1" }
-serde_json = "1"
-bincode = "1"
-
-[dependencies.twilight-model]
-git = "https://github.com/twilight-rs/twilight.git"
+cortex-m = "0.5"
+cortex-m-rt = "0.6"
+cortex-m-semihosting = "0.3"
+panic-halt = "0.2"
+spin = "0.5"

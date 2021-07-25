@@ -1,0 +1,4 @@
+   Compiling star-test v0.1.0 (/root/github/starlight-rs/test)
+error: language item required, but not found: `eh_personality`
+
+error: could not compile `star-test` due to previous error

@@ -1,16 +1,17 @@
+use super::{PartialApplicationCommand, Response};
 use crate::lib::state::State;
+use anyhow::Result;
 use async_trait::async_trait;
+use std::convert::TryInto;
 use twilight_model::application::{
     callback::InteractionResponse, command::Command as SlashCommand,
 };
-
-use super::{PartialApplicationCommand, Response};
 
 #[async_trait]
 pub trait Command {
     const NAME: &'static str;
 
-    async fn run(&self, ctx: &State) -> Result<InteractionResponse, ()>;
+    async fn run(&self, ctx: &State) -> Result<InteractionResponse>;
 
     fn define() -> SlashCommand;
 }
@@ -28,7 +29,7 @@ impl Commands {
         }
     }
 
-    pub async fn run(&self, state: &State) -> Result<InteractionResponse, ()> {
+    pub async fn run(&self, state: &State) -> Result<InteractionResponse> {
         match self {
             Self::Ping(c) => c.run(state).await,
         }
@@ -60,8 +61,25 @@ impl Command for Ping {
         }
     }
 
-    async fn run(&self, _: &State) -> Result<InteractionResponse, ()> {
-        Ok(Response::message("Pong!"))
+    async fn run(&self, state: &State) -> Result<InteractionResponse> {
+        let info = state
+            .cluster
+            .info()
+            .values()
+            .map(|info| info.latency().average())
+            .filter(|val| val.is_some())
+            .map(|val| val.unwrap())
+            .collect::<Vec<_>>();
+
+        let shard_length = info.len();
+
+        let ping =
+            info.iter().cloned().reduce(|acc, val| acc + val).unwrap_or_default() / shard_length.try_into()?;
+
+        Ok(Response::message(format!(
+            "Pong! Average latency is {} milliseconds",
+            ping.as_millis()
+        )))
     }
 }
 

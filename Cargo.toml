@@ -31,7 +31,7 @@ path = "./error"
 path = "./lang"
 
 [dependencies.tokio]
-version = "1.6"
+version = "1"
 features = ["macros", "rt-multi-thread"]
 
 [dependencies.tracing-subscriber]
@@ -67,6 +67,9 @@ features = ["snowflake"]
 [dev-dependencies]
 static_assertions = "1"
 
+[profile.dev]
+panic = "abort"
+
 [profile.release]
 lto = "fat"
 
@@ -75,7 +78,6 @@ lto = "fat"
 
 [workspace]
 members = [
-    "./args",
     "./error",
     "./lang",
     "./test"

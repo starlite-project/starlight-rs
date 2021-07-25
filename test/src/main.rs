@@ -1,72 +1,47 @@
-use serde::{Deserialize, Serialize};
-use twilight_model::application::command::{Command, CommandOption};
+#![feature(llvm_asm)]
+#![no_std]
+#![no_main]
 
-pub type StarSlashies = Vec<StarCommand>;
+extern crate panic_halt;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct StarCommand {
-    pub name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub default_permissions: Option<bool>,
-    pub description: String,
-    #[serde(default)]
-    pub options: Vec<CommandOption>,
+use core::sync::atomic::{AtomicBool, Ordering};
+use cortex_m_rt::{entry, exception};
+
+static X: AtomicBool = AtomicBool::new(true);
+
+#[inline(never)]
+#[entry]
+fn main() -> ! {
+    foo();
+
+    quux();
+
+    loop {}
 }
 
-impl PartialEq<Command> for StarCommand {
-    fn eq(&self, other: &Command) -> bool {
-        (
-            &self.name,
-            self.default_permissions,
-            &self.description,
-            &self.options,
-        ) == (
-            &other.name,
-            other.default_permission,
-            &other.description,
-            &other.options,
-        )
+fn foo() {
+    if X.load(Ordering::Relaxed) {
+        bar()
     }
 }
 
-impl From<StarCommand> for Command {
-    fn from(value: StarCommand) -> Self {
-        Self {
-            application_id: None,
-            guild_id: None,
-            name: value.name,
-            default_permission: value.default_permissions,
-            description: value.description,
-            id: None,
-            options: value.options,
-        }
+fn bar() {
+    if X.load(Ordering::Relaxed) {
+        baz()
     }
 }
 
-impl From<&StarCommand> for Command {
-    fn from(value: &StarCommand) -> Self {
-        Self {
-            application_id: None,
-            guild_id: None,
-            name: value.name.clone(),
-            default_permission: value.default_permissions,
-            description: value.description.clone(),
-            id: None,
-            options: value.options.clone(),
-        }
+fn baz() {
+    if X.load(Ordering::Relaxed) {
+        foo()
     }
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let path = std::path::Path::new("./commands.json");
+fn quux() {
+    unsafe { llvm_asm!("" : : "r"(0) "r"(1) "r"(2) "r"(3) "r"(4) "r"(5)) }
+}
 
-    let json = std::fs::read_to_string(path)?;
-
-    let val: StarSlashies = serde_json::from_str(&json)?;
-
-    dbg!(&val);
-
-    dbg!(&val.iter().map(Command::from).collect::<Vec<_>>());
-
-    Ok(())
+#[exception]
+fn SysTick() {
+    X.store(false, Ordering::Relaxed);
 }
