@@ -15,6 +15,7 @@ pub trait Command {
     fn define() -> SlashCommand;
 }
 
+#[derive(Debug, Clone)]
 pub enum Commands {
     Ping(Ping),
 }

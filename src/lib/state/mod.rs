@@ -3,7 +3,6 @@ use star_lang::I18nMap;
 use twilight_cache_inmemory::InMemoryCache as Cache;
 use twilight_gateway::{Cluster, Event};
 use twilight_http::Client as HttpClient;
-use twilight_model::id::GuildId;
 use twilight_standby::Standby;
 
 mod builder;
@@ -33,13 +32,12 @@ impl State {
 
         tracing::event!(tracing::Level::INFO, "setting slash commands");
 
-        let guild_id = std::env::var("GUILD_ID").unwrap_or(String::from("0")).parse::<u64>()?;
+        let guild_id = std::env::var("TEST_GUILD_ID").unwrap_or(String::from("0")).parse::<u64>()?;
 
         if guild_id == 0 {
             self.http.set_global_commands(commands())?.await?;
         } else {
-            let guild_id = GuildId(guild_id);
-            self.http.set_guild_commands(guild_id, commands())?.await?;
+            self.http.set_guild_commands(guild_id.into(), commands())?.await?;
         }
 
         tokio::spawn(async move {

@@ -1,3 +1,5 @@
+use self::commands::Commands;
+
 use super::state::State;
 use tracing::{event, instrument, Level};
 use twilight_model::{
@@ -12,11 +14,37 @@ use twilight_model::{
 
 pub mod commands;
 
+fn log_err<T, E: std::error::Error + 'static>(res: Result<T, E>) {
+    if let Err(e) = res {
+        event!(Level::ERROR, error = &e as &dyn std::error::Error);
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Interaction<'a> {
     state: &'a State,
     id: InteractionId,
     token: String,
+}
+
+impl<'a> Interaction<'a> {
+    pub async fn ack(&self) {
+        log_err(
+            self.state
+                .http
+                .interaction_callback(self.id, self.token.as_str(), Response::ack())
+                .await,
+        )
+    }
+
+    pub async fn response(&self, response: InteractionResponse) {
+        log_err(
+            self.state
+                .http
+                .interaction_callback(self.id, self.token.as_str(), response)
+                .await,
+        )
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -83,5 +111,17 @@ pub async fn act(state: &State, command: ApplicationCommand) {
 
     let partial_command = PartialApplicationCommand::from(command);
 
-    todo!()
+    if let Some(cmd) = Commands::r#match(partial_command) {
+        if cmd.is_long() {
+            interaction.ack().await;
+        }
+
+        let response = cmd
+            .run(state)
+            .await
+            .unwrap_or_else(|_| Response::message("Error running command"));
+        interaction.response(response).await;
+    } else {
+        event!(Level::WARN, "recieved unregistered command");
+    }
 }

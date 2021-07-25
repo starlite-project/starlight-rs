@@ -27,6 +27,7 @@ pub async fn handle(event: Event, state: Arc<State>) -> EventResult {
         GuildEmojisUpdate(guild) => internal::guild_emojis_update(state, guild).await?,
         GuildIntegrationsUpdate(guild) => internal::guild_integrations_update(state, guild).await?,
         GuildUpdate(guild) => internal::guild_update(state, *guild).await?,
+        InteractionCreate(interaction) => internal::interaction_create(state, *interaction).await?,
         InviteCreate(invite) => internal::invite_create(state, *invite).await?,
         InviteDelete(invite) => internal::invite_delete(state, invite).await?,
         MemberAdd(member) => internal::member_add(state, *member).await?,
@@ -82,8 +83,12 @@ pub async fn handle(event: Event, state: Arc<State>) -> EventResult {
 mod internal {
     #![allow(unused_variables, dead_code, clippy::wildcard_imports)]
     use super::EventResult;
-    use crate::lib::state::State;
-    use twilight_model::gateway::{event::shard::*, payload::*};
+    use crate::lib::{slashies, state::State};
+    use tracing::{event, Level};
+    use twilight_model::{
+        application::interaction::Interaction,
+        gateway::{event::shard::*, payload::*},
+    };
 
     macro_rules! gen_empty_handlers {
         ($($fn_names:ident: [$($fn_args:ty),*];)*) => {
@@ -167,6 +172,12 @@ mod internal {
         state: &State,
         interaction: InteractionCreate,
     ) -> EventResult {
+        println!("got to interaction_create");
+        match interaction.0 {
+            Interaction::Ping(_) => (),
+            Interaction::ApplicationCommand(cmd) => slashies::act(state, *cmd).await,
+            i => event!(Level::WARN, ?i, "unhandled interaction"),
+        }
         Ok(())
     }
 }
