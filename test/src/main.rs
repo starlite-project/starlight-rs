@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
-use twilight_model::application::command::{
-    BaseCommandOptionData, ChoiceCommandOptionData, Command, CommandOption,
-};
+use twilight_model::application::command::{Command, CommandOption};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct StarCommand {

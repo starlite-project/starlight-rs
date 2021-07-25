@@ -113,7 +113,7 @@ mod internal {
         guild_emojis_update: [GuildEmojisUpdate];
         guild_integrations_update: [GuildIntegrationsUpdate];
         guild_update: [GuildUpdate];
-        interaction_create: [InteractionCreate];
+        // interaction_create: [InteractionCreate];
         invite_create: [InviteCreate];
         invite_delete: [InviteDelete];
         member_add: [MemberAdd];
@@ -162,6 +162,13 @@ mod internal {
         let discriminator = user.discriminator;
         let id = user.id;
         tracing::info!("ready as user {}#{} ({})", username, discriminator, id);
+        Ok(())
+    }
+
+    pub(super) async fn interaction_create(
+        state: &State,
+        interaction: InteractionCreate,
+    ) -> EventResult {
         Ok(())
     }
 }
