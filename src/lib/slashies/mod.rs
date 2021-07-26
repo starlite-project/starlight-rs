@@ -1,5 +1,6 @@
-use self::commands::Commands;
+#![allow(dead_code)]
 
+use self::commands::Commands;
 use super::state::State;
 use tracing::{event, instrument, Level};
 use twilight_model::{
@@ -7,6 +8,7 @@ use twilight_model::{
         callback::{CallbackData, InteractionResponse},
         interaction::application_command::{ApplicationCommand, CommandData},
     },
+    channel::embed::Embed,
     guild::PartialMember,
     id::{ChannelId, GuildId, InteractionId},
     user::User,
@@ -86,6 +88,26 @@ impl Response {
 
     pub fn message(msg: impl Into<String>) -> InteractionResponse {
         Self::_message(msg.into())
+    }
+
+    pub fn embed(embed: Embed) -> InteractionResponse {
+        Self::_embeds(vec![embed])
+    }
+
+    pub fn embeds(embeds: Vec<Embed>) -> InteractionResponse {
+        Self::_embeds(embeds)
+    }
+
+    fn _embeds(embeds: Vec<Embed>) -> InteractionResponse {
+        if embeds.is_empty() {
+            panic!("empty embeds is not allowed")
+        }
+
+        let mut data = Self::BASE;
+
+        data.embeds = embeds;
+
+        InteractionResponse::ChannelMessageWithSource(data)
     }
 
     fn _message(msg: String) -> InteractionResponse {
