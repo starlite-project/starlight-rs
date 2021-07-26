@@ -33,7 +33,7 @@ impl<'a> Interaction<'a> {
     pub async fn ack(&self) {
         log_err(
             self.state
-                .http
+                .http()
                 .interaction_callback(self.id, self.token.as_str(), Response::ack())
                 .await,
         )
@@ -42,7 +42,7 @@ impl<'a> Interaction<'a> {
     pub async fn response(&self, response: InteractionResponse) {
         log_err(
             self.state
-                .http
+                .http()
                 .interaction_callback(self.id, self.token.as_str(), response)
                 .await,
         )

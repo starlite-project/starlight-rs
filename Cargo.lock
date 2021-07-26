@@ -980,13 +980,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 
 [[package]]
-name = "star-error"
-version = "0.1.0"
-dependencies = [
- "static_assertions",
-]
-
-[[package]]
 name = "star-test"
 version = "0.1.0"
 
@@ -1002,7 +995,6 @@ dependencies = [
  "futures",
  "serde",
  "serde_json",
- "star-error",
  "static_assertions",
  "tokio",
  "tracing",

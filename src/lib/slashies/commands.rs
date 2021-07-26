@@ -63,7 +63,7 @@ impl Command for Ping {
 
     async fn run(&self, state: &State) -> Result<InteractionResponse> {
         let info = state
-            .cluster
+            .cluster()
             .info()
             .values()
             .map(|info| info.latency().average())
