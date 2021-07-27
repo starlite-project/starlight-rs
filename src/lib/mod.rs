@@ -54,7 +54,7 @@ impl Config {
     fn get_token() -> Result<String> {
         let token = if let Some(credential_dir) = env::var_os("CREDENTIALS_DIRECTORY") {
             event!(Level::INFO, "using systemd credential storage");
-            let path: PathBuf = [&credential_dir, OsStr::new("token")].iter().collect();
+            let path = [&credential_dir, OsStr::new("token")].iter().collect::<PathBuf>();
             fs::read_to_string(path)?
         } else {
             event!(Level::WARN, "falling back to `TOKEN` environment variable");
