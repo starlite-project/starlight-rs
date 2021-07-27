@@ -16,40 +16,37 @@ pub mod events;
 pub use self::builder::StateBuilder;
 
 #[derive(Debug, Clone)]
-struct StateRef {
-    cache: Cache,
-    cluster: Cluster,
-    http: HttpClient,
-    standby: Standby,
+pub struct State {
+    cache: Arc<Cache>,
+    cluster: Arc<Cluster>,
+    http: Arc<HttpClient>,
+    standby: Arc<Standby>,
     config: Config,
 }
 
-#[derive(Debug, Clone)]
-pub struct State(Arc<StateRef>);
-
 impl State {
     pub async fn connect(&self) -> Result<()> {
-        let cluster_spawn = self.0.cluster.clone();
+        let cluster_spawn = self.cluster.clone();
 
-        let id = self.0.http.current_user_application().await?.id;
-        self.0.http.set_application_id(id);
+        let id = self.http.current_user_application().await?.id;
+        self.http.set_application_id(id);
 
-        if self.0.config.remove_slash_commands {
+        if self.config.remove_slash_commands {
             event!(Level::INFO, "removing all slash commands");
-            if let Some(guild_id) = self.0.config.guild_id {
-                self.0.http.set_guild_commands(guild_id, vec![])?.await
+            if let Some(guild_id) = self.config.guild_id {
+                self.http.set_guild_commands(guild_id, vec![])?.await
             } else {
-                self.0.http.set_global_commands(vec![])?.await
+                self.http.set_global_commands(vec![])?.await
             }?;
 
             std::process::exit(0);
         };
 
         event!(Level::INFO, "setting slash commands");
-        if let Some(guild_id) = self.0.config.guild_id {
-            self.0.http.set_guild_commands(guild_id, commands())?.await
+        if let Some(guild_id) = self.config.guild_id {
+            self.http.set_guild_commands(guild_id, commands())?.await
         } else {
-            self.0.http.set_global_commands(commands())?.await
+            self.http.set_global_commands(commands())?.await
         }?;
 
         tokio::spawn(async move {
@@ -59,20 +56,24 @@ impl State {
         Ok(())
     }
 
-    pub fn cluster(&self) -> &Cluster {
-        &self.0.cluster
+    pub fn cluster(&self) -> Arc<Cluster> {
+        self.cluster.clone()
     }
 
-    pub fn http(&self)-> &HttpClient {
-        &self.0.http
+    pub fn http(&self) -> Arc<HttpClient> {
+        self.http.clone()
     }
 
-    pub fn cache(&self) -> &Cache {
-        &self.0.cache
+    pub fn cache(&self) -> Arc<Cache> {
+        self.cache.clone()
+    }
+
+    pub fn standby(&self) -> Arc<Standby> {
+        self.standby.clone()
     }
 
     pub fn handle_event(&self, event: &Event) {
-        self.0.cache.update(event);
-        self.0.standby.process(event);
+        self.cache.update(event);
+        self.standby.process(event);
     }
 }

@@ -1,11 +1,10 @@
-use std::sync::Arc;
-
+use super::State;
 use crate::lib::Config;
-
-use super::{State, StateRef};
+use anyhow::{Context, Result};
+use std::sync::Arc;
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
 use twilight_gateway::{
-    cluster::{ClusterBuilder, ClusterStartError, Events},
+    cluster::{ClusterBuilder, Events},
     Intents,
 };
 use twilight_http::client::ClientBuilder as HttpBuilder;
@@ -47,11 +46,15 @@ impl StateBuilder {
     where
         F: FnOnce(ClusterBuilder) -> ClusterBuilder,
     {
-        let intents = self.intents.expect("need intents to build cluster");
+        let intents = self
+            .intents
+            .context("need intents to build cluster")
+            .unwrap();
         let token = self
             .config
             .clone()
-            .expect("need config to build cluster")
+            .context("need config to build cluster")
+            .unwrap()
             .token;
 
         let cluster = cluster_fn((token, intents).into());
@@ -79,7 +82,8 @@ impl StateBuilder {
         let token = self
             .config
             .clone()
-            .expect("need config to build http")
+            .context("need config to build http")
+            .unwrap()
             .token;
         let http_builder = self
             .http
@@ -91,10 +95,10 @@ impl StateBuilder {
         self
     }
 
-    pub async fn build(self) -> Result<(State, Events), ClusterStartError> {
+    pub async fn build(self) -> Result<(State, Events)> {
         let token = self.config.clone().unwrap_or_default().token;
         let http_builder = self.http.unwrap_or_default();
-        let cluster_builder = self.cluster.expect("Need cluster to build state");
+        let cluster_builder = self.cluster.context("Need cluster to build state").unwrap();
         let cache_builder = self.cache.unwrap_or_default();
 
         let http = http_builder.token(token).build();
@@ -103,13 +107,13 @@ impl StateBuilder {
         let standby = Standby::new();
 
         Ok((
-            State(Arc::new(StateRef {
-                cache,
-                cluster: cluster.0,
-                http,
-                standby,
+            State {
+                cache: Arc::new(cache),
+                cluster: Arc::new(cluster.0),
+                http: Arc::new(http),
+                standby: Arc::new(standby),
                 config: self.config.unwrap_or_default(),
-            })),
+            },
             cluster.1,
         ))
     }

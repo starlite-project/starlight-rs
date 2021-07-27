@@ -1,9 +1,5 @@
 fn main() {
-    let mut x = 0;
+    let val: &'static i32 = Box::leak(Box::new(10));
 
-    for i in 0..10 {
-        x += i;
-    }
-
-    dbg!(x);
+    dbg!(val);
 }
