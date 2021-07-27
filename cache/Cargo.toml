@@ -1,0 +1,48 @@
+[package]
+name = "star-cache"
+version = "0.1.0"
+edition = "2018"
+authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
+
+
+[dependencies.bitflags]
+version = "1"
+default-features = false
+
+[dependencies.dashmap]
+version = "4.0"
+default-features = false
+
+[dependencies.serde]
+version = "1"
+default-features = false
+features = ["derive"]
+
+[dependencies.twilight-model]
+git = "https://github.com/twilight-rs/twilight.git"
+default-features = false
+
+[dependencies.twilight-util]
+git = "https://github.com/twilight-rs/twilight.git"
+features = ["permission-calculator"]
+optional = true
+default-features = false
+
+[dev-dependencies.futures]
+version = "0.3"
+default-features = false
+
+[dev-dependencies.static_assertions]
+default-features = false
+version = "1"
+
+[dev-dependencies.tokio]
+version = "1.0"
+default-features = false
+features = ["macros", "rt-multi-thread"]
+
+[dev-dependencies.twilight-gateway]
+git = "https://github.com/twilight-rs/twilight.git"
+
+[features]
+permission-calculator = ["twilight-util"]
