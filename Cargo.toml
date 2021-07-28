@@ -35,8 +35,6 @@ git = "https://github.com/twilight-rs/twilight.git"
 
 [dependencies.twilight-gateway]
 git = "https://github.com/twilight-rs/twilight.git"
-default-features = false
-features = ["rustls"]
 
 [dependencies.twilight-http]
 git = "https://github.com/twilight-rs/twilight.git"
