@@ -10,10 +10,8 @@ license = "MIT"
 [dependencies]
 anyhow = "1"
 async-trait = "0.1"
-chrono = "0.4"
 dotenv = "0.15.0"
 futures = "0.3"
-serde_json = "1"
 tracing = "0.1"
 
 [dependencies.clap]
@@ -34,7 +32,6 @@ features = ["fmt", "ansi"]
 
 [dependencies.twilight-cache-inmemory]
 git = "https://github.com/twilight-rs/twilight.git"
-features = ["permission-calculator"]
 
 [dependencies.twilight-gateway]
 git = "https://github.com/twilight-rs/twilight.git"
@@ -45,18 +42,11 @@ features = ["rustls"]
 git = "https://github.com/twilight-rs/twilight.git"
 features = ["tracing"]
 
-[dependencies.twilight-mention]
-git = "https://github.com/twilight-rs/twilight.git"
-
 [dependencies.twilight-model]
 git = "https://github.com/twilight-rs/twilight.git"
 
 [dependencies.twilight-standby]
 git = "https://github.com/twilight-rs/twilight.git"
-
-[dependencies.twilight-util]
-git = "https://github.com/twilight-rs/twilight.git"
-features = ["snowflake"]
 
 [dev-dependencies]
 static_assertions = "1"
@@ -69,6 +59,5 @@ lto = "fat"
 
 [workspace]
 members = [
-    "./cache",
     "./test"
 ]
