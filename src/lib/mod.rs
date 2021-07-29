@@ -22,9 +22,9 @@ impl Config {
             .license(crate_license!())
             .version(crate_version!())
             .args(&[
-                Arg::new("guild_id")
+                Arg::new("guild-id")
                     .about("Guild Id to use for testing slash commands")
-                    .env("TESTING_GUILD_ID")
+                    .env("GUILD_ID")
                     .long("guild-id")
                     .takes_value(true),
                 Arg::new("remove-slash-commands")

@@ -1,5 +1,4 @@
 use self_meter::Meter;
-use star_test::Grid;
 use std::{
     collections::BTreeMap,
     io::{stderr, Write},
@@ -22,7 +21,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             meter.thread_report().map(|x| x.collect::<BTreeMap<_, _>>())
         );
 
-        let val = Box::new(10);
 
         sleep(Duration::new(1, 0));
     }

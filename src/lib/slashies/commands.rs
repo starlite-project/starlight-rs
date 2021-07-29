@@ -71,7 +71,7 @@ impl Command for Ping {
             .map(|val| val.unwrap())
             .collect::<Vec<_>>();
 
-        let shard_length = info.len();
+        let shard_length = state.cluster().shards().len();
 
         let ping = info
             .iter()
@@ -80,10 +80,16 @@ impl Command for Ping {
             .unwrap_or_default()
             / shard_length.try_into()?;
 
-        Ok(Response::message(format!(
-            "Pong! Average latency is {} milliseconds",
-            ping.as_millis()
-        )))
+        if ping.as_millis() == 0 {
+            Ok(Response::message(format!(
+                "Pong! Couldn't quite get average latency"
+            )))
+        } else {
+            Ok(Response::message(format!(
+                "Pong! Average latency is {} milliseconds",
+                ping.as_millis()
+            )))
+        }
     }
 }
 

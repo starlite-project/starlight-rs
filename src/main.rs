@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
 
     let config = Config::new()?;
 
-    let (client, mut events) = StateBuilder::new()
+    let (mut client, mut events) = StateBuilder::new()
         .config(config)
         .intents(Intents::all())
         .cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))

@@ -1,7 +1,7 @@
 use super::State;
 use crate::lib::Config;
 use anyhow::{Context, Result};
-use std::sync::Arc;
+use std::{sync::Arc, time::Instant};
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
 use twilight_gateway::{
     cluster::{ClusterBuilder, Events},
@@ -113,6 +113,7 @@ impl StateBuilder {
                 http: Arc::new(http),
                 standby: Arc::new(standby),
                 config: self.config.unwrap_or_default(),
+                uptime: Instant::now(),
             },
             cluster.1,
         ))
