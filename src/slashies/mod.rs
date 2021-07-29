@@ -36,7 +36,7 @@ impl<'a> Interaction<'a> {
                 .http()
                 .interaction_callback(self.id, self.token.as_str(), Response::ack())
                 .await,
-        )
+        );
     }
 
     pub async fn response(&self, response: InteractionResponse) {
@@ -45,7 +45,7 @@ impl<'a> Interaction<'a> {
                 .http()
                 .interaction_callback(self.id, self.token.as_str(), response)
                 .await,
-        )
+        );
     }
 }
 
@@ -82,25 +82,29 @@ impl Response {
         tts: None,
     };
 
+    #[must_use]
     pub const fn ack() -> InteractionResponse {
         InteractionResponse::DeferredChannelMessageWithSource(Self::BASE)
     }
 
+    #[must_use]
     pub fn message(msg: impl Into<String>) -> InteractionResponse {
         Self::_message(msg.into())
     }
 
+    #[must_use]
     pub fn embed(embed: Embed) -> InteractionResponse {
         Self::_embeds(vec![embed])
     }
 
+    #[must_use]
     pub fn embeds(embeds: Vec<Embed>) -> InteractionResponse {
         Self::_embeds(embeds)
     }
 
     fn _embeds(embeds: Vec<Embed>) -> InteractionResponse {
         if embeds.is_empty() {
-            panic!("empty embeds is not allowed")
+            panic!("empty embeds is not allowed");
         }
 
         let mut data = Self::BASE;
@@ -112,7 +116,7 @@ impl Response {
 
     fn _message(msg: String) -> InteractionResponse {
         if msg.is_empty() {
-            panic!("empty message is not allowed")
+            panic!("empty message is not allowed");
         }
 
         let mut data = Self::BASE;

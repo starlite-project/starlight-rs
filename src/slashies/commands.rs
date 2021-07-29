@@ -22,6 +22,7 @@ pub enum Commands {
 }
 
 impl Commands {
+    #[must_use]
     pub fn r#match(command: PartialApplicationCommand) -> Option<Self> {
         match command.data.name.as_str() {
             Ping::NAME => Some(Self::Ping(Ping(command))),
@@ -35,6 +36,7 @@ impl Commands {
         }
     }
 
+    #[must_use]
     pub const fn is_long(&self) -> bool {
         match self {
             Self::Ping(_) => false,
@@ -66,24 +68,22 @@ impl Command for Ping {
             .cluster()
             .info()
             .values()
-            .map(|info| info.latency().average())
-            .filter(|val| val.is_some())
-            .map(|val| val.unwrap())
+            .filter_map(|info| info.latency().average())
             .collect::<Vec<_>>();
 
         let shard_length = state.cluster().shards().len();
 
         let ping = info
             .iter()
-            .cloned()
+            .copied()
             .reduce(|acc, val| acc + val)
             .unwrap_or_default()
             / shard_length.try_into()?;
 
         if ping.as_millis() == 0 {
-            Ok(Response::message(format!(
-                "Pong! Couldn't quite get average latency"
-            )))
+            Ok(Response::message(
+                "Pong! Couldn't quite get average latency",
+            ))
         } else {
             Ok(Response::message(format!(
                 "Pong! Average latency is {} milliseconds",
@@ -93,6 +93,7 @@ impl Command for Ping {
     }
 }
 
+#[must_use]
 pub fn commands() -> Vec<SlashCommand> {
     vec![Ping::define()]
 }

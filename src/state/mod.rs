@@ -56,22 +56,27 @@ impl State {
         Ok(())
     }
 
+    #[must_use]
     pub fn cluster(&self) -> Arc<Cluster> {
         self.cluster.clone()
     }
 
+    #[must_use]
     pub fn http(&self) -> Arc<HttpClient> {
         self.http.clone()
     }
 
+    #[must_use]
     pub fn cache(&self) -> Arc<Cache> {
         self.cache.clone()
     }
 
+    #[must_use]
     pub fn standby(&self) -> Arc<Standby> {
         self.standby.clone()
     }
 
+    #[must_use]
     pub const fn uptime(&self) -> Instant {
         self.uptime
     }

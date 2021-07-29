@@ -1,6 +1,3 @@
-#![warn(clippy::nursery, clippy::pedantic)]
-#![allow(clippy::from_iter_instead_of_collect, clippy::module_name_repetitions)]
-
 use anyhow::Result;
 use futures::StreamExt;
 use starlight_rs::{state::StateBuilder, Config};

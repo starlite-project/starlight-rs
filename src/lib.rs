@@ -1,3 +1,11 @@
+#![warn(clippy::pedantic, clippy::nursery)]
+#![deny(clippy::all)]
+#![allow(
+    clippy::missing_errors_doc,
+    clippy::missing_panics_doc,
+    clippy::module_name_repetitions
+)]
+
 use anyhow::Result;
 use clap::{crate_authors, crate_description, crate_license, crate_name, crate_version, App, Arg};
 use std::{env, ffi::OsStr, fs, path::PathBuf};
@@ -15,7 +23,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new() -> Result<Config> {
+    pub fn new() -> Result<Self> {
         let matches = App::new(crate_name!())
             .about(crate_description!())
             .author(crate_authors!())

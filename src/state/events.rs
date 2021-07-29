@@ -47,22 +47,22 @@ pub async fn handle(event: Event, state: &'static State) -> Result<()> {
         ShardConnected(connected) => internal::shard_connected(state, connected).await?,
         ShardConnecting(connecting) => internal::shard_connecting(state, connecting).await?,
         ShardDisconnected(disconnected) => {
-            internal::shard_disconnected(state, disconnected).await?
+            internal::shard_disconnected(state, disconnected).await?;
         }
         ShardIdentifying(identifying) => internal::shard_identifying(state, identifying).await?,
         ShardReconnecting(reconnecting) => {
-            internal::shard_reconnecting(state, reconnecting).await?
+            internal::shard_reconnecting(state, reconnecting).await?;
         }
         ShardPayload(payload) => internal::shard_payload(state, payload).await?,
         ShardResuming(resume) => internal::shard_resuming(state, resume).await?,
         StageInstanceCreate(stage_instance) => {
-            internal::stage_instance_create(state, stage_instance).await?
+            internal::stage_instance_create(state, stage_instance).await?;
         }
         StageInstanceDelete(stage_instance) => {
-            internal::stage_instance_delete(state, stage_instance).await?
+            internal::stage_instance_delete(state, stage_instance).await?;
         }
         StageInstanceUpdate(stage_instance) => {
-            internal::stage_instance_update(state, stage_instance).await?
+            internal::stage_instance_update(state, stage_instance).await?;
         }
         TypingStart(typing) => internal::typing_start(state, *typing).await?,
         UnavailableGuild(guild) => internal::unavailable_guild(state, guild).await?,
@@ -76,7 +76,7 @@ pub async fn handle(event: Event, state: &'static State) -> Result<()> {
 }
 
 mod internal {
-    #![allow(unused_variables, dead_code, clippy::wildcard_imports)]
+    #![allow(unused_variables, dead_code, clippy::wildcard_imports, clippy::unused_async)]
     use crate::{slashies, state::State};
     use anyhow::Result;
     use tracing::{event, Level};

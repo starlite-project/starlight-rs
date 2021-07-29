@@ -20,6 +20,7 @@ pub struct StateBuilder {
 }
 
 impl StateBuilder {
+    #[must_use]
     pub const fn new() -> Self {
         Self {
             cluster: None,
@@ -30,7 +31,7 @@ impl StateBuilder {
         }
     }
 
-    pub fn config(mut self, config: Config) -> Self {
+    pub const fn config(mut self, config: Config) -> Self {
         self.config = Some(config);
 
         self
@@ -52,7 +53,6 @@ impl StateBuilder {
             .unwrap();
         let token = self
             .config
-            .clone()
             .context("need config to build cluster")
             .unwrap()
             .token;
@@ -81,7 +81,6 @@ impl StateBuilder {
     {
         let token = self
             .config
-            .clone()
             .context("need config to build http")
             .unwrap()
             .token;
@@ -96,7 +95,7 @@ impl StateBuilder {
     }
 
     pub async fn build(self) -> Result<(&'static State, Events)> {
-        let token = self.config.clone().unwrap_or_default().token;
+        let token = self.config.unwrap_or_default().token.to_owned();
         let http_builder = self.http.unwrap_or_default();
         let cluster_builder = self.cluster.context("Need cluster to build state").unwrap();
         let cache_builder = self.cache.unwrap_or_default();
