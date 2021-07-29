@@ -2,10 +2,15 @@ use super::{PartialApplicationCommand, Response};
 use crate::state::State;
 use anyhow::Result;
 use async_trait::async_trait;
-use std::convert::TryInto;
+use std::{convert::TryInto, time::Duration};
 use twilight_model::application::{
     callback::InteractionResponse, command::Command as SlashCommand,
 };
+
+#[must_use]
+pub fn get_slashies() -> Vec<SlashCommand> {
+    vec![Ping::define()]
+}
 
 #[async_trait]
 pub trait Command {
@@ -64,36 +69,22 @@ impl Command for Ping {
     }
 
     async fn run(&self, state: &State) -> Result<InteractionResponse> {
-        let info = state
+        let ping = state
             .cluster()
             .info()
             .values()
             .filter_map(|info| info.latency().average())
-            .collect::<Vec<_>>();
+            .sum::<Duration>()
+            / state.cluster().shards().len().try_into()?;
 
-        let shard_length = state.cluster().shards().len();
-
-        let ping = info
-            .iter()
-            .copied()
-            .reduce(|acc, val| acc + val)
-            .unwrap_or_default()
-            / shard_length.try_into()?;
-
-        if ping.as_millis() == 0 {
-            Ok(Response::message(
+        match ping.as_millis() {
+            0 => Ok(Response::message(
                 "Pong! Couldn't quite get average latency",
-            ))
-        } else {
-            Ok(Response::message(format!(
+            )),
+            ping => Ok(Response::message(format!(
                 "Pong! Average latency is {} milliseconds",
-                ping.as_millis()
-            )))
+                ping
+            ))),
         }
     }
-}
-
-#[must_use]
-pub fn commands() -> Vec<SlashCommand> {
-    vec![Ping::define()]
 }

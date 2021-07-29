@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 use super::Config;
-use crate::slashies::commands::commands;
+use crate::slashies::commands::get_slashies;
 use anyhow::Result;
 use std::{sync::Arc, time::Instant};
 use tracing::{event, Level};
@@ -44,9 +44,11 @@ impl State {
 
         event!(Level::INFO, ?self.config.guild_id, "setting slash commands");
         if let Some(guild_id) = self.config.guild_id {
-            self.http.set_guild_commands(guild_id, commands())?.await
+            self.http
+                .set_guild_commands(guild_id, get_slashies())?
+                .await
         } else {
-            self.http.set_global_commands(commands())?.await
+            self.http.set_global_commands(get_slashies())?.await
         }?;
 
         tokio::spawn(async move {

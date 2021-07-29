@@ -3,6 +3,3 @@ name = "star-test"
 version = "0.1.0"
 edition = "2018"
 authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
-
-[dependencies]
-self-meter = "0.6"
