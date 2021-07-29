@@ -1,12 +1,10 @@
 use super::State;
 use anyhow::Result;
-use std::sync::Arc;
 use twilight_gateway::Event;
 
 #[allow(clippy::enum_glob_use, clippy::match_wildcard_for_single_variants)]
-pub async fn handle(event: Event, state: Arc<State>) -> Result<()> {
+pub async fn handle(event: Event, state: &'static State) -> Result<()> {
     use Event::*;
-    let state = &*state;
     match event {
         BanAdd(ban) => internal::ban_add(state, ban).await?,
         BanRemove(ban) => internal::ban_remove(state, ban).await?,
@@ -79,7 +77,7 @@ pub async fn handle(event: Event, state: Arc<State>) -> Result<()> {
 
 mod internal {
     #![allow(unused_variables, dead_code, clippy::wildcard_imports)]
-    use crate::lib::{slashies, state::State};
+    use crate::{slashies, state::State};
     use anyhow::Result;
     use tracing::{event, Level};
     use twilight_model::{

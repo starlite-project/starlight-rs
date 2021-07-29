@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 use super::Config;
-use crate::lib::slashies::commands::commands;
+use crate::slashies::commands::commands;
 use anyhow::Result;
 use std::{sync::Arc, time::Instant};
 use tracing::{event, Level};
@@ -25,7 +25,7 @@ pub struct State {
 }
 
 impl State {
-    pub async fn connect(&mut self) -> Result<()> {
+    pub async fn connect(&self) -> Result<()> {
         let cluster_spawn = self.cluster.clone();
 
         let id = self.http.current_user_application().await?.id;
@@ -52,8 +52,6 @@ impl State {
         tokio::spawn(async move {
             cluster_spawn.up().await;
         });
-
-        self.uptime = Instant::now();
 
         Ok(())
     }

@@ -1,5 +1,5 @@
 use super::State;
-use crate::lib::Config;
+use crate::Config;
 use anyhow::{Context, Result};
 use std::{sync::Arc, time::Instant};
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
@@ -95,7 +95,7 @@ impl StateBuilder {
         self
     }
 
-    pub async fn build(self) -> Result<(State, Events)> {
+    pub async fn build(self) -> Result<(&'static State, Events)> {
         let token = self.config.clone().unwrap_or_default().token;
         let http_builder = self.http.unwrap_or_default();
         let cluster_builder = self.cluster.context("Need cluster to build state").unwrap();
@@ -106,16 +106,27 @@ impl StateBuilder {
         let cluster = cluster_builder.http_client(http.clone()).build().await?;
         let standby = Standby::new();
 
-        Ok((
-            State {
-                cache: Arc::new(cache),
-                cluster: Arc::new(cluster.0),
-                http: Arc::new(http),
-                standby: Arc::new(standby),
-                config: self.config.unwrap_or_default(),
-                uptime: Instant::now(),
-            },
-            cluster.1,
-        ))
+        let state: &'static State = Box::leak(Box::new(State {
+            cache: Arc::new(cache),
+            cluster: Arc::new(cluster.0),
+            http: Arc::new(http),
+            standby: Arc::new(standby),
+            config: self.config.unwrap_or_default(),
+            uptime: Instant::now(),
+        }));
+
+        Ok((state, cluster.1))
+
+        // Ok((
+        //     Box::new(State {
+        //         cache: Arc::new(cache),
+        //         cluster: Arc::new(cluster.0),
+        //         http: Arc::new(http),
+        //         standby: Arc::new(standby),
+        //         config: self.config.unwrap_or_default(),
+        //         uptime: Instant::now(),
+        //     }),
+        //     cluster.1,
+        // ))
     }
 }

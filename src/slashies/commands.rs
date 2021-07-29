@@ -1,5 +1,5 @@
 use super::{PartialApplicationCommand, Response};
-use crate::lib::state::State;
+use crate::state::State;
 use anyhow::Result;
 use async_trait::async_trait;
 use std::convert::TryInto;

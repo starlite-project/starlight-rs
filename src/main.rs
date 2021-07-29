@@ -3,14 +3,11 @@
 
 use anyhow::Result;
 use futures::StreamExt;
-use lib::{state::StateBuilder, Config};
-use std::sync::Arc;
+use starlight_rs::{state::StateBuilder, Config};
 use tracing_subscriber::{fmt::format::FmtSpan, FmtSubscriber};
 use twilight_cache_inmemory::ResourceType;
 use twilight_gateway::cluster::ShardScheme;
 use twilight_model::gateway::Intents;
-
-mod lib;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -30,7 +27,7 @@ async fn main() -> Result<()> {
 
     let config = Config::new()?;
 
-    let (mut client, mut events) = StateBuilder::new()
+    let (client, mut events) = StateBuilder::new()
         .config(config)
         .intents(Intents::all())
         .cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))
@@ -40,14 +37,11 @@ async fn main() -> Result<()> {
 
     client.connect().await?;
 
-    let state = Arc::new(client);
-
     while let Some((_, event)) = events.next().await {
-        state.handle_event(&event);
-        let state_clone = Arc::clone(&state);
+        client.handle_event(&event);
 
         tokio::spawn(async move {
-            self::lib::state::events::handle(event, state_clone)
+            starlight_rs::state::events::handle(event, client)
                 .await
                 .unwrap();
         });

@@ -7,11 +7,11 @@ use twilight_model::id::GuildId;
 pub mod slashies;
 pub mod state;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Config {
     pub guild_id: Option<GuildId>,
     pub remove_slash_commands: bool,
-    pub token: String,
+    pub token: &'static str,
 }
 
 impl Config {
@@ -51,16 +51,18 @@ impl Config {
     }
 
     #[instrument]
-    fn get_token() -> Result<String> {
+    fn get_token() -> Result<&'static str> {
         let token = if let Some(credential_dir) = env::var_os("CREDENTIALS_DIRECTORY") {
             event!(Level::INFO, "using systemd credential storage");
-            let path = [&credential_dir, OsStr::new("token")].iter().collect::<PathBuf>();
+            let path = [&credential_dir, OsStr::new("token")]
+                .iter()
+                .collect::<PathBuf>();
             fs::read_to_string(path)?
         } else {
             event!(Level::WARN, "falling back to `TOKEN` environment variable");
             env::var("DISCORD_TOKEN")?
         };
 
-        Ok(token)
+        Ok(Box::leak(Box::new(token)))
     }
 }
