@@ -26,7 +26,7 @@ async fn main() -> Result<()> {
 
     let (client, mut events) = StateBuilder::new()
         .config(config)
-        .intents(Intents::all())
+        .intents(Intents::empty())
         .cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))
         .cache_builder(|builder| builder.resource_types(ResourceType::MESSAGE))
         .build()
