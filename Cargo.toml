@@ -49,6 +49,9 @@ git = "https://github.com/twilight-rs/twilight.git"
 [dev-dependencies]
 static_assertions = "1"
 
+[profile.dev]
+opt-level = 3
+
 [profile.release]
 lto = "fat"
 
