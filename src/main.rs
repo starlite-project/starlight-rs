@@ -14,20 +14,10 @@ use tokio::signal::unix::{signal, SignalKind};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // let mut fmt_builder = FmtSubscriber::builder().with_span_events(FmtSpan::FULL);
-
-    // fmt_builder = if cfg!(debug_assertions) {
-    //     fmt_builder.with_thread_ids(true).with_thread_names(true)
-    // } else {
-    //     fmt_builder
-    // };
-
-    // fmt_builder
-    //     .try_init()
-    //     .expect("failed to init fmt subscriber");
-
-    let log_filter_layer =
-        EnvFilter::try_from_default_env().or_else(|_| EnvFilter::try_new("info"))?;
+    let log_filter_layer = EnvFilter::try_from_default_env()
+        .or_else(|_| EnvFilter::try_new("info"))?
+        .add_directive("starlight_rs=trace".parse()?)
+        .add_directive("starlight_rs[act]=debug".parse()?);
     let mut log_fmt_layer = fmt::layer();
 
     log_fmt_layer = if cfg!(debug_assertions) {
