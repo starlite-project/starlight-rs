@@ -150,6 +150,6 @@ pub async fn act(state: State, command: ApplicationCommand) {
             .unwrap_or_else(|_| Response::message("Error running command"));
         interaction.response(response).await;
     } else {
-        event!(Level::WARN, "recieved unregistered command");
+        event!(Level::WARN, "received unregistered command");
     }
 }
