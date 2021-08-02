@@ -8,7 +8,7 @@ use twilight_model::{
         callback::{CallbackData, InteractionResponse},
         interaction::application_command::{ApplicationCommand, CommandData},
     },
-    channel::embed::Embed,
+    channel::{embed::Embed, message::MessageFlags},
     guild::PartialMember,
     id::{ChannelId, GuildId, InteractionId},
     user::User,
@@ -72,11 +72,11 @@ impl From<ApplicationCommand> for PartialApplicationCommand {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct Response;
+#[derive(Debug, Clone)]
+pub struct Response(CallbackData);
 
 impl Response {
-    pub const BASE: CallbackData = CallbackData {
+    const BASE: CallbackData = CallbackData {
         allowed_mentions: None,
         content: None,
         embeds: vec![],
@@ -84,48 +84,57 @@ impl Response {
         tts: None,
     };
 
-    #[must_use]
+    pub const fn new() -> Self {
+        Self(Self::BASE)
+    }
+
     pub const fn ack() -> InteractionResponse {
         InteractionResponse::DeferredChannelMessageWithSource(Self::BASE)
     }
 
-    #[must_use]
-    pub fn message(msg: impl Into<String>) -> InteractionResponse {
-        Self::_message(msg.into())
+    pub fn message(&mut self, content: &str) -> Self {
+        if content.is_empty() {
+            panic!("empty message not allowed");
+        }
+
+        self.0.content = Some(content.to_owned());
+
+        self.to_owned()
     }
 
-    #[must_use]
-    pub fn embed(embed: Embed) -> InteractionResponse {
-        Self::_embeds(vec![embed])
-    }
-
-    #[must_use]
-    pub fn embeds(embeds: Vec<Embed>) -> InteractionResponse {
-        Self::_embeds(embeds)
-    }
-
-    fn _embeds(embeds: Vec<Embed>) -> InteractionResponse {
+    pub fn embeds(&mut self, embeds: Vec<Embed>) -> Self {
         if embeds.is_empty() {
-            panic!("empty embeds is not allowed");
+            panic!("empty embeds not allowed");
         }
 
-        let mut data = Self::BASE;
+        self.0.embeds.extend(embeds);
 
-        data.embeds = embeds;
-
-        InteractionResponse::ChannelMessageWithSource(data)
+        self.to_owned()
     }
 
-    fn _message(msg: String) -> InteractionResponse {
-        if msg.is_empty() {
-            panic!("empty message is not allowed");
+    pub fn embed(&mut self, embed: Embed) -> Self {
+        self.embeds(vec![embed])
+    }
+
+    pub fn flags(&mut self, flags: MessageFlags) ->Self {
+        match self.0.flags {
+            None => {
+                self.0.flags = Some(flags);
+            }
+            Some(current_flags) => {
+                self.0.flags = Some(flags | current_flags);
+            }
         }
 
-        let mut data = Self::BASE;
+        self.to_owned()
+    }
 
-        data.content = Some(msg);
+    pub fn ephemeral(&mut self) -> Self {
+        self.flags(MessageFlags::EPHEMERAL)
+    }
 
-        InteractionResponse::ChannelMessageWithSource(data)
+    pub fn exec(self) -> InteractionResponse {
+        InteractionResponse::ChannelMessageWithSource(self.0)
     }
 }
 
@@ -147,7 +156,7 @@ pub async fn act(state: State, command: ApplicationCommand) {
         let response = cmd
             .run(state)
             .await
-            .unwrap_or_else(|_| Response::message("Error running command"));
+            .unwrap_or_else(|_| Response::new().message("error executing command").exec());
         interaction.response(response).await;
     } else {
         event!(Level::WARN, "received unregistered command");
