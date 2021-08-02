@@ -28,6 +28,11 @@ async fn main() -> Result<()> {
         .config(config)
         .intents(Intents::empty())
         .cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))
+        .http_builder(|builder| {
+            builder
+                .proxy("localhost:80".to_owned(), true)
+                .ratelimiter(None)
+        })
         .cache_builder(|builder| builder.resource_types(ResourceType::MESSAGE))
         .build()
         .await?;

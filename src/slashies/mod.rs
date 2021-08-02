@@ -34,7 +34,8 @@ impl<'a> Interaction<'a> {
         log_err(
             self.state
                 .http()
-                .interaction_callback(self.id, self.token.as_str(), Response::ack())
+                .interaction_callback(self.id, self.token.as_str(), &Response::ack())
+                .exec()
                 .await,
         );
     }
@@ -43,7 +44,8 @@ impl<'a> Interaction<'a> {
         log_err(
             self.state
                 .http()
-                .interaction_callback(self.id, self.token.as_str(), response)
+                .interaction_callback(self.id, self.token.as_str(), &response)
+                .exec()
                 .await,
         );
     }

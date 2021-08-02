@@ -84,9 +84,10 @@ impl StateBuilder {
             .context("need config to build http")
             .unwrap()
             .token;
-        let http_builder = self
-            .http
-            .map_or_else(move || HttpBuilder::new().token(token), |builder| builder);
+        let http_builder = self.http.map_or_else(
+            move || HttpBuilder::new().token(token.to_owned()),
+            |builder| builder,
+        );
         let http = http_fn(http_builder);
 
         self.http = Some(http);

@@ -28,15 +28,25 @@ impl State {
     pub async fn connect(&self) -> Result<()> {
         let cluster_spawn = self.cluster.clone();
 
-        let id = self.http.current_user_application().await?.id;
+        let id = self
+            .http
+            .current_user_application()
+            .exec()
+            .await?
+            .model()
+            .await?
+            .id;
         self.http.set_application_id(id);
 
         if self.config.remove_slash_commands {
             event!(Level::INFO, ?self.config.guild_id, "removing all slash commands");
             if let Some(guild_id) = self.config.guild_id {
-                self.http.set_guild_commands(guild_id, vec![])?.await
+                self.http
+                    .set_guild_commands(guild_id, &[])?
+                    .exec()
+                    .await
             } else {
-                self.http.set_global_commands(vec![])?.await
+                self.http.set_global_commands(&[])?.exec().await
             }?;
 
             std::process::exit(0);
@@ -45,10 +55,11 @@ impl State {
         event!(Level::INFO, ?self.config.guild_id, "setting slash commands");
         if let Some(guild_id) = self.config.guild_id {
             self.http
-                .set_guild_commands(guild_id, get_slashies())?
+                .set_guild_commands(guild_id, &get_slashies())?
+                .exec()
                 .await
         } else {
-            self.http.set_global_commands(get_slashies())?.await
+            self.http.set_global_commands(&get_slashies())?.exec().await
         }?;
 
         tokio::spawn(async move {

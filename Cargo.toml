@@ -54,11 +54,13 @@ opt-level = 3
 
 [profile.release]
 lto = "fat"
+panic = "abort"
 
 [profile.bench]
 lto = "fat"
 
 [workspace]
 members = [
+    "./proxy",
     "./test"
 ]
