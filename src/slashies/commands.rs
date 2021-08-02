@@ -16,7 +16,7 @@ pub fn get_slashies() -> Vec<SlashCommand> {
 pub trait Command {
     const NAME: &'static str;
 
-    async fn run(&self, ctx: &State) -> Result<InteractionResponse>;
+    async fn run(&self, ctx: State) -> Result<InteractionResponse>;
 
     fn define() -> SlashCommand;
 }
@@ -35,7 +35,7 @@ impl Commands {
         }
     }
 
-    pub async fn run(&self, state: &State) -> Result<InteractionResponse> {
+    pub async fn run(&self, state: State) -> Result<InteractionResponse> {
         match self {
             Self::Ping(c) => c.run(state).await,
         }
@@ -68,14 +68,14 @@ impl Command for Ping {
         }
     }
 
-    async fn run(&self, state: &State) -> Result<InteractionResponse> {
+    async fn run(&self, state: State) -> Result<InteractionResponse> {
         let ping = state
-            .cluster()
+            .cluster
             .info()
             .values()
             .filter_map(|info| info.latency().average())
             .sum::<Duration>()
-            / state.cluster().shards().len().try_into()?;
+            / state.cluster.shards().len().try_into()?;
 
         match ping.as_millis() {
             0 => Ok(Response::message(

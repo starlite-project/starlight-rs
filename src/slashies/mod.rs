@@ -23,17 +23,17 @@ fn log_err<T, E: std::error::Error + 'static>(res: Result<T, E>) {
 }
 
 #[derive(Debug, Clone)]
-pub struct Interaction<'a> {
-    state: &'a State,
+pub struct Interaction {
+    state: State,
     id: InteractionId,
     token: String,
 }
 
-impl<'a> Interaction<'a> {
+impl Interaction {
     pub async fn ack(&self) {
         log_err(
             self.state
-                .http()
+                .http
                 .interaction_callback(self.id, self.token.as_str(), &Response::ack())
                 .exec()
                 .await,
@@ -43,7 +43,7 @@ impl<'a> Interaction<'a> {
     pub async fn response(&self, response: InteractionResponse) {
         log_err(
             self.state
-                .http()
+                .http
                 .interaction_callback(self.id, self.token.as_str(), &response)
                 .exec()
                 .await,
@@ -130,7 +130,7 @@ impl Response {
 }
 
 #[instrument(skip(state, command), fields(command.name = %command.data.name, command.guild_id))]
-pub async fn act(state: &State, command: ApplicationCommand) {
+pub async fn act(state: State, command: ApplicationCommand) {
     let interaction = Interaction {
         state,
         id: command.id,

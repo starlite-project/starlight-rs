@@ -3,7 +3,7 @@ use anyhow::Result;
 use twilight_gateway::Event;
 
 #[allow(clippy::enum_glob_use, clippy::match_wildcard_for_single_variants)]
-pub async fn handle(event: Event, state: &'static State) -> Result<()> {
+pub async fn handle(event: Event, state: State) -> Result<()> {
     use Event::*;
     match event {
         BanAdd(ban) => internal::ban_add(state, ban).await?,
@@ -76,7 +76,12 @@ pub async fn handle(event: Event, state: &'static State) -> Result<()> {
 }
 
 mod internal {
-    #![allow(unused_variables, dead_code, clippy::wildcard_imports, clippy::unused_async)]
+    #![allow(
+        unused_variables,
+        dead_code,
+        clippy::wildcard_imports,
+        clippy::unused_async
+    )]
     use crate::{slashies, state::State};
     use anyhow::Result;
     use tracing::{event, Level};
@@ -88,7 +93,7 @@ mod internal {
     macro_rules! gen_empty_handlers {
         ($($fn_names:ident: [$($fn_args:ty),*];)*) => {
             $(
-                pub(super) async fn $fn_names(state: &State, $(_: $fn_args),*) -> Result<()> {
+                pub(super) async fn $fn_names(state: State, $(_: $fn_args),*) -> Result<()> {
                     Ok(())
                 }
             )*
@@ -153,14 +158,14 @@ mod internal {
         webhooks_update: [WebhooksUpdate];
     }
 
-    pub(super) async fn ready(state: &State, ready: Ready) -> Result<()> {
+    pub(super) async fn ready(state: State, ready: Ready) -> Result<()> {
         event!(Level::INFO, user_name = %ready.user.name);
         event!(Level::INFO, guilds = %ready.guilds.len());
         Ok(())
     }
 
     pub(super) async fn interaction_create(
-        state: &State,
+        state: State,
         interaction: InteractionCreate,
     ) -> Result<()> {
         match interaction.0 {
