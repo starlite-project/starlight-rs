@@ -15,6 +15,7 @@ use twilight_model::{
 };
 
 pub mod commands;
+pub mod interaction;
 
 fn log_err<T, E: std::error::Error + 'static>(res: Result<T, E>) {
     if let Err(e) = res {
