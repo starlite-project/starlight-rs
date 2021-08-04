@@ -78,9 +78,9 @@ impl Command for Ping {
             / state.cluster.shards().len().try_into()?;
 
         let mut response = match ping.as_millis() {
-            0 => Response::new().message("Pong! Couldn't quite get the average latency"),
+            0 => Response::from("Pong! Couldn't quite get the average latency"),
             ping => {
-                Response::new().message(&format!("Pong! Average latency is {} milliseconds", ping))
+                Response::new().message(format!("Pong! Average latency is {} milliseconds", ping))
             }
         };
 

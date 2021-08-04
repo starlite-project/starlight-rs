@@ -6,10 +6,10 @@ use twilight_cache_inmemory::ResourceType;
 use twilight_gateway::cluster::ShardScheme;
 use twilight_model::gateway::Intents;
 
-#[cfg(target_os = "windows")]
+#[cfg(windows)]
 use tokio::signal::windows::ctrl_c;
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(unix)]
 use tokio::signal::unix::{signal, SignalKind};
 
 #[tokio::main]
@@ -26,11 +26,10 @@ async fn main() -> Result<()> {
         log_fmt_layer
     };
 
-    let log_subscriber = tracing_subscriber::registry()
+    tracing_subscriber::registry()
         .with(log_filter_layer)
-        .with(log_fmt_layer);
-
-    log_subscriber.try_init()?;
+        .with(log_fmt_layer)
+        .try_init()?;
 
     dotenv::dotenv()?;
 
@@ -46,7 +45,7 @@ async fn main() -> Result<()> {
 
     client.connect().await?;
 
-    #[cfg(target_os = "windows")]
+    #[cfg(windows)]
     {
         let mut signal = ctrl_c()?;
         tokio::select! {
@@ -55,7 +54,7 @@ async fn main() -> Result<()> {
         };
     }
 
-    #[cfg(not(target_os = "windows"))]
+    #[cfg(unix)]
     {
         let mut sigint = signal(SignalKind::interrupt())?;
 
