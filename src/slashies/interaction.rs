@@ -1,4 +1,7 @@
-use twilight_http::Error;
+use twilight_http::{
+    request::application::{InteractionError, UpdateOriginalResponse},
+    Error,
+};
 use twilight_model::application::{callback::InteractionResponse, interaction::ApplicationCommand};
 
 use crate::state::State;
@@ -27,5 +30,11 @@ impl Interaction {
             .exec()
             .await?;
         Ok(())
+    }
+
+    pub fn update(&self) -> Result<UpdateOriginalResponse<'_>, InteractionError> {
+        self.state
+            .http
+            .update_interaction_original(&self.command.token)
     }
 }

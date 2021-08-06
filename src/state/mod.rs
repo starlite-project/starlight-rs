@@ -2,13 +2,14 @@
 use std::ops::Deref;
 
 use super::Config;
-use crate::slashies::commands::get_slashies;
+use crate::slashies::{commands::get_slashies, interaction::Interaction};
 use anyhow::Result;
 use futures::StreamExt;
 use tracing::{event, Level};
 use twilight_cache_inmemory::InMemoryCache as Cache;
-use twilight_gateway::{Cluster, Event, cluster::Events};
+use twilight_gateway::{cluster::Events, Cluster, Event};
 use twilight_http::Client as HttpClient;
+use twilight_model::application::interaction::ApplicationCommand;
 use twilight_standby::Standby;
 
 mod builder;
@@ -51,10 +52,7 @@ impl State {
                 .exec()
                 .await
         } else {
-            self.http
-                .set_global_commands(&get_slashies())?
-                .exec()
-                .await
+            self.http.set_global_commands(&get_slashies())?.exec().await
         }?;
 
         tokio::spawn(async move {
@@ -62,6 +60,13 @@ impl State {
         });
 
         Ok(())
+    }
+
+    pub const fn interaction(self, command: ApplicationCommand) -> Interaction {
+        Interaction {
+            state: self,
+            command,
+        }
     }
 
     pub async fn process(self, mut events: Events) {

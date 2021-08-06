@@ -57,11 +57,13 @@ async fn main() -> Result<()> {
     #[cfg(unix)]
     {
         let mut sigint = signal(SignalKind::interrupt())?;
+        let mut sigterm = signal(SignalKind::terminate())?;
 
         tokio::select! {
             _ = sigint.recv() => event!(Level::INFO, "received SIGINT"),
+            _ = sigterm.recv() => event!(Level::INFO, "received SIGTERM")
             _ = client.process(events) => (),
-        }
+        };
     }
 
     event!(Level::INFO, "shutting down");

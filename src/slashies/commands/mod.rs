@@ -1,9 +1,8 @@
-use super::PartialApplicationCommand;
 use crate::state::State;
 use anyhow::Result;
 use async_trait::async_trait;
 use ping::Ping;
-use twilight_model::application::{callback::InteractionResponse, command::Command};
+use twilight_model::application::{callback::InteractionResponse, command::Command, interaction::ApplicationCommand};
 
 mod ping;
 
@@ -28,7 +27,7 @@ pub enum Commands {
 
 impl Commands {
     #[must_use]
-    pub fn r#match(command: PartialApplicationCommand) -> Option<Self> {
+    pub fn r#match(command: ApplicationCommand) -> Option<Self> {
         match command.data.name.as_str() {
             Ping::NAME => Some(Self::Ping(Ping(command))),
             _ => None,

@@ -169,7 +169,6 @@ mod internal {
         interaction: InteractionCreate,
     ) -> Result<()> {
         match interaction.0 {
-            Interaction::Ping(_) => (),
             Interaction::ApplicationCommand(cmd) => slashies::act(state, *cmd).await,
             i => event!(Level::WARN, ?i, "unhandled interaction"),
         }

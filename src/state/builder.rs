@@ -105,7 +105,7 @@ impl StateBuilder {
         let cluster = cluster_builder.http_client(http.clone()).build().await?;
         let standby = Standby::new();
 
-        let components = Box::leak(Box::new(Components {
+        let components: &'static Components = Box::leak(Box::new(Components {
             cache,
             cluster: cluster.0,
             standby,

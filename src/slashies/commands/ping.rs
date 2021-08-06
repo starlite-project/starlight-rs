@@ -1,12 +1,14 @@
-use super::{PartialApplicationCommand, SlashCommand};
+use super::SlashCommand;
 use crate::{slashies::Response, state::State};
 use anyhow::Result;
 use async_trait::async_trait;
 use std::{convert::TryInto, time::Duration};
-use twilight_model::application::{callback::InteractionResponse, command::Command};
+use twilight_model::application::{
+    callback::InteractionResponse, command::Command, interaction::ApplicationCommand,
+};
 
 #[derive(Debug, Clone)]
-pub struct Ping(pub(super) PartialApplicationCommand);
+pub struct Ping(pub(super) ApplicationCommand);
 
 #[async_trait]
 impl SlashCommand for Ping {

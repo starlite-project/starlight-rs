@@ -17,61 +17,6 @@ use twilight_model::{
 pub mod commands;
 pub mod interaction;
 
-fn log_err<T, E: std::error::Error + 'static>(res: Result<T, E>) {
-    if let Err(e) = res {
-        event!(Level::ERROR, error = &e as &dyn std::error::Error);
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct Interaction {
-    state: State,
-    id: InteractionId,
-    token: String,
-}
-
-impl Interaction {
-    pub async fn ack(&self) {
-        log_err(
-            self.state
-                .http
-                .interaction_callback(self.id, self.token.as_str(), &Response::ack())
-                .exec()
-                .await,
-        );
-    }
-
-    pub async fn response(&self, response: InteractionResponse) {
-        log_err(
-            self.state
-                .http
-                .interaction_callback(self.id, self.token.as_str(), &response)
-                .exec()
-                .await,
-        );
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct PartialApplicationCommand {
-    pub channel_id: ChannelId,
-    pub data: CommandData,
-    pub guild_id: Option<GuildId>,
-    pub member: Option<PartialMember>,
-    pub user: Option<User>,
-}
-
-impl From<ApplicationCommand> for PartialApplicationCommand {
-    fn from(command: ApplicationCommand) -> Self {
-        Self {
-            channel_id: command.channel_id,
-            data: command.data,
-            guild_id: command.guild_id,
-            member: command.member,
-            user: command.user,
-        }
-    }
-}
 
 #[derive(Debug, Clone)]
 pub struct Response(CallbackData);
@@ -163,7 +108,6 @@ pub async fn act(state: State, command: ApplicationCommand) {
         token: command.token.clone(),
     };
 
-    let partial_command = PartialApplicationCommand::from(command);
 
     if let Some(cmd) = Commands::r#match(partial_command) {
         if cmd.is_long() {
