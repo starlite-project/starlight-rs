@@ -8,12 +8,12 @@ use crate::state::State;
 
 use super::Response;
 
-pub struct Interaction {
+pub struct Interaction<'a> {
     pub state: State,
-    pub command: ApplicationCommand,
+    pub command: &'a ApplicationCommand,
 }
 
-impl Interaction {
+impl<'a> Interaction<'a> {
     pub async fn ack(&self) -> Result<(), Error> {
         self.state
             .http
@@ -23,10 +23,10 @@ impl Interaction {
         Ok(())
     }
 
-    pub async fn response(&self, response: &InteractionResponse) -> Result<(), Error> {
+    pub async fn response(&self, response: impl Into<InteractionResponse>) -> Result<(), Error> {
         self.state
             .http
-            .interaction_callback(self.command.id, &self.command.token, response)
+            .interaction_callback(self.command.id, &self.command.token, &response.into())
             .exec()
             .await?;
         Ok(())

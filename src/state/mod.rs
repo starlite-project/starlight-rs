@@ -62,7 +62,7 @@ impl State {
         Ok(())
     }
 
-    pub const fn interaction(self, command: ApplicationCommand) -> Interaction {
+    pub const fn interaction<'a>(self, command: &'a ApplicationCommand) -> Interaction<'a> {
         Interaction {
             state: self,
             command,

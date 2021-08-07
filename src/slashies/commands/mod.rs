@@ -2,7 +2,7 @@ use crate::state::State;
 use anyhow::Result;
 use async_trait::async_trait;
 use ping::Ping;
-use twilight_model::application::{callback::InteractionResponse, command::Command, interaction::ApplicationCommand};
+use twilight_model::application::{command::Command, interaction::ApplicationCommand};
 
 mod ping;
 
@@ -15,7 +15,7 @@ pub fn get_slashies() -> [Command; 1] {
 pub trait SlashCommand {
     const NAME: &'static str;
 
-    async fn run(&self, state: State) -> Result<InteractionResponse>;
+    async fn run(&self, state: State) -> Result<()>;
 
     fn define() -> Command;
 }
@@ -34,7 +34,7 @@ impl Commands {
         }
     }
 
-    pub async fn run(&self, state: State) -> Result<InteractionResponse> {
+    pub async fn run(&self, state: State) -> Result<()> {
         match self {
             Self::Ping(c) => c.run(state).await,
         }

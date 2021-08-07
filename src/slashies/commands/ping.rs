@@ -3,9 +3,7 @@ use crate::{slashies::Response, state::State};
 use anyhow::Result;
 use async_trait::async_trait;
 use std::{convert::TryInto, time::Duration};
-use twilight_model::application::{
-    callback::InteractionResponse, command::Command, interaction::ApplicationCommand,
-};
+use twilight_model::application::{command::Command, interaction::ApplicationCommand};
 
 #[derive(Debug, Clone)]
 pub struct Ping(pub(super) ApplicationCommand);
@@ -26,7 +24,9 @@ impl SlashCommand for Ping {
         }
     }
 
-    async fn run(&self, state: State) -> Result<InteractionResponse> {
+    async fn run(&self, state: State) -> Result<()> {
+        let interaction = state.interaction(&self.0);
+
         let ping = state
             .cluster
             .info()
@@ -35,13 +35,17 @@ impl SlashCommand for Ping {
             .sum::<Duration>()
             / state.cluster.shards().len().try_into()?;
 
-        let mut response = match ping.as_millis() {
+        let response = match ping.as_millis() {
             0 => Response::from("Pong! Couldn't quite get average latency"),
             ping => {
                 Response::new().message(format!("Pong! Average latency is {} milliseconds", ping))
             }
         };
 
-        Ok(response.ephemeral().exec())
+        interaction
+            .response(Response::from(response).ephemeral())
+            .await?;
+
+        Ok(())
     }
 }

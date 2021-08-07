@@ -6,17 +6,13 @@ use tracing::{event, instrument, Level};
 use twilight_model::{
     application::{
         callback::{CallbackData, InteractionResponse},
-        interaction::application_command::{ApplicationCommand, CommandData},
+        interaction::application_command::ApplicationCommand,
     },
     channel::{embed::Embed, message::MessageFlags},
-    guild::PartialMember,
-    id::{ChannelId, GuildId, InteractionId},
-    user::User,
 };
 
 pub mod commands;
 pub mod interaction;
-
 
 #[derive(Debug, Clone)]
 pub struct Response(CallbackData);
@@ -65,8 +61,10 @@ impl Response {
     }
 
     pub fn flags(&mut self, flags: MessageFlags) -> Self {
-
-        self.0.flags = self.0.flags.map_or(Some(flags), |current_flags| Some(flags | current_flags));
+        self.0.flags = self
+            .0
+            .flags
+            .map_or(Some(flags), |current_flags| Some(flags | current_flags));
 
         self.clone()
     }
@@ -100,26 +98,23 @@ impl From<Vec<Embed>> for Response {
     }
 }
 
+impl Into<InteractionResponse> for Response {
+    fn into(self) -> InteractionResponse {
+        self.exec()
+    }
+}
+
 #[instrument(skip(state, command), fields(command.name = %command.data.name, command.guild_id))]
 pub async fn act(state: State, command: ApplicationCommand) {
-    let interaction = Interaction {
-        state,
-        id: command.id,
-        token: command.token.clone(),
-    };
-
-
-    if let Some(cmd) = Commands::r#match(partial_command) {
-        if cmd.is_long() {
-            interaction.ack().await;
+    if let Some(cmd) = Commands::r#match(command) {
+        if let Err(e) = cmd.run(state).await {
+            event!(
+                Level::ERROR,
+                error = &*e as &dyn std::error::Error,
+                "error running command"
+            );
         }
-
-        let response = cmd
-            .run(state)
-            .await
-            .unwrap_or_else(|_| Response::new().message("error executing command").exec());
-        interaction.response(response).await;
     } else {
-        event!(Level::WARN, "received unregistered command");
+        event!(Level::WARN, "received unregistered command")
     }
 }
