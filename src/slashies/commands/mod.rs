@@ -39,11 +39,4 @@ impl Commands {
             Self::Ping(c) => c.run(state).await,
         }
     }
-
-    #[must_use]
-    pub const fn is_long(&self) -> bool {
-        match self {
-            Self::Ping(_) => false,
-        }
-    }
 }

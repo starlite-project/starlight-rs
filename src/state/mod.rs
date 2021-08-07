@@ -22,8 +22,6 @@ pub struct State(&'static Components, pub Config);
 
 impl State {
     pub async fn connect(self) -> Result<()> {
-        let cluster_spawn = self.0.cluster.clone();
-
         let id = self
             .http
             .current_user_application()
@@ -55,9 +53,9 @@ impl State {
             self.http.set_global_commands(&get_slashies())?.exec().await
         }?;
 
-        tokio::spawn(async move {
-            cluster_spawn.up().await;
-        });
+        self.cluster.up().await;
+        event!(Level::INFO, "all shards connected");
+
 
         Ok(())
     }
