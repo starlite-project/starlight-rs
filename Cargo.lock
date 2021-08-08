@@ -117,7 +117,7 @@ dependencies = [
 [[package]]
 name = "clap"
 version = "3.0.0-beta.2"
-source = "git+https://github.com/clap-rs/clap.git#8b6034e668de0933ab0f88ad14a60a8f1d79a172"
+source = "git+https://github.com/clap-rs/clap.git#10c7228b3f8f1e9e1f2b9744cd802d8658c36f1a"
 dependencies = [
  "atty",
  "bitflags",
@@ -134,7 +134,7 @@ dependencies = [
 [[package]]
 name = "clap_derive"
 version = "3.0.0-beta.2"
-source = "git+https://github.com/clap-rs/clap.git#8b6034e668de0933ab0f88ad14a60a8f1d79a172"
+source = "git+https://github.com/clap-rs/clap.git#10c7228b3f8f1e9e1f2b9744cd802d8658c36f1a"
 dependencies = [
  "heck",
  "proc-macro-error",
@@ -210,6 +210,18 @@ name = "dotenv"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
+
+[[package]]
+name = "extend"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5c89e2933a4ec753dc007a4d6a7f9b6dc8e89b8fe89cabc252ccddf39c08bb1"
+dependencies = [
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "flate2"
@@ -411,9 +423,9 @@ dependencies = [
 
 [[package]]
 name = "http-body"
-version = "0.4.2"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "60daa14be0e0786db0f03a9e57cb404c9d756eed2b6c62b9ea98ec5743ec75a9"
+checksum = "399c583b2979440c60be0821a6199eca73bc3c8dcd9d070d75ac726e2c6186e5"
 dependencies = [
  "bytes",
  "http",
@@ -997,9 +1009,9 @@ dependencies = [
 
 [[package]]
 name = "slab"
-version = "0.4.3"
+version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f173ac3d1a7e3b28003f40de0b5ce7fe2710f9b9dc3fc38664cebee46b3b6527"
+checksum = "c307a32c1c5c437f38c7fd45d753050587732ba8628319fbdf12a7e289ccc590"
 
 [[package]]
 name = "smallvec"
@@ -1026,6 +1038,9 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 [[package]]
 name = "star-test"
 version = "0.1.0"
+dependencies = [
+ "extend",
+]
 
 [[package]]
 name = "starlight-rs"
@@ -1318,7 +1333,7 @@ dependencies = [
 [[package]]
 name = "twilight-cache-inmemory"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#637c1e00652bd47807e9ef8b1ba042a36a6ea3dd"
+source = "git+https://github.com/twilight-rs/twilight.git#581662836e00e2c2c78471739bf344985adfe1a2"
 dependencies = [
  "bitflags",
  "dashmap",
@@ -1329,7 +1344,7 @@ dependencies = [
 [[package]]
 name = "twilight-gateway"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#637c1e00652bd47807e9ef8b1ba042a36a6ea3dd"
+source = "git+https://github.com/twilight-rs/twilight.git#581662836e00e2c2c78471739bf344985adfe1a2"
 dependencies = [
  "bitflags",
  "flate2",
@@ -1349,7 +1364,7 @@ dependencies = [
 [[package]]
 name = "twilight-gateway-queue"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#637c1e00652bd47807e9ef8b1ba042a36a6ea3dd"
+source = "git+https://github.com/twilight-rs/twilight.git#581662836e00e2c2c78471739bf344985adfe1a2"
 dependencies = [
  "tokio",
  "tracing",
@@ -1359,7 +1374,7 @@ dependencies = [
 [[package]]
 name = "twilight-http"
 version = "0.6.1"
-source = "git+https://github.com/twilight-rs/twilight.git#637c1e00652bd47807e9ef8b1ba042a36a6ea3dd"
+source = "git+https://github.com/twilight-rs/twilight.git#581662836e00e2c2c78471739bf344985adfe1a2"
 dependencies = [
  "hyper",
  "hyper-rustls",
@@ -1375,7 +1390,7 @@ dependencies = [
 [[package]]
 name = "twilight-model"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#637c1e00652bd47807e9ef8b1ba042a36a6ea3dd"
+source = "git+https://github.com/twilight-rs/twilight.git#581662836e00e2c2c78471739bf344985adfe1a2"
 dependencies = [
  "bitflags",
  "serde",
@@ -1386,7 +1401,7 @@ dependencies = [
 [[package]]
 name = "twilight-standby"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#637c1e00652bd47807e9ef8b1ba042a36a6ea3dd"
+source = "git+https://github.com/twilight-rs/twilight.git#581662836e00e2c2c78471739bf344985adfe1a2"
 dependencies = [
  "dashmap",
  "futures-util",

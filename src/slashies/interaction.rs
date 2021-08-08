@@ -23,7 +23,10 @@ impl<'a> Interaction<'a> {
         Ok(())
     }
 
-    pub async fn response(&self, response: impl Into<InteractionResponse>) -> Result<(), Error> {
+    pub async fn response<T: Send + Sync + Into<InteractionResponse>>(
+        &self,
+        response: T,
+    ) -> Result<(), Error> {
         self.state
             .http
             .interaction_callback(self.command.id, &self.command.token, &response.into())

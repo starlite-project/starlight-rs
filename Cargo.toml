@@ -8,11 +8,11 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1"
-async-trait = "0.1"
+anyhow = "1.0.42"
+async-trait = "0.1.51"
 dotenv = "0.15.0"
-futures = "0.3"
-tracing = "0.1"
+futures = "0.3.16"
+tracing = "0.1.26"
 
 [dependencies.clap]
 git = "https://github.com/clap-rs/clap.git"
@@ -20,14 +20,14 @@ git = "https://github.com/clap-rs/clap.git"
 [dependencies.serde]
 default-features = false
 features = ["derive"]
-version = "1"
+version = "1.0.127"
 
 [dependencies.tokio]
-version = "1"
+version = "1.9.0"
 features = ["macros", "rt-multi-thread", "signal"]
 
 [dependencies.tracing-subscriber]
-version = "0.2"
+version = "0.2.19"
 features = ["fmt", "ansi"]
 
 [dependencies.twilight-cache-inmemory]
@@ -47,7 +47,7 @@ git = "https://github.com/twilight-rs/twilight.git"
 git = "https://github.com/twilight-rs/twilight.git"
 
 [dev-dependencies]
-static_assertions = "1"
+static_assertions = "1.1.0"
 
 [profile.dev]
 opt-level = 3

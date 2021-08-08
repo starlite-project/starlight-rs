@@ -61,7 +61,7 @@ async fn main() -> Result<()> {
 
         tokio::select! {
             _ = sigint.recv() => event!(Level::INFO, "received SIGINT"),
-            _ = sigterm.recv() => event!(Level::INFO, "received SIGTERM")
+            _ = sigterm.recv() => event!(Level::INFO, "received SIGTERM"),
             _ = client.process(events) => (),
         };
     }

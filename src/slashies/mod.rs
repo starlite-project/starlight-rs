@@ -98,9 +98,15 @@ impl From<Vec<Embed>> for Response {
     }
 }
 
-impl Into<InteractionResponse> for Response {
-    fn into(self) -> InteractionResponse {
-        self.exec()
+// impl Into<InteractionResponse> for Response {
+//     fn into(self) -> InteractionResponse {
+//         self.exec()
+//     }
+// }
+
+impl From<Response> for InteractionResponse {
+    fn from(value: Response) -> Self {
+        value.exec()
     }
 }
 
@@ -115,6 +121,6 @@ pub async fn act(state: State, command: ApplicationCommand) {
             );
         }
     } else {
-        event!(Level::WARN, "received unregistered command")
+        event!(Level::WARN, "received unregistered command");
     }
 }
