@@ -14,9 +14,8 @@ use tokio::signal::unix::{signal, SignalKind};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let log_filter_layer = EnvFilter::try_from_default_env()
+    let mut log_filter_layer = EnvFilter::try_from_default_env()
         .or_else(|_| EnvFilter::try_new("info"))?
-        .add_directive("starlight_rs=trace".parse()?)
         .add_directive("starlight_rs[act]=debug".parse()?);
     let mut log_fmt_layer = fmt::layer();
 
@@ -24,6 +23,12 @@ async fn main() -> Result<()> {
         log_fmt_layer.with_thread_ids(true).with_thread_names(true)
     } else {
         log_fmt_layer
+    };
+
+    log_filter_layer = if cfg!(debug_assertions) {
+        log_filter_layer.add_directive("starlight_rs=trace".parse()?)
+    } else {
+        log_filter_layer.add_directive("starlight_rs=warn".parse()?)
     };
 
     tracing_subscriber::registry()
