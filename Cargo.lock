@@ -660,6 +660,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28988d872ab76095a6e6ac88d99b54fd267702734fd7ffe610ca27f533ddb95a"
 
 [[package]]
+name = "ordered-float"
+version = "2.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "039f02eb0f69271f26abe3202189275d7aa2258b903cb0281b5de710a2570ff3"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "os_str_bytes"
 version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -929,6 +938,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f03b9878abf6d14e6779d3f24f07b2cfa90352cfec4acc5aab8f1ac7f146fae8"
 dependencies = [
  "serde_derive",
+]
+
+[[package]]
+name = "serde-value"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f3a1a3341211875ef120e117ea7fd5228530ae7e7036a779fdc9117be6b3282c"
+dependencies = [
+ "ordered-float",
+ "serde",
 ]
 
 [[package]]
@@ -1323,7 +1342,7 @@ dependencies = [
 [[package]]
 name = "twilight-cache-inmemory"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#581662836e00e2c2c78471739bf344985adfe1a2"
+source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#1084d13d2a89e8d9f2083b05a6822b00dbb4ae4c"
 dependencies = [
  "bitflags",
  "dashmap",
@@ -1334,7 +1353,7 @@ dependencies = [
 [[package]]
 name = "twilight-gateway"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#581662836e00e2c2c78471739bf344985adfe1a2"
+source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#1084d13d2a89e8d9f2083b05a6822b00dbb4ae4c"
 dependencies = [
  "bitflags",
  "flate2",
@@ -1354,7 +1373,7 @@ dependencies = [
 [[package]]
 name = "twilight-gateway-queue"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#581662836e00e2c2c78471739bf344985adfe1a2"
+source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#1084d13d2a89e8d9f2083b05a6822b00dbb4ae4c"
 dependencies = [
  "tokio",
  "tracing",
@@ -1364,7 +1383,7 @@ dependencies = [
 [[package]]
 name = "twilight-http"
 version = "0.6.1"
-source = "git+https://github.com/twilight-rs/twilight.git#581662836e00e2c2c78471739bf344985adfe1a2"
+source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#1084d13d2a89e8d9f2083b05a6822b00dbb4ae4c"
 dependencies = [
  "hyper",
  "hyper-rustls",
@@ -1380,10 +1399,11 @@ dependencies = [
 [[package]]
 name = "twilight-model"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#581662836e00e2c2c78471739bf344985adfe1a2"
+source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#1084d13d2a89e8d9f2083b05a6822b00dbb4ae4c"
 dependencies = [
  "bitflags",
  "serde",
+ "serde-value",
  "serde_repr",
  "tracing",
 ]
@@ -1391,7 +1411,7 @@ dependencies = [
 [[package]]
 name = "twilight-standby"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#581662836e00e2c2c78471739bf344985adfe1a2"
+source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#1084d13d2a89e8d9f2083b05a6822b00dbb4ae4c"
 dependencies = [
  "dashmap",
  "futures-util",

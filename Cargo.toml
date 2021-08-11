@@ -33,19 +33,24 @@ features = ["fmt", "ansi"]
 
 [dependencies.twilight-cache-inmemory]
 git = "https://github.com/twilight-rs/twilight.git"
+branch = "feature/message-components"
 
 [dependencies.twilight-gateway]
 git = "https://github.com/twilight-rs/twilight.git"
+branch = "feature/message-components"
 
 [dependencies.twilight-http]
 git = "https://github.com/twilight-rs/twilight.git"
+branch = "feature/message-components"
 features = ["tracing"]
 
 [dependencies.twilight-model]
 git = "https://github.com/twilight-rs/twilight.git"
+branch = "feature/message-components"
 
 [dependencies.twilight-standby]
 git = "https://github.com/twilight-rs/twilight.git"
+branch = "feature/message-components"
 
 [dev-dependencies]
 static_assertions = "1.1.0"

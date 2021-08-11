@@ -23,6 +23,7 @@ impl Response {
         content: None,
         embeds: vec![],
         flags: None,
+        components: None,
         tts: None,
     };
 
@@ -97,12 +98,6 @@ impl From<Vec<Embed>> for Response {
         Self::new().embeds(embeds)
     }
 }
-
-// impl Into<InteractionResponse> for Response {
-//     fn into(self) -> InteractionResponse {
-//         self.exec()
-//     }
-// }
 
 impl From<Response> for InteractionResponse {
     fn from(value: Response) -> Self {
