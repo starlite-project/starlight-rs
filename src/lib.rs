@@ -75,10 +75,6 @@ impl Config {
     }
 
     fn decode_user_id(token: &str) -> Result<u64> {
-        // String::from_utf8_unchecked(
-        //     base64::decode(token.split(".").collect::<Vec<_>>().first().unwrap()).unwrap(),
-        // )
-        // .parse()
 
         let first_part_of_token = token.split(".").collect::<Vec<_>>();
 
