@@ -22,14 +22,7 @@ pub struct State(&'static Components, pub Config);
 
 impl State {
     pub async fn connect(self) -> Result<()> {
-        let id = self
-            .http
-            .current_user_application()
-            .exec()
-            .await?
-            .model()
-            .await?
-            .id;
+        let id = Config::decode_user_id(self.1.token)?.into();
         self.http.set_application_id(id);
 
         if self.1.remove_slash_commands {
@@ -56,12 +49,11 @@ impl State {
         self.cluster.up().await;
         event!(Level::INFO, "all shards connected");
 
-
         Ok(())
     }
 
     #[must_use]
-    pub const fn interaction(self, command: & ApplicationCommand) -> Interaction {
+    pub const fn interaction(self, command: &ApplicationCommand) -> Interaction {
         Interaction {
             state: self,
             command,

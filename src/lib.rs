@@ -73,4 +73,21 @@ impl Config {
 
         Ok(Box::leak(Box::new(token)))
     }
+
+    fn decode_user_id(token: &str) -> Result<u64> {
+        // String::from_utf8_unchecked(
+        //     base64::decode(token.split(".").collect::<Vec<_>>().first().unwrap()).unwrap(),
+        // )
+        // .parse()
+
+        let first_part_of_token = token.split(".").collect::<Vec<_>>();
+
+        let first_part_of_token = first_part_of_token.first().unwrap();
+
+        let decoded = base64::decode(first_part_of_token)?;
+
+        let value = unsafe { String::from_utf8_unchecked(decoded) }.parse()?;
+
+        Ok(value)
+    }
 }

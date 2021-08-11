@@ -5,11 +5,5 @@ edition = "2018"
 authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
 
 [dependencies]
-rayon = "1"
-
-[dev-dependencies]
-criterion = "0.3"
-
-[[bench]]
-name = "rayon"
-harness = false
+base64 = "0.13"
+dotenv = "0.15"
