@@ -1,7 +1,10 @@
 #![allow(dead_code)]
 
-use super::{ComponentBuilder, builder::BuildError};
-use twilight_model::{application::component::{Button, Component, button::ButtonStyle}, channel::ReactionType};
+use super::{builder::BuildError, ComponentBuilder};
+use twilight_model::{
+    application::component::{button::ButtonStyle, Button, Component},
+    channel::ReactionType,
+};
 
 #[derive(Debug, Default, Clone, PartialEq, Hash)]
 pub struct ButtonBuilder {
@@ -10,7 +13,7 @@ pub struct ButtonBuilder {
     emoji: Option<ReactionType>,
     label: Option<String>,
     style: Option<ButtonStyle>,
-    url: Option<String>
+    url: Option<String>,
 }
 
 impl ButtonBuilder {
@@ -21,7 +24,7 @@ impl ButtonBuilder {
             emoji: None,
             label: None,
             style: None,
-            url: None
+            url: None,
         }
     }
 
@@ -81,7 +84,7 @@ impl ComponentBuilder for ButtonBuilder {
             emoji,
             label,
             style,
-            url
+            url,
         })
     }
 
