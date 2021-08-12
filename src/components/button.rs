@@ -17,6 +17,7 @@ pub struct ButtonBuilder {
 }
 
 impl ButtonBuilder {
+    #[must_use]
     pub const fn new() -> Self {
         Self {
             custom_id: None,
@@ -72,7 +73,7 @@ impl ComponentBuilder for ButtonBuilder {
 
     fn build(self) -> Result<Self::Target, BuildError> {
         let custom_id = self.custom_id;
-        let disabled = self.disabled.ok_or(BuildError)?;
+        let disabled = self.disabled.unwrap_or(false);
         let emoji = self.emoji;
         let label = self.label;
         let style = self.style.ok_or(BuildError)?;
