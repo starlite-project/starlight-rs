@@ -17,7 +17,7 @@ pub struct BuildError;
 
 impl Display for BuildError {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        f.write_str("an error occured while building the component")
+        f.write_str("an error occurred while building the component")
     }
 }
 
