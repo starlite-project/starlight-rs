@@ -12,6 +12,7 @@ use std::{env, ffi::OsStr, fs, path::PathBuf};
 use tracing::{event, instrument, Level};
 use twilight_model::id::GuildId;
 
+pub mod components;
 pub mod slashies;
 pub mod state;
 
