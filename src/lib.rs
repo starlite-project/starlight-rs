@@ -77,7 +77,7 @@ impl Config {
 
     fn decode_user_id(token: &str) -> Result<u64> {
 
-        let first_part_of_token = token.split(".").collect::<Vec<_>>();
+        let first_part_of_token = token.split('.').collect::<Vec<_>>();
 
         let first_part_of_token = first_part_of_token.first().unwrap();
 
