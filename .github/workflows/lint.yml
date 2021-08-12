@@ -33,3 +33,22 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --tests
+
+  rustfmt:
+    name: Format
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          components: rustfmt
+          profile: minimal
+          override: true
+
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check
