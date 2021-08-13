@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
     let mut log_filter_layer = EnvFilter::try_from_default_env()
         .or_else(|_| EnvFilter::try_new("info"))?
         .add_directive("starlight_rs[act]=debug".parse()?);
-    let mut log_fmt_layer = fmt::layer();
+    let mut log_fmt_layer = fmt::layer().pretty();
 
     log_fmt_layer = if cfg!(debug_assertions) {
         log_fmt_layer.with_thread_ids(true).with_thread_names(true)

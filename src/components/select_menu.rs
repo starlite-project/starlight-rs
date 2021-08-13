@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use super::{builder::BuildError, ComponentBuilder};
+use super::{BuildError, ComponentBuilder};
 use twilight_model::{
     application::component::{select_menu::SelectMenuOption, Component, SelectMenu},
     channel::ReactionType,

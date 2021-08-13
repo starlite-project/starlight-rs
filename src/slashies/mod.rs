@@ -1,11 +1,14 @@
 #![allow(dead_code)]
 
+use crate::components::ComponentBuilder;
+
 use self::commands::Commands;
-use super::state::State;
+use super::{components::ActionRowBuilder, state::State};
 use tracing::{event, instrument, Level};
 use twilight_model::{
     application::{
         callback::{CallbackData, InteractionResponse},
+        component::{Component, ComponentType},
         interaction::application_command::ApplicationCommand,
     },
     channel::{embed::Embed, message::MessageFlags},
@@ -35,6 +38,33 @@ impl Response {
     #[must_use]
     pub const fn ack() -> InteractionResponse {
         InteractionResponse::DeferredChannelMessageWithSource(Self::BASE)
+    }
+
+    pub fn add_component(&mut self, component: Component) -> Self {
+        self.add_components(vec![component])
+    }
+
+    pub fn add_components(&mut self, components: Vec<Component>) -> Self {
+        let components = Self::check_components(components);
+        if let Some(ref mut current) = self.0.components {
+            current.extend(components);
+
+            self.clone()
+        } else {
+            self.set_components(components)
+        }
+    }
+
+    pub fn set_components(&mut self, components: Vec<Component>) -> Self {
+        let components = Self::check_components(components);
+        self.0.components = Some(components);
+        self.clone()
+    }
+
+    pub fn clear_components(&mut self) -> Self {
+        self.0.components = None;
+
+        self.clone()
     }
 
     pub fn message<T: AsRef<str>>(&mut self, content: T) -> Self {
@@ -78,6 +108,23 @@ impl Response {
     #[allow(clippy::missing_const_for_fn)]
     pub fn exec(self) -> InteractionResponse {
         InteractionResponse::ChannelMessageWithSource(self.0)
+    }
+
+    fn check_component(component: Component) -> Component {
+        if component.kind() == ComponentType::Button {
+            let action_row = ActionRowBuilder::new()
+                .push_button(component)
+                .build_component()
+                .unwrap();
+
+            action_row
+        } else {
+            component
+        }
+    }
+
+    fn check_components(components: Vec<Component>) -> Vec<Component> {
+        components.into_iter().map(Self::check_component).collect()
     }
 }
 

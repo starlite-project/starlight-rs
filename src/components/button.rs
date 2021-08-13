@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use super::{builder::BuildError, ComponentBuilder};
+use super::{BuildError, ComponentBuilder};
 use twilight_model::{
     application::component::{button::ButtonStyle, Button, Component},
     channel::ReactionType,
@@ -29,39 +29,39 @@ impl ButtonBuilder {
         }
     }
 
-    pub fn custom_id(&mut self, value: impl Into<String>) -> &mut Self {
+    pub fn custom_id(&mut self, value: impl Into<String>) -> Self {
         self.custom_id = Some(value.into());
 
-        self
+        self.clone()
     }
 
-    pub fn set_disabled(&mut self, value: bool) -> &mut Self {
+    pub fn set_disabled(&mut self, value: bool) -> Self {
         self.disabled = Some(value);
 
-        self
+        self.clone()
     }
 
-    pub fn label(&mut self, label: impl Into<String>) -> &mut Self {
+    pub fn label(&mut self, label: impl Into<String>) -> Self {
         self.label = Some(label.into());
 
-        self
+        self.clone()
     }
 
-    pub fn disable(&mut self) -> &mut Self {
+    pub fn disable(&mut self) -> Self {
         self.set_disabled(true)
     }
 
-    pub fn enable(&mut self) -> &mut Self {
+    pub fn enable(&mut self) -> Self {
         self.set_disabled(false)
     }
 
-    pub fn style(&mut self, style: ButtonStyle) -> &mut Self {
+    pub fn style(&mut self, style: ButtonStyle) -> Self {
         self.style = Some(style);
 
-        self
+        self.clone()
     }
 
-    pub fn url(&mut self, link: impl Into<String>) -> &mut Self {
+    pub fn url(&mut self, link: impl Into<String>) -> Self {
         self.url = Some(link.into());
 
         self.style(ButtonStyle::Link)
