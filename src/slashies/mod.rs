@@ -44,6 +44,7 @@ impl Response {
         self.add_components(vec![component])
     }
 
+    #[allow(clippy::option_if_let_else)]
     pub fn add_components(&mut self, components: Vec<Component>) -> Self {
         let components = Self::check_components(components);
         if let Some(ref mut current) = self.0.components {
@@ -112,12 +113,10 @@ impl Response {
 
     fn check_component(component: Component) -> Component {
         if component.kind() == ComponentType::Button {
-            let action_row = ActionRowBuilder::new()
+            ActionRowBuilder::new()
                 .push_button(component)
                 .build_component()
-                .unwrap();
-
-            action_row
+                .unwrap()
         } else {
             component
         }

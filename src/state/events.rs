@@ -170,6 +170,8 @@ mod internal {
     ) -> Result<()> {
         match interaction.0 {
             Interaction::ApplicationCommand(cmd) => slashies::act(state, *cmd).await,
+            // Ignore components, as it's handled by Standby
+            Interaction::MessageComponent(_) => {}
             i => event!(Level::WARN, ?i, "unhandled interaction"),
         }
         Ok(())

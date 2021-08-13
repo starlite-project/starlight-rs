@@ -8,6 +8,7 @@ use crate::state::State;
 
 use super::Response;
 
+#[derive(Debug, Clone, Copy)]
 pub struct Interaction<'a> {
     pub state: State,
     pub command: &'a ApplicationCommand,

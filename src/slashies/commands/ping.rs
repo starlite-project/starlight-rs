@@ -9,8 +9,10 @@ use twilight_model::application::{command::Command, interaction::ApplicationComm
 pub struct Ping(pub(super) ApplicationCommand);
 
 #[async_trait]
-impl SlashCommand for Ping {
+impl SlashCommand<0> for Ping {
     const NAME: &'static str = "ping";
+
+    const COMPONENT_IDS: [&'static str; 0] = [];
 
     fn define() -> Command {
         Command {

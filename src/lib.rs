@@ -1,3 +1,5 @@
+#![feature(negative_impls)]
+
 #![warn(clippy::pedantic, clippy::nursery)]
 #![deny(clippy::all)]
 #![allow(
