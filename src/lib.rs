@@ -1,5 +1,5 @@
-#![feature(associated_type_defaults, negative_impls)]
-#![warn(clippy::pedantic, clippy::nursery)]
+#![feature(negative_impls)]
+#![warn(clippy::pedantic, clippy::nursery, clippy::suspicious)]
 #![deny(clippy::all)]
 #![allow(
     clippy::missing_errors_doc,
