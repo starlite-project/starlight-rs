@@ -10,7 +10,7 @@ use twilight_gateway::Event;
 use twilight_model::application::{
     command::Command,
     component::{button::ButtonStyle, Component},
-    interaction::{ApplicationCommand, Interaction, MessageComponentInteraction},
+    interaction::{ApplicationCommand, Interaction},
 };
 
 #[derive(Debug, Clone)]
@@ -112,13 +112,13 @@ impl SlashCommand<2> for Click {
 impl ClickCommand<2> for Click {
     fn define_components(&self) -> Result<Vec<Component>, BuildError> {
         Ok(vec![ActionRowBuilder::new()
-            .create_button(|builder| {
+            .create_button(|mut builder| {
                 builder
                     .custom_id(Self::COMPONENT_IDS[0])
                     .label("A button")
                     .style(ButtonStyle::Primary)
             })
-            .create_button(|builder| {
+            .create_button(|mut builder| {
                 builder
                     .custom_id(Self::COMPONENT_IDS[1])
                     .label("Another button!")

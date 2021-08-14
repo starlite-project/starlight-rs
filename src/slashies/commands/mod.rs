@@ -1,15 +1,18 @@
+use super::interaction::Interaction;
 use crate::{components::BuildError, state::State};
 use anyhow::Result;
 use async_trait::async_trait;
 use click::Click;
 use ping::Ping;
-use twilight_model::application::{
-    command::Command,
-    component::Component,
-    interaction::{ApplicationCommand, MessageComponentInteraction},
+use std::any::type_name;
+use twilight_model::{
+    application::{
+        command::Command,
+        component::Component,
+        interaction::{ApplicationCommand, MessageComponentInteraction},
+    },
+    gateway::event::Event,
 };
-
-use super::interaction::Interaction;
 
 mod click;
 mod ping;
@@ -30,15 +33,42 @@ pub trait SlashCommand<const N: usize> {
     fn define() -> Command;
 }
 
+const EMPTY: String = String::new();
+
 #[async_trait]
 pub trait ClickCommand<const N: usize>: SlashCommand<N> {
     fn define_components(&self) -> Result<Vec<Component>, BuildError>;
 
-    async fn wait_for_click(
+    fn component_ids<'a>() -> [String; N] {
+        let mut array = [EMPTY; N];
+
+        for i in 0..N {
+            array[i] = format!("{}_{}", type_name::<Self>(), i);
+        }
+
+        array
+    }
+
+    async fn wait_for_click<'a>(
         &self,
         state: State,
-        interaction: Interaction,
-    ) -> MessageComponentInteraction {
+        interaction: Interaction<'a>,
+    ) -> Result<MessageComponentInteraction> {
+        let event = if let Some(guild_id) = interaction.command.guild_id {
+            state
+                .standby
+                .wait_for(guild_id, |event: &Event| {
+                    if let Event::InteractionCreate(interaction_create) = event {
+                    } else {
+                        false
+                    }
+                })
+                .await?
+        } else {
+            todo!()
+        };
+
+        todo!()
     }
 }
 
