@@ -119,7 +119,7 @@ pub struct ClickError;
 
 impl Display for ClickError {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        f.write_str("an error occured getting the click data")
+        f.write_str("an error occurred getting the click data")
     }
 }
 
