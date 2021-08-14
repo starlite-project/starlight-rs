@@ -1,5 +1,4 @@
 #![feature(negative_impls)]
-
 #![warn(clippy::pedantic, clippy::nursery)]
 #![deny(clippy::all)]
 #![allow(
@@ -15,8 +14,11 @@ use tracing::{event, instrument, Level};
 use twilight_model::id::GuildId;
 
 pub mod components;
+pub mod ext_traits;
 pub mod slashies;
 pub mod state;
+
+pub use ext_traits::GetUserId;
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Config {

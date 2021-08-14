@@ -12,8 +12,6 @@ pub struct Ping(pub(super) ApplicationCommand);
 impl SlashCommand<0> for Ping {
     const NAME: &'static str = "ping";
 
-    const COMPONENT_IDS: [&'static str; 0] = [];
-
     fn define() -> Command {
         Command {
             application_id: None,

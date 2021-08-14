@@ -1,16 +1,18 @@
+use std::collections::HashMap;
+
 use super::{ClickCommand, SlashCommand};
 use crate::{
-    components::{ActionRowBuilder, BuildError, ButtonBuilder, ComponentBuilder},
+    components::{BuildError, ButtonBuilder, ComponentBuilder},
     slashies::Response,
     state::State,
+    GetUserId,
 };
 use anyhow::Result;
 use async_trait::async_trait;
-use twilight_gateway::Event;
 use twilight_model::application::{
     command::Command,
-    component::{button::ButtonStyle, Component},
-    interaction::{ApplicationCommand, Interaction},
+    component::{button::ButtonStyle, Button},
+    interaction::ApplicationCommand,
 };
 
 #[derive(Debug, Clone)]
@@ -19,8 +21,6 @@ pub struct Click(pub(super) ApplicationCommand);
 #[async_trait]
 impl SlashCommand<2> for Click {
     const NAME: &'static str = "click";
-
-    const COMPONENT_IDS: [&'static str; 2] = ["click_two", "click_one"];
 
     fn define() -> Command {
         Command {
@@ -37,69 +37,26 @@ impl SlashCommand<2> for Click {
     async fn run(&self, state: State) -> Result<()> {
         let interaction = state.interaction(&self.0);
 
-        let button = ButtonBuilder::new()
-            .custom_id(Self::COMPONENT_IDS[0])
-            .label("Test")
-            .style(ButtonStyle::Primary)
-            .build()?;
-
-        let second_button = ButtonBuilder::new()
-            .custom_id(Self::COMPONENT_IDS[1])
-            .label("Test as well")
-            .style(ButtonStyle::Secondary)
-            .build()?;
-
-        let row = ActionRowBuilder::from(vec![button, second_button]).build_component()?;
-
         let response = Response::new()
             .message("Click this")
-            .add_component(row.clone());
+            .add_components(Self::define_components()?);
 
         interaction.response(response).await?;
 
-        let click = if let Some(guild_id) = interaction.command.guild_id {
-            state
-                .standby
-                .wait_for(guild_id, |event: &Event| {
-                    if let Event::InteractionCreate(interaction_create) = event {
-                        match &interaction_create.0 {
-                            Interaction::MessageComponent(button) => {
-                                Self::COMPONENT_IDS.contains(&button.data.custom_id.as_str())
-                            }
-                            _ => false,
-                        }
-                    } else {
-                        false
-                    }
-                })
-                .await?
-        } else {
-            state
-                .standby
-                .wait_for_event(|event: &Event| {
-                    if let Event::InteractionCreate(interaction) = event {
-                        match &interaction.0 {
-                            Interaction::MessageComponent(_) => true,
-                            _ => false,
-                        }
-                    } else {
-                        false
-                    }
-                })
-                .await?
-        };
+        let click_data =
+            Self::wait_for_click(state, interaction, interaction.command.user_id()).await?;
 
-        let _click = match click {
-            Event::InteractionCreate(interaction) => match &interaction.0 {
-                Interaction::MessageComponent(comp) => *comp.clone(),
-                _ => unreachable!(),
-            },
-            _ => unreachable!(),
-        };
+        let buttons = Self::buttons()?;
 
         interaction
             .update()?
-            .content(Some("success!"))?
+            .content(Some(
+                format!(
+                    "Success! You clicked {}",
+                    buttons[&click_data.data.custom_id].label.as_ref().unwrap()
+                )
+                .as_str(),
+            ))?
             .components(Some(&[]))?
             .exec()
             .await?;
@@ -110,20 +67,28 @@ impl SlashCommand<2> for Click {
 
 #[async_trait]
 impl ClickCommand<2> for Click {
-    fn define_components(&self) -> Result<Vec<Component>, BuildError> {
-        Ok(vec![ActionRowBuilder::new()
-            .create_button(|mut builder| {
-                builder
-                    .custom_id(Self::COMPONENT_IDS[0])
-                    .label("A button")
-                    .style(ButtonStyle::Primary)
-            })
-            .create_button(|mut builder| {
-                builder
-                    .custom_id(Self::COMPONENT_IDS[1])
-                    .label("Another button!")
-                    .style(ButtonStyle::Danger)
-            })
-            .build_component()?])
+    fn buttons() -> Result<HashMap<String, Button>, BuildError> {
+        let component_ids = Self::component_ids();
+        let mut map = HashMap::new();
+
+        map.insert(
+            component_ids[0].clone(),
+            ButtonBuilder::new()
+                .custom_id(component_ids[0].clone())
+                .label("A button")
+                .style(ButtonStyle::Success)
+                .build()?,
+        );
+
+        map.insert(
+            component_ids[1].clone(),
+            ButtonBuilder::new()
+                .custom_id(component_ids[1].clone())
+                .label("Another button!")
+                .style(ButtonStyle::Danger)
+                .build()?,
+        );
+
+        Ok(map)
     }
 }

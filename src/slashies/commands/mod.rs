@@ -1,17 +1,28 @@
 use super::interaction::Interaction;
-use crate::{components::BuildError, state::State};
+use crate::{
+    components::{BuildError, ComponentBuilder},
+    state::State,
+};
 use anyhow::Result;
 use async_trait::async_trait;
 use click::Click;
 use ping::Ping;
-use std::any::type_name;
+use std::{
+    any::type_name,
+    collections::HashMap,
+    error::Error,
+    fmt::{Display, Formatter, Result as FmtResult},
+};
 use twilight_model::{
     application::{
         command::Command,
-        component::Component,
-        interaction::{ApplicationCommand, MessageComponentInteraction},
+        component::{Button, Component},
+        interaction::{
+            ApplicationCommand, Interaction as DiscordInteraction, MessageComponentInteraction,
+        },
     },
     gateway::event::Event,
+    id::UserId,
 };
 
 mod click;
@@ -26,8 +37,6 @@ pub fn get_slashies() -> [Command; 2] {
 pub trait SlashCommand<const N: usize> {
     const NAME: &'static str;
 
-    const COMPONENT_IDS: [&'static str; N];
-
     async fn run(&self, state: State) -> Result<()>;
 
     fn define() -> Command;
@@ -37,11 +46,20 @@ const EMPTY: String = String::new();
 
 #[async_trait]
 pub trait ClickCommand<const N: usize>: SlashCommand<N> {
-    fn define_components(&self) -> Result<Vec<Component>, BuildError>;
+    fn define_components() -> Result<Vec<Component>, BuildError> {
+        let buttons = Self::buttons()?.into_values().collect::<Vec<_>>();
 
-    fn component_ids<'a>() -> [String; N] {
+        Ok(vec![buttons.build_component()?])
+    }
+
+    fn buttons() -> Result<HashMap<String, Button>, BuildError>;
+
+    #[must_use]
+    fn component_ids() -> [String; N] {
         let mut array = [EMPTY; N];
 
+        // Needed cause clippy things this should be enumerated, and we don't actually need the values
+        #[allow(clippy::needless_range_loop)]
         for i in 0..N {
             array[i] = format!("{}_{}", type_name::<Self>(), i);
         }
@@ -50,27 +68,68 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
     }
 
     async fn wait_for_click<'a>(
-        &self,
         state: State,
         interaction: Interaction<'a>,
+        user_id: UserId,
     ) -> Result<MessageComponentInteraction> {
         let event = if let Some(guild_id) = interaction.command.guild_id {
             state
                 .standby
-                .wait_for(guild_id, |event: &Event| {
+                .wait_for(guild_id, move |event: &Event| {
                     if let Event::InteractionCreate(interaction_create) = event {
+                        match &interaction_create.0 {
+                            DiscordInteraction::MessageComponent(button) => {
+                                Self::component_ids().contains(&button.data.custom_id)
+                                    && button.author_id().unwrap_or_default() == user_id
+                            }
+                            _ => false,
+                        }
                     } else {
                         false
                     }
                 })
                 .await?
         } else {
-            todo!()
+            state
+                .standby
+                .wait_for_event(move |event: &Event| {
+                    if let Event::InteractionCreate(interaction_create) = event {
+                        match &interaction_create.0 {
+                            DiscordInteraction::MessageComponent(button) => {
+                                Self::component_ids().contains(&button.data.custom_id)
+                                    && button.author_id().unwrap_or_default() == user_id
+                            }
+                            _ => false,
+                        }
+                    } else {
+                        false
+                    }
+                })
+                .await?
         };
 
-        todo!()
+        if let Event::InteractionCreate(interaction_create) = event {
+            if let DiscordInteraction::MessageComponent(comp) = interaction_create.0 {
+                Ok(*comp)
+            } else {
+                Err(ClickError.into())
+            }
+        } else {
+            Err(ClickError.into())
+        }
     }
 }
+
+#[derive(Debug)]
+pub struct ClickError;
+
+impl Display for ClickError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        f.write_str("an error occured getting the click data")
+    }
+}
+
+impl Error for ClickError {}
 
 impl<T: SlashCommand<0>> !ClickCommand<0> for T {}
 
