@@ -17,29 +17,6 @@ use twilight_model::application::{
 #[derive(Debug, Clone)]
 pub struct Click(pub(super) ApplicationCommand);
 
-impl Click {
-    fn get_button(value: &str) -> String {
-        let components = Self::define_components().unwrap_or_else(|_| debug_unreachable!());
-
-        components
-            .iter()
-            .map(|comp| match comp {
-                Component::Button(button) => button.clone(),
-                _ => debug_unreachable!(),
-            })
-            .find(|button| {
-                *button
-                    .custom_id
-                    .as_ref()
-                    .unwrap_or_else(|| debug_unreachable!())
-                    == value
-            })
-            .unwrap_or_else(|| debug_unreachable!())
-            .label
-            .unwrap()
-    }
-}
-
 #[async_trait]
 impl SlashCommand<2> for Click {
     const NAME: &'static str = "click";
@@ -73,7 +50,7 @@ impl SlashCommand<2> for Click {
             .content(Some(
                 format!(
                     "Success! You clicked {}",
-                    Self::get_button(&click_data.data.custom_id)
+                    Self::parse(&click_data.data.custom_id)
                 )
                 .as_str(),
             ))?
@@ -87,11 +64,28 @@ impl SlashCommand<2> for Click {
 
 #[async_trait]
 impl ClickCommand<2> for Click {
-    type Input = ();
+    type Output = String;
 
-    type Output = ();
+    fn parse(value: &str) -> Self::Output {
+        let components = Self::define_components().unwrap_or_else(|_| debug_unreachable!());
 
-    fn parse(_: &Self::Input) -> Self::Output {}
+        components
+            .iter()
+            .map(|comp| match comp {
+                Component::Button(button) => button.clone(),
+                _ => debug_unreachable!(),
+            })
+            .find(|button| {
+                *button
+                    .custom_id
+                    .as_ref()
+                    .unwrap_or_else(|| debug_unreachable!())
+                    == value
+            })
+            .unwrap_or_else(|| debug_unreachable!())
+            .label
+            .unwrap()
+    }
 
     fn define_components() -> Result<Vec<Component>, BuildError> {
         let component_ids = Self::component_ids();

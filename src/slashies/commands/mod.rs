@@ -42,13 +42,11 @@ const EMPTY: String = String::new();
 
 #[async_trait]
 pub trait ClickCommand<const N: usize>: SlashCommand<N> {
-    type Input;
-
     type Output;
 
     fn define_components() -> Result<Vec<Component>, BuildError>;
 
-    fn parse(input: &Self::Input) -> Self::Output;
+    fn parse(input: &str) -> Self::Output;
 
     #[must_use]
     fn component_ids() -> [String; N] {
