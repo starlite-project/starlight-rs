@@ -18,14 +18,25 @@ use twilight_model::application::{
 pub struct Click(pub(super) ApplicationCommand);
 
 impl Click {
-    fn get_button(value: String) -> String {
-        let component_ids = Self::component_ids();
+    fn get_button(value: &str) -> String {
+        let components = Self::define_components().unwrap_or_else(|_| debug_unreachable!());
 
-        component_ids
+        components
             .iter()
-            .find(|id| (**id) == value)
+            .map(|comp| match comp {
+                Component::Button(button) => button.clone(),
+                _ => debug_unreachable!(),
+            })
+            .find(|button| {
+                *button
+                    .custom_id
+                    .as_ref()
+                    .unwrap_or_else(|| debug_unreachable!())
+                    == value
+            })
             .unwrap_or_else(|| debug_unreachable!())
-            .to_string()
+            .label
+            .unwrap()
     }
 }
 
@@ -62,7 +73,7 @@ impl SlashCommand<2> for Click {
             .content(Some(
                 format!(
                     "Success! You clicked {}",
-                    Self::get_button(click_data.data.custom_id)
+                    Self::get_button(&click_data.data.custom_id)
                 )
                 .as_str(),
             ))?
@@ -76,26 +87,26 @@ impl SlashCommand<2> for Click {
 
 #[async_trait]
 impl ClickCommand<2> for Click {
+    type Input = ();
+
+    type Output = ();
+
+    fn parse(_: &Self::Input) -> Self::Output {}
+
     fn define_components() -> Result<Vec<Component>, BuildError> {
         let component_ids = Self::component_ids();
-        let mut buttons = Vec::with_capacity(2);
 
-        buttons.push(
+        Ok(vec![
             ButtonBuilder::new()
                 .custom_id(component_ids[0].clone())
                 .label("A button")
                 .style(ButtonStyle::Success)
                 .build_component()?,
-        );
-
-        buttons.push(
             ButtonBuilder::new()
                 .custom_id(component_ids[1].clone())
                 .label("Another button!")
                 .style(ButtonStyle::Danger)
                 .build_component()?,
-        );
-
-        Ok(buttons)
+        ])
     }
 }

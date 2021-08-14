@@ -1,4 +1,4 @@
-#![feature(negative_impls)]
+#![feature(associated_type_defaults, negative_impls)]
 #![warn(clippy::pedantic, clippy::nursery)]
 #![deny(clippy::all)]
 #![allow(
