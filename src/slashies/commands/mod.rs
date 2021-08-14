@@ -1,22 +1,18 @@
 use super::interaction::Interaction;
-use crate::{
-    components::{BuildError, ComponentBuilder},
-    state::State,
-};
+use crate::{components::BuildError, state::State};
 use anyhow::Result;
 use async_trait::async_trait;
 use click::Click;
 use ping::Ping;
 use std::{
     any::type_name,
-    collections::HashMap,
     error::Error,
     fmt::{Display, Formatter, Result as FmtResult},
 };
 use twilight_model::{
     application::{
         command::Command,
-        component::{Button, Component},
+        component::Component,
         interaction::{
             ApplicationCommand, Interaction as DiscordInteraction, MessageComponentInteraction,
         },
@@ -46,22 +42,14 @@ const EMPTY: String = String::new();
 
 #[async_trait]
 pub trait ClickCommand<const N: usize>: SlashCommand<N> {
-    fn define_components() -> Result<Vec<Component>, BuildError> {
-        let buttons = Self::buttons()?.into_values().collect::<Vec<_>>();
-
-        Ok(vec![buttons.build_component()?])
-    }
-
-    fn buttons() -> Result<HashMap<String, Button>, BuildError>;
+    fn define_components() -> Result<Vec<Component>, BuildError>;
 
     #[must_use]
     fn component_ids() -> [String; N] {
         let mut array = [EMPTY; N];
 
-        // Needed cause clippy things this should be enumerated, and we don't actually need the values
-        #[allow(clippy::needless_range_loop)]
-        for i in 0..N {
-            array[i] = format!("{}_{}", type_name::<Self>(), i);
+        for (i, val) in array.iter_mut().enumerate() {
+            *val = format!("{}_{}", type_name::<Self>(), i);
         }
 
         array

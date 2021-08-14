@@ -20,6 +20,20 @@ pub mod state;
 
 pub use ext_traits::GetUserId;
 
+#[macro_export]
+macro_rules! debug_unreachable {
+    () => {
+        debug_unreachable!("entered unreachable code")
+    };
+    ($e:expr) => {
+        if cfg!(not(debug_assertions)) {
+            unsafe { std::hint::unreachable_unchecked() };
+        } else {
+            panic!($e)
+        }
+    };
+}
+
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Config {
     pub guild_id: Option<GuildId>,

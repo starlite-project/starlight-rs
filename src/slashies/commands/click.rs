@@ -1,8 +1,7 @@
-use std::collections::HashMap;
-
 use super::{ClickCommand, SlashCommand};
 use crate::{
     components::{BuildError, ButtonBuilder, ComponentBuilder},
+    debug_unreachable,
     slashies::Response,
     state::State,
     GetUserId,
@@ -11,12 +10,24 @@ use anyhow::Result;
 use async_trait::async_trait;
 use twilight_model::application::{
     command::Command,
-    component::{button::ButtonStyle, Button},
+    component::{button::ButtonStyle, Component},
     interaction::ApplicationCommand,
 };
 
 #[derive(Debug, Clone)]
 pub struct Click(pub(super) ApplicationCommand);
+
+impl Click {
+    fn get_button(value: String) -> String {
+        let component_ids = Self::component_ids();
+
+        component_ids
+            .iter()
+            .find(|id| (**id) == value)
+            .unwrap_or_else(|| debug_unreachable!())
+            .to_string()
+    }
+}
 
 #[async_trait]
 impl SlashCommand<2> for Click {
@@ -46,14 +57,12 @@ impl SlashCommand<2> for Click {
         let click_data =
             Self::wait_for_click(state, interaction, interaction.command.user_id()).await?;
 
-        let buttons = Self::buttons()?;
-
         interaction
             .update()?
             .content(Some(
                 format!(
                     "Success! You clicked {}",
-                    buttons[&click_data.data.custom_id].label.as_ref().unwrap()
+                    Self::get_button(click_data.data.custom_id)
                 )
                 .as_str(),
             ))?
@@ -67,28 +76,26 @@ impl SlashCommand<2> for Click {
 
 #[async_trait]
 impl ClickCommand<2> for Click {
-    fn buttons() -> Result<HashMap<String, Button>, BuildError> {
+    fn define_components() -> Result<Vec<Component>, BuildError> {
         let component_ids = Self::component_ids();
-        let mut map = HashMap::new();
+        let mut buttons = Vec::with_capacity(2);
 
-        map.insert(
-            component_ids[0].clone(),
+        buttons.push(
             ButtonBuilder::new()
                 .custom_id(component_ids[0].clone())
                 .label("A button")
                 .style(ButtonStyle::Success)
-                .build()?,
+                .build_component()?,
         );
 
-        map.insert(
-            component_ids[1].clone(),
+        buttons.push(
             ButtonBuilder::new()
                 .custom_id(component_ids[1].clone())
                 .label("Another button!")
                 .style(ButtonStyle::Danger)
-                .build()?,
+                .build_component()?,
         );
 
-        Ok(map)
+        Ok(buttons)
     }
 }
