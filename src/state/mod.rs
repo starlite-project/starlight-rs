@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 use std::ops::Deref;
 
-use super::Config;
 use crate::slashies::{commands::get_slashies, interaction::Interaction};
 use anyhow::Result;
 use futures::StreamExt;
@@ -13,16 +12,17 @@ use twilight_model::application::interaction::ApplicationCommand;
 use twilight_standby::Standby;
 
 mod builder;
+mod config;
 pub mod events;
 
-pub use self::builder::StateBuilder;
+pub use self::{builder::StateBuilder, config::Config};
 
 #[derive(Debug, Clone, Copy)]
 pub struct State(&'static Components, pub Config);
 
 impl State {
     pub async fn connect(self) -> Result<()> {
-        let id = Config::decode_user_id(self.1.token)?.into();
+        let id = self.1.get_user_id()?.into();
         self.http.set_application_id(id);
 
         if self.1.remove_slash_commands {

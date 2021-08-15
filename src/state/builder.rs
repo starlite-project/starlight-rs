@@ -1,5 +1,5 @@
 use super::{Components, State};
-use crate::Config;
+use super::Config;
 use anyhow::{Context, Result};
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
 use twilight_gateway::{

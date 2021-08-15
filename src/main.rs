@@ -1,5 +1,5 @@
 use anyhow::Result;
-use starlight_rs::{state::StateBuilder, Config};
+use starlight_rs::state::{Config, StateBuilder};
 use tracing::{event, Level};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 use twilight_cache_inmemory::ResourceType;
