@@ -8,6 +8,7 @@ use crate::{
 };
 use anyhow::Result;
 use async_trait::async_trait;
+use smallvec::{smallvec, SmallVec};
 use twilight_model::application::{
     command::Command,
     component::{button::ButtonStyle, Button},
@@ -38,7 +39,7 @@ impl SlashCommand<2> for Click {
 
         let response = Response::new()
             .message("Click this")
-            .add_components(Self::components()?);
+            .add_components(Self::components()?.into_iter().collect());
 
         interaction.response(response).await?;
 
@@ -84,10 +85,10 @@ impl ClickCommand<2> for Click {
             .unwrap()
     }
 
-    fn define_buttons() -> Result<Vec<Button>, BuildError> {
+    fn define_buttons() -> Result<SmallVec<[Button; 2]>, BuildError> {
         let component_ids = Self::component_ids();
 
-        let buttons = vec![
+        Ok(smallvec![
             ButtonBuilder::new()
                 .custom_id(component_ids[0])
                 .label("A button")
@@ -98,8 +99,6 @@ impl ClickCommand<2> for Click {
                 .label("Another button!")
                 .style(ButtonStyle::Danger)
                 .build()?,
-        ];
-
-        Ok(buttons)
+        ])
     }
 }

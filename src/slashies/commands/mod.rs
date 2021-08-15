@@ -8,6 +8,7 @@ use async_trait::async_trait;
 use base64::encode;
 use click::Click;
 use ping::Ping;
+use smallvec::{smallvec, SmallVec};
 use std::{
     any::type_name,
     error::Error,
@@ -46,12 +47,12 @@ pub trait SlashCommand<const N: usize> {
 pub trait ClickCommand<const N: usize>: SlashCommand<N> {
     type Output;
 
-    fn define_buttons() -> Result<Vec<Button>, BuildError>;
+    fn define_buttons() -> Result<SmallVec<[Button; N]>, BuildError>;
 
     fn parse(input: &str) -> Self::Output;
 
-    fn components() -> Result<Vec<Component>, BuildError> {
-        Ok(vec![Self::define_buttons()?.build_component()?])
+    fn components() -> Result<SmallVec<[Component; N]>, BuildError> {
+        Ok(smallvec![Self::define_buttons()?.build_component()?])
     }
 
     #[must_use]

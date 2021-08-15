@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 use super::{BuildError, ButtonBuilder, ComponentBuilder};
+use smallvec::SmallVec;
 use twilight_model::application::component::{ActionRow, Button, Component, ComponentType};
 
 #[derive(Debug, Default, Clone, PartialEq, Hash)]
@@ -58,6 +59,18 @@ impl ComponentBuilder for ActionRowBuilder {
     }
 }
 
+impl<const N: usize> ComponentBuilder for SmallVec<[Button; N]> {
+    type Target = ActionRow;
+
+    fn build(self) -> Result<Self::Target, BuildError> {
+        ActionRowBuilder::from(self).build()
+    }
+
+    fn build_component(self) -> Result<Component, BuildError> {
+        ActionRowBuilder::from(self).build_component()
+    }
+}
+
 impl ComponentBuilder for Vec<Button> {
     type Target = ActionRow;
 
@@ -67,6 +80,14 @@ impl ComponentBuilder for Vec<Button> {
 
     fn build_component(self) -> Result<Component, BuildError> {
         ActionRowBuilder::from(self).build_component()
+    }
+}
+
+impl<const N: usize> From<SmallVec<[Button; N]>> for ActionRowBuilder {
+    fn from(buttons: SmallVec<[Button; N]>) -> Self {
+        Self {
+            components: buttons.into_iter().map(Component::Button).collect(),
+        }
     }
 }
 
