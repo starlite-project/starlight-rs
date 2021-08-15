@@ -12,7 +12,7 @@ use std::{
 use twilight_model::{
     application::{
         command::Command,
-        component::Component,
+        component::{ActionRow, Component},
         interaction::{
             ApplicationCommand, Interaction as DiscordInteraction, MessageComponentInteraction,
         },
@@ -44,9 +44,13 @@ const EMPTY: String = String::new();
 pub trait ClickCommand<const N: usize>: SlashCommand<N> {
     type Output;
 
-    fn define_components() -> Result<Vec<Component>, BuildError>;
+    fn define_buttons() -> Result<ActionRow, BuildError>;
 
     fn parse(input: &str) -> Self::Output;
+
+    fn components() -> Result<Vec<Component>, BuildError> {
+        Ok(vec![Component::ActionRow(Self::define_buttons()?)])
+    }
 
     #[must_use]
     fn component_ids() -> [String; N] {

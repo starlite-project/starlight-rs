@@ -53,9 +53,7 @@ impl Config {
     }
 
     pub fn get_user_id(self) -> Result<u64> {
-        let token_split = self.token.split('.').collect::<Vec<_>>();
-
-        let first_part_of_token = token_split.first().unwrap();
+        let first_part_of_token = self.token.split('.').next().unwrap_or_default();
 
         let decoded = base64::decode(first_part_of_token)?;
 
@@ -79,5 +77,4 @@ impl Config {
 
         Ok(Box::leak(Box::new(token)))
     }
-
 }

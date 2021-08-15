@@ -1,6 +1,6 @@
 use super::{ClickCommand, SlashCommand};
 use crate::{
-    components::{BuildError, ButtonBuilder, ComponentBuilder},
+    components::{ActionRowBuilder, BuildError, ComponentBuilder},
     debug_unreachable,
     slashies::Response,
     state::State,
@@ -10,7 +10,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use twilight_model::application::{
     command::Command,
-    component::{button::ButtonStyle, Component},
+    component::{button::ButtonStyle, ActionRow, Component},
     interaction::ApplicationCommand,
 };
 
@@ -38,7 +38,7 @@ impl SlashCommand<2> for Click {
 
         let response = Response::new()
             .message("Click this")
-            .add_components(Self::define_components()?);
+            .add_components(Self::components()?);
 
         interaction.response(response).await?;
 
@@ -67,7 +67,7 @@ impl ClickCommand<2> for Click {
     type Output = String;
 
     fn parse(value: &str) -> Self::Output {
-        let components = Self::define_components().unwrap_or_else(|_| debug_unreachable!());
+        let components = Self::components().unwrap_or_else(|_| debug_unreachable!());
 
         components
             .iter()
@@ -87,20 +87,24 @@ impl ClickCommand<2> for Click {
             .unwrap()
     }
 
-    fn define_components() -> Result<Vec<Component>, BuildError> {
+    fn define_buttons() -> Result<ActionRow, BuildError> {
         let component_ids = Self::component_ids();
+    
+        let action_row = ActionRowBuilder::new()
+            .create_button(|mut builder| {
+                builder
+                    .custom_id(component_ids[0].clone())
+                    .label("A button")
+                    .style(ButtonStyle::Success)
+            })
+            .create_button(|mut builder| {
+                builder
+                    .custom_id(component_ids[1].clone())
+                    .label("Another button!")
+                    .style(ButtonStyle::Danger)
+            })
+            .build()?;
 
-        Ok(vec![
-            ButtonBuilder::new()
-                .custom_id(component_ids[0].clone())
-                .label("A button")
-                .style(ButtonStyle::Success)
-                .build_component()?,
-            ButtonBuilder::new()
-                .custom_id(component_ids[1].clone())
-                .label("Another button!")
-                .style(ButtonStyle::Danger)
-                .build_component()?,
-        ])
+        Ok(action_row)
     }
 }
