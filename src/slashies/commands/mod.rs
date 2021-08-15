@@ -42,8 +42,6 @@ pub trait SlashCommand<const N: usize> {
     fn define() -> Command;
 }
 
-const EMPTY: String = String::new();
-
 #[async_trait]
 pub trait ClickCommand<const N: usize>: SlashCommand<N> {
     type Output;
