@@ -1,6 +1,6 @@
 use super::{ClickCommand, SlashCommand};
 use crate::{
-    components::{ActionRowBuilder, BuildError, ComponentBuilder},
+    components::{BuildError, ButtonBuilder, ComponentBuilder},
     debug_unreachable,
     slashies::Response,
     state::State,
@@ -10,7 +10,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use twilight_model::application::{
     command::Command,
-    component::{button::ButtonStyle, ActionRow, Component},
+    component::{button::ButtonStyle, Button},
     interaction::ApplicationCommand,
 };
 
@@ -67,14 +67,10 @@ impl ClickCommand<2> for Click {
     type Output = String;
 
     fn parse(value: &str) -> Self::Output {
-        let components = Self::components().unwrap_or_else(|_| debug_unreachable!());
+        let components = Self::define_buttons().unwrap_or_else(|_| debug_unreachable!());
 
         components
             .iter()
-            .map(|comp| match comp {
-                Component::Button(button) => button.clone(),
-                _ => debug_unreachable!(),
-            })
             .find(|button| {
                 *button
                     .custom_id
@@ -84,27 +80,26 @@ impl ClickCommand<2> for Click {
             })
             .unwrap_or_else(|| debug_unreachable!())
             .label
+            .clone()
             .unwrap()
     }
 
-    fn define_buttons() -> Result<ActionRow, BuildError> {
+    fn define_buttons() -> Result<Vec<Button>, BuildError> {
         let component_ids = Self::component_ids();
-    
-        let action_row = ActionRowBuilder::new()
-            .create_button(|mut builder| {
-                builder
-                    .custom_id(component_ids[0].clone())
-                    .label("A button")
-                    .style(ButtonStyle::Success)
-            })
-            .create_button(|mut builder| {
-                builder
-                    .custom_id(component_ids[1].clone())
-                    .label("Another button!")
-                    .style(ButtonStyle::Danger)
-            })
-            .build()?;
 
-        Ok(action_row)
+        let buttons = vec![
+            ButtonBuilder::new()
+                .custom_id(component_ids[0])
+                .label("A button")
+                .style(ButtonStyle::Success)
+                .build()?,
+            ButtonBuilder::new()
+                .custom_id(component_ids[1])
+                .label("Another button!")
+                .style(ButtonStyle::Danger)
+                .build()?,
+        ];
+
+        Ok(buttons)
     }
 }

@@ -1,7 +1,11 @@
 use super::interaction::Interaction;
-use crate::{components::BuildError, state::State};
+use crate::{
+    components::{BuildError, ComponentBuilder},
+    state::State,
+};
 use anyhow::Result;
 use async_trait::async_trait;
+use base64::encode;
 use click::Click;
 use ping::Ping;
 use std::{
@@ -12,7 +16,7 @@ use std::{
 use twilight_model::{
     application::{
         command::Command,
-        component::{ActionRow, Component},
+        component::{Button, Component},
         interaction::{
             ApplicationCommand, Interaction as DiscordInteraction, MessageComponentInteraction,
         },
@@ -44,20 +48,22 @@ const EMPTY: String = String::new();
 pub trait ClickCommand<const N: usize>: SlashCommand<N> {
     type Output;
 
-    fn define_buttons() -> Result<ActionRow, BuildError>;
+    fn define_buttons() -> Result<Vec<Button>, BuildError>;
 
     fn parse(input: &str) -> Self::Output;
 
     fn components() -> Result<Vec<Component>, BuildError> {
-        Ok(vec![Component::ActionRow(Self::define_buttons()?)])
+        Ok(vec![Self::define_buttons()?.build_component()?])
     }
 
     #[must_use]
-    fn component_ids() -> [String; N] {
-        let mut array = [EMPTY; N];
+    fn component_ids() -> [&'static str; N] {
+        let mut array = [""; N];
+
+        let encoded = encode(type_name::<Self>());
 
         for (i, val) in array.iter_mut().enumerate() {
-            *val = format!("{}_{}", type_name::<Self>(), i);
+            *val = Box::leak(Box::new(format!("{}_{}", encoded, i)));
         }
 
         array
@@ -75,7 +81,7 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
                     if let Event::InteractionCreate(interaction_create) = event {
                         match &interaction_create.0 {
                             DiscordInteraction::MessageComponent(button) => {
-                                Self::component_ids().contains(&button.data.custom_id)
+                                Self::component_ids().contains(&button.data.custom_id.as_str())
                                     && button.author_id().unwrap_or_default() == user_id
                             }
                             _ => false,
@@ -92,7 +98,7 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
                     if let Event::InteractionCreate(interaction_create) = event {
                         match &interaction_create.0 {
                             DiscordInteraction::MessageComponent(button) => {
-                                Self::component_ids().contains(&button.data.custom_id)
+                                Self::component_ids().contains(&button.data.custom_id.as_str())
                                     && button.author_id().unwrap_or_default() == user_id
                             }
                             _ => false,
