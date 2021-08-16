@@ -1,5 +1,2 @@
-[build]
-rustflags = ["-C", "target-cpu=native"]
-
 [target.'cfg(any(target_os = "windows", target_os = "linux"))']
 rustflags = ["-C", "target-cpu=native", "-C", "link-arg=-fuse-ld=lld"]
