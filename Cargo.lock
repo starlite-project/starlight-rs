@@ -1053,7 +1053,6 @@ dependencies = [
  "dotenv",
  "futures",
  "serde",
- "smallvec",
  "static_assertions",
  "tokio",
  "tracing",

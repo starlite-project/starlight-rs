@@ -1,9 +1,8 @@
 #![allow(dead_code)]
 
-use crate::components::ComponentBuilder;
-
 use self::commands::Commands;
 use super::{components::ActionRowBuilder, state::State};
+use crate::components::ComponentBuilder;
 use tracing::{event, instrument, Level};
 use twilight_model::{
     application::{
@@ -112,9 +111,9 @@ impl Response {
     }
 
     fn check_component(component: Component) -> Component {
-        if component.kind() == ComponentType::Button {
+        if component.kind() != ComponentType::ActionRow {
             ActionRowBuilder::new()
-                .push_button(component)
+                .push_component(component)
                 .build_component()
                 .unwrap()
         } else {

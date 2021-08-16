@@ -8,7 +8,6 @@ use crate::{
 };
 use anyhow::Result;
 use async_trait::async_trait;
-use smallvec::{smallvec, SmallVec};
 use twilight_model::application::{
     command::Command,
     component::{button::ButtonStyle, Button},
@@ -85,10 +84,10 @@ impl ClickCommand<2> for Click {
             .unwrap()
     }
 
-    fn define_buttons() -> Result<SmallVec<[Button; 2]>, BuildError> {
+    fn define_buttons() -> Result<[Button; 2], BuildError> {
         let component_ids = Self::component_ids();
 
-        Ok(smallvec![
+        Ok([
             ButtonBuilder::new()
                 .custom_id(component_ids[0])
                 .label("A button")
