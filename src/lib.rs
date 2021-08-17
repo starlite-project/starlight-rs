@@ -12,7 +12,6 @@ pub mod ext_traits;
 pub mod slashies;
 pub mod state;
 
-
 pub use ext_traits::*;
 
 #[macro_export]
