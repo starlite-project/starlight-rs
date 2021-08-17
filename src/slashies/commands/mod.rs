@@ -52,6 +52,10 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
 
         let encoded = encode(type_name::<Self>());
 
+        for (i, val) in array.iter_mut().enumerate() {
+            *val = Box::leak(Box::new(format!("{}_{}", encoded, i)));
+        }
+
         array
     });
 
@@ -63,19 +67,6 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
 
     fn components() -> Result<Vec<Component>, BuildError> {
         Ok(vec![Self::define_buttons()?.build_component()?])
-    }
-
-    #[must_use]
-    fn component_ids() -> [&'static str; N] {
-        let mut array = [""; N];
-
-        let encoded = encode(type_name::<Self>());
-
-        for (i, val) in array.iter_mut().enumerate() {
-            *val = Box::leak(Box::new(format!("{}_{}", encoded, i)));
-        }
-
-        array
     }
 
     async fn wait_for_click<'a>(
@@ -90,7 +81,7 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
                     if let Event::InteractionCreate(interaction_create) = event {
                         match &interaction_create.0 {
                             DiscordInteraction::MessageComponent(button) => {
-                                Self::component_ids().contains(&button.data.custom_id.as_str())
+                                Self::COMPONENT_IDS.contains(&button.data.custom_id.as_str())
                                     && button.author_id().unwrap_or_default() == user_id
                             }
                             _ => false,
@@ -107,7 +98,7 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
                     if let Event::InteractionCreate(interaction_create) = event {
                         match &interaction_create.0 {
                             DiscordInteraction::MessageComponent(button) => {
-                                Self::component_ids().contains(&button.data.custom_id.as_str())
+                                Self::COMPONENT_IDS.contains(&button.data.custom_id.as_str())
                                     && button.author_id().unwrap_or_default() == user_id
                             }
                             _ => false,

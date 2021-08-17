@@ -86,7 +86,7 @@ impl ClickCommand<2> for Click {
     }
 
     fn define_buttons() -> Result<[Button; 2], BuildError> {
-        let component_ids = Self::component_ids();
+        let component_ids = Self::COMPONENT_IDS;
 
         Ok([
             ButtonBuilder::new()

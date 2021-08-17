@@ -109,7 +109,7 @@ impl ClickCommand<3> for Info {
     type Output = InfoType;
 
     fn define_buttons() -> Result<[Button; 3], BuildError> {
-        let component_ids: [&'static str; 3] = Self::component_ids();
+        let component_ids = Self::COMPONENT_IDS;
         let buttons = [
             ButtonBuilder::new()
                 .custom_id(component_ids[0])
@@ -132,7 +132,9 @@ impl ClickCommand<3> for Info {
     }
 
     fn parse(_: State, key: &str) -> Self::Output {
-        let [author, bot, guild]: [&'static str; 3] = Self::component_ids();
+        let component_ids = Self::COMPONENT_IDS;
+
+        let [author, bot, guild] = *component_ids;
 
         if key == author {
             InfoType::Author
