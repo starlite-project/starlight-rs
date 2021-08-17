@@ -1,4 +1,4 @@
-#![feature(negative_impls)]
+#![feature(negative_impls, once_cell)]
 #![warn(clippy::pedantic, clippy::nursery, clippy::suspicious)]
 #![deny(clippy::all)]
 #![allow(

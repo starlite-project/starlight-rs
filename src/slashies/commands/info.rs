@@ -55,6 +55,19 @@ impl<'a> Info {
     async fn run_user(&self, interaction: Interaction<'a>) -> Result<()> {
         let response = Response::from("User info: todo");
 
+        let user = interaction
+            .command
+            .data
+            .resolved
+            .as_ref()
+            .unwrap_or_else(|| crate::debug_unreachable!())
+            .users
+            .get(0)
+            .unwrap_or_else(|| crate::debug_unreachable!())
+            .clone();
+
+        dbg!(user);
+
         interaction.response(response).await?;
 
         Ok(())
@@ -119,13 +132,13 @@ impl ClickCommand<3> for Info {
     }
 
     fn parse(_: State, key: &str) -> Self::Output {
-        let ids: [&'static str; 3] = Self::component_ids();
+        let [author, bot, guild]: [&'static str; 3] = Self::component_ids();
 
-        if ids[0] == key {
+        if key == author {
             InfoType::Author
-        } else if ids[1] == key {
+        } else if key == bot {
             InfoType::Bot
-        } else if ids[2] == key {
+        } else if key == guild {
             InfoType::Guild
         } else {
             crate::debug_unreachable!()

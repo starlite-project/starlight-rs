@@ -13,6 +13,7 @@ use std::{
     any::type_name,
     error::Error,
     fmt::{Display, Formatter, Result as FmtResult},
+    lazy::Lazy,
 };
 use twilight_model::{
     application::{
@@ -46,6 +47,14 @@ pub trait SlashCommand<const N: usize> {
 
 #[async_trait]
 pub trait ClickCommand<const N: usize>: SlashCommand<N> {
+    const COMPONENT_IDS: Lazy<[&'static str; N]> = Lazy::new(|| {
+        let mut array = [""; N];
+
+        let encoded = encode(type_name::<Self>());
+
+        array
+    });
+
     type Output;
 
     fn define_buttons() -> Result<[Button; N], BuildError>;
