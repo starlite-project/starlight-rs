@@ -14,6 +14,13 @@ use twilight_model::application::{
 };
 
 #[derive(Debug, Clone)]
+pub enum InfoType {
+    Author,
+    Bot,
+    Guild,
+}
+
+#[derive(Debug, Clone)]
 pub struct Info(pub(crate) ApplicationCommand);
 
 impl<'a> Info {
@@ -86,7 +93,7 @@ impl SlashCommand<3> for Info {
 }
 
 impl ClickCommand<3> for Info {
-    type Output = ();
+    type Output = InfoType;
 
     fn define_buttons() -> Result<[Button; 3], BuildError> {
         let component_ids: [&'static str; 3] = Self::component_ids();
@@ -98,7 +105,7 @@ impl ClickCommand<3> for Info {
                 .build()?,
             ButtonBuilder::new()
                 .custom_id(component_ids[1])
-                .label("Me")
+                .label("Bot")
                 .style(ButtonStyle::Success)
                 .build()?,
             ButtonBuilder::new()
@@ -111,5 +118,17 @@ impl ClickCommand<3> for Info {
         Ok(buttons)
     }
 
-    fn parse(_: State, _: &str) -> Self::Output {}
+    fn parse(_: State, key: &str) -> Self::Output {
+        let ids: [&'static str; 3] = Self::component_ids();
+
+        if ids[0] == key {
+            InfoType::Author
+        } else if ids[1] == key {
+            InfoType::Bot
+        } else if ids[2] == key {
+            InfoType::Guild
+        } else {
+            crate::debug_unreachable!()
+        }
+    }
 }

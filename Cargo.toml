@@ -42,11 +42,12 @@ branch = "feature/message-components"
 [dependencies.twilight-gateway]
 git = "https://github.com/twilight-rs/twilight.git"
 branch = "feature/message-components"
+features = ["zlib-simd", "metrics"]
 
 [dependencies.twilight-http]
 git = "https://github.com/twilight-rs/twilight.git"
 branch = "feature/message-components"
-features = ["tracing"]
+features = ["tracing", "simd-json"]
 
 [dependencies.twilight-model]
 git = "https://github.com/twilight-rs/twilight.git"
@@ -55,6 +56,7 @@ branch = "feature/message-components"
 [dependencies.twilight-standby]
 git = "https://github.com/twilight-rs/twilight.git"
 branch = "feature/message-components"
+features = ["tracing"]
 
 [dev-dependencies]
 static_assertions = "1.1.0"

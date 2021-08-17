@@ -17,7 +17,7 @@ pub use ext_traits::*;
 #[macro_export]
 macro_rules! debug_unreachable {
     () => {
-        debug_unreachable!("entered unreachable code")
+        $crate::debug_unreachable!("entered unreachable code")
     };
     ($e:expr) => {
         if cfg!(not(debug_assertions)) {

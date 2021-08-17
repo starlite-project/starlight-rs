@@ -11,6 +11,7 @@ use super::Response;
 #[derive(Debug, Clone, Copy)]
 pub struct Interaction<'a> {
     pub state: State,
+    // Use a reference bc Interaction doesn't need to own it
     pub command: &'a ApplicationCommand,
 }
 
