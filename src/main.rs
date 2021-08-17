@@ -3,7 +3,7 @@ use starlight_rs::state::{Config, StateBuilder};
 use tracing::{event, Level};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 use twilight_cache_inmemory::ResourceType;
-use twilight_gateway::cluster::ShardScheme;
+use twilight_gateway::{cluster::ShardScheme, EventTypeFlags};
 use twilight_model::gateway::Intents;
 
 #[cfg(windows)]
@@ -14,22 +14,14 @@ use tokio::signal::unix::{signal, SignalKind};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let mut log_filter_layer = EnvFilter::try_from_default_env()
+    let log_filter_layer = EnvFilter::try_from_default_env()
         .or_else(|_| EnvFilter::try_new("info"))?
-        .add_directive("starlight_rs[act]=debug".parse()?);
-    let mut log_fmt_layer = fmt::layer().pretty();
-
-    log_fmt_layer = if cfg!(debug_assertions) {
-        log_fmt_layer.with_thread_ids(true).with_thread_names(true)
-    } else {
-        log_fmt_layer
-    };
-
-    log_filter_layer = if cfg!(debug_assertions) {
-        log_filter_layer.add_directive("starlight_rs=trace".parse()?)
-    } else {
-        log_filter_layer.add_directive("starlight_rs=warn".parse()?)
-    };
+        .add_directive("starlight_rs[act]=debug".parse()?)
+        .add_directive("starlight_rs=trace".parse()?);
+    let log_fmt_layer = fmt::layer()
+        .pretty()
+        .with_thread_ids(true)
+        .with_thread_names(true);
 
     tracing_subscriber::registry()
         .with(log_filter_layer)
@@ -43,8 +35,12 @@ async fn main() -> Result<()> {
     let (client, events) = StateBuilder::new()
         .config(config)
         .intents(Intents::empty())
-        .cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))
-        .cache_builder(|builder| builder.resource_types(ResourceType::MESSAGE))
+        .cluster_builder(|builder| {
+            builder
+                .shard_scheme(ShardScheme::Auto)
+                .event_types(EventTypeFlags::READY | EventTypeFlags::INTERACTION_CREATE)
+        })
+        .cache_builder(|builder| builder.resource_types(ResourceType::empty()))
         .build()
         .await?;
 
