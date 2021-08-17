@@ -102,5 +102,5 @@ impl ClickCommand<3> for Info {
         Ok(buttons)
     }
 
-    fn parse(_: &str) -> Self::Output {}
+    fn parse(_: State, _: &str) -> Self::Output {}
 }

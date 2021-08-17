@@ -50,7 +50,7 @@ impl SlashCommand<2> for Click {
             .content(Some(
                 format!(
                     "Success! You clicked {}",
-                    Self::parse(&click_data.data.custom_id)
+                    Self::parse(state, &click_data.data.custom_id)
                 )
                 .as_str(),
             ))?
@@ -66,7 +66,7 @@ impl SlashCommand<2> for Click {
 impl ClickCommand<2> for Click {
     type Output = String;
 
-    fn parse(value: &str) -> Self::Output {
+    fn parse(_state: State, value: &str) -> Self::Output {
         let components = Self::define_buttons().unwrap_or_else(|_| debug_unreachable!());
 
         components
