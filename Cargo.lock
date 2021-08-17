@@ -59,9 +59,9 @@ checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 
 [[package]]
 name = "bitflags"
-version = "1.3.1"
+version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2da1976d75adbe5fbc88130ecd119529cf1cc6a93ae1546d8696ee66f0d21af1"
+checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "block-buffer"
@@ -116,8 +116,8 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.0.0-beta.2"
-source = "git+https://github.com/clap-rs/clap.git#33c305ea6ff6cdda7796e57966374cb40633968f"
+version = "3.0.0-beta.4"
+source = "git+https://github.com/clap-rs/clap.git#0394ae6102d3b1c3ffc0bab17c9bb6317828b239"
 dependencies = [
  "atty",
  "bitflags",
@@ -133,8 +133,8 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "3.0.0-beta.2"
-source = "git+https://github.com/clap-rs/clap.git#33c305ea6ff6cdda7796e57966374cb40633968f"
+version = "3.0.0-beta.4"
+source = "git+https://github.com/clap-rs/clap.git#0394ae6102d3b1c3ffc0bab17c9bb6317828b239"
 dependencies = [
  "heck",
  "proc-macro-error",
@@ -561,9 +561,9 @@ dependencies = [
 
 [[package]]
 name = "matches"
-version = "0.1.8"
+version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ffc5c5338469d4d3ea17d269fa8ea3512ad247247c30bd2df69e68309ed0a08"
+checksum = "a3e378b66a060d48947b590737b30a1be76706c8dd7b8ba0f2fe3989c68a853f"
 
 [[package]]
 name = "memchr"
@@ -1152,9 +1152,9 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "1.9.0"
+version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b7b349f11a7047e6d1276853e612d152f5e8a352c61917887cc2169e2366b4c"
+checksum = "01cf844b23c6131f624accf65ce0e4e9956a8bb329400ea5bcc26ae3a5c20b0b"
 dependencies = [
  "autocfg",
  "bytes",
@@ -1361,7 +1361,7 @@ dependencies = [
 [[package]]
 name = "twilight-cache-inmemory"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#1084d13d2a89e8d9f2083b05a6822b00dbb4ae4c"
+source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
 dependencies = [
  "bitflags",
  "dashmap",
@@ -1372,7 +1372,7 @@ dependencies = [
 [[package]]
 name = "twilight-gateway"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#1084d13d2a89e8d9f2083b05a6822b00dbb4ae4c"
+source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
 dependencies = [
  "bitflags",
  "flate2",
@@ -1392,7 +1392,7 @@ dependencies = [
 [[package]]
 name = "twilight-gateway-queue"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#1084d13d2a89e8d9f2083b05a6822b00dbb4ae4c"
+source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
 dependencies = [
  "tokio",
  "tracing 0.1.26",
@@ -1402,7 +1402,7 @@ dependencies = [
 [[package]]
 name = "twilight-http"
 version = "0.6.1"
-source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#1084d13d2a89e8d9f2083b05a6822b00dbb4ae4c"
+source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
 dependencies = [
  "hyper",
  "hyper-rustls",
@@ -1418,7 +1418,7 @@ dependencies = [
 [[package]]
 name = "twilight-model"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#1084d13d2a89e8d9f2083b05a6822b00dbb4ae4c"
+source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
 dependencies = [
  "bitflags",
  "serde",
@@ -1430,7 +1430,7 @@ dependencies = [
 [[package]]
 name = "twilight-standby"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#1084d13d2a89e8d9f2083b05a6822b00dbb4ae4c"
+source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
 dependencies = [
  "dashmap",
  "futures-util",
@@ -1447,12 +1447,9 @@ checksum = "879f6906492a7cd215bfa4cf595b600146ccfac0c79bcbd1f3000162af5e8b06"
 
 [[package]]
 name = "unicode-bidi"
-version = "0.3.5"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eeb8be209bb1c96b7c177c7420d26e04eccacb0eeae6b980e35fcb74678107e0"
-dependencies = [
- "matches",
-]
+checksum = "246f4c42e67e7a4e3c6106ff716a5d067d4132a642840b242e357e468a2a0085"
 
 [[package]]
 name = "unicode-normalization"
