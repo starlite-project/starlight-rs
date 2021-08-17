@@ -1058,6 +1058,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "twilight-cache-inmemory",
+ "twilight-embed-builder",
  "twilight-gateway",
  "twilight-http",
  "twilight-model",
@@ -1339,6 +1340,14 @@ dependencies = [
  "bitflags",
  "dashmap",
  "serde",
+ "twilight-model",
+]
+
+[[package]]
+name = "twilight-embed-builder"
+version = "0.6.0"
+source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
+dependencies = [
  "twilight-model",
 ]
 

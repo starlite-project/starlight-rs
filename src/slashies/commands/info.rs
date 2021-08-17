@@ -3,7 +3,7 @@ use crate::{
     components::{BuildError, ButtonBuilder, ComponentBuilder},
     slashies::{interaction::Interaction, Response},
     state::State,
-    GetUserId,
+    InteractionAuthor,
 };
 use anyhow::Result;
 use async_trait::async_trait;
@@ -27,7 +27,7 @@ impl<'a> Info {
         let click_data = Self::wait_for_click(
             interaction.state,
             interaction,
-            interaction.command.user_id(),
+            interaction.command.interaction_author(),
         )
         .await?;
 

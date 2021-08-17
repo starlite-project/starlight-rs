@@ -35,6 +35,10 @@ features = ["fmt", "ansi"]
 git = "https://github.com/twilight-rs/twilight.git"
 branch = "feature/message-components"
 
+[dependencies.twilight-embed-builder]
+git = "https://github.com/twilight-rs/twilight.git"
+branch = "feature/message-components"
+
 [dependencies.twilight-gateway]
 git = "https://github.com/twilight-rs/twilight.git"
 branch = "feature/message-components"

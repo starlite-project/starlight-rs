@@ -4,7 +4,7 @@ use crate::{
     debug_unreachable,
     slashies::Response,
     state::State,
-    GetUserId,
+    InteractionAuthor,
 };
 use anyhow::Result;
 use async_trait::async_trait;
@@ -43,7 +43,8 @@ impl SlashCommand<2> for Click {
         interaction.response(response).await?;
 
         let click_data =
-            Self::wait_for_click(state, interaction, interaction.command.user_id()).await?;
+            Self::wait_for_click(state, interaction, interaction.command.interaction_author())
+                .await?;
 
         interaction
             .update()?

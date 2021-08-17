@@ -12,7 +12,8 @@ pub mod ext_traits;
 pub mod slashies;
 pub mod state;
 
-pub use ext_traits::GetUserId;
+
+pub use ext_traits::*;
 
 #[macro_export]
 macro_rules! debug_unreachable {
