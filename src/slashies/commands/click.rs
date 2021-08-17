@@ -38,7 +38,7 @@ impl SlashCommand<2> for Click {
 
         let response = Response::new()
             .message("Click this")
-            .add_components(Self::components()?.into_iter().collect());
+            .add_components(Self::components()?);
 
         interaction.response(response).await?;
 

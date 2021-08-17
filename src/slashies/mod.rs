@@ -111,13 +111,13 @@ impl Response {
     }
 
     fn check_component(component: Component) -> Component {
-        if component.kind() != ComponentType::ActionRow {
+        if component.kind() == ComponentType::ActionRow {
+            component
+        } else {
             ActionRowBuilder::new()
                 .push_component(component)
                 .build_component()
                 .unwrap()
-        } else {
-            component
         }
     }
 
