@@ -371,7 +371,7 @@ dependencies = [
  "slab",
  "tokio",
  "tokio-util",
- "tracing 0.1.26",
+ "tracing",
 ]
 
 [[package]]
@@ -452,7 +452,7 @@ dependencies = [
  "socket2",
  "tokio",
  "tower-service",
- "tracing 0.1.26",
+ "tracing",
  "want",
 ]
 
@@ -1055,8 +1055,7 @@ dependencies = [
  "serde",
  "static_assertions",
  "tokio",
- "tracing 0.1.26",
- "tracing-macros",
+ "tracing",
  "tracing-subscriber",
  "twilight-cache-inmemory",
  "twilight-gateway",
@@ -1237,17 +1236,7 @@ dependencies = [
  "cfg-if",
  "pin-project-lite",
  "tracing-attributes",
- "tracing-core 0.1.18",
-]
-
-[[package]]
-name = "tracing"
-version = "0.2.0"
-source = "git+https://github.com/tokio-rs/tracing.git#cdde7c770e48c6d5e0fba63bfc1157978baf8e76"
-dependencies = [
- "cfg-if",
- "pin-project-lite",
- "tracing-core 0.2.0",
+ "tracing-core",
 ]
 
 [[package]]
@@ -1271,14 +1260,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tracing-core"
-version = "0.2.0"
-source = "git+https://github.com/tokio-rs/tracing.git#cdde7c770e48c6d5e0fba63bfc1157978baf8e76"
-dependencies = [
- "lazy_static",
-]
-
-[[package]]
 name = "tracing-log"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1286,15 +1267,7 @@ checksum = "a6923477a48e41c1951f1999ef8bb5a3023eb723ceadafe78ffb65dc366761e3"
 dependencies = [
  "lazy_static",
  "log",
- "tracing-core 0.1.18",
-]
-
-[[package]]
-name = "tracing-macros"
-version = "0.1.0"
-source = "git+https://github.com/tokio-rs/tracing.git#cdde7c770e48c6d5e0fba63bfc1157978baf8e76"
-dependencies = [
- "tracing 0.2.0",
+ "tracing-core",
 ]
 
 [[package]]
@@ -1304,7 +1277,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fb65ea441fbb84f9f6748fd496cf7f63ec9af5bca94dd86456978d055e8eb28b"
 dependencies = [
  "serde",
- "tracing-core 0.1.18",
+ "tracing-core",
 ]
 
 [[package]]
@@ -1323,8 +1296,8 @@ dependencies = [
  "sharded-slab",
  "smallvec",
  "thread_local",
- "tracing 0.1.26",
- "tracing-core 0.1.18",
+ "tracing",
+ "tracing-core",
  "tracing-log",
  "tracing-serde",
 ]
@@ -1382,7 +1355,7 @@ dependencies = [
  "serde_json",
  "tokio",
  "tokio-tungstenite",
- "tracing 0.1.26",
+ "tracing",
  "twilight-gateway-queue",
  "twilight-http",
  "twilight-model",
@@ -1395,7 +1368,7 @@ version = "0.6.0"
 source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
 dependencies = [
  "tokio",
- "tracing 0.1.26",
+ "tracing",
  "twilight-http",
 ]
 
@@ -1411,7 +1384,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
- "tracing 0.1.26",
+ "tracing",
  "twilight-model",
 ]
 
@@ -1424,7 +1397,7 @@ dependencies = [
  "serde",
  "serde-value",
  "serde_repr",
- "tracing 0.1.26",
+ "tracing",
 ]
 
 [[package]]
@@ -1435,7 +1408,7 @@ dependencies = [
  "dashmap",
  "futures-util",
  "tokio",
- "tracing 0.1.26",
+ "tracing",
  "twilight-model",
 ]
 

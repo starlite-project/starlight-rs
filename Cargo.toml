@@ -24,11 +24,8 @@ features = ["derive"]
 version = "1.0.127"
 
 [dependencies.tokio]
-version = "1.9.0"
+version = "1"
 features = ["macros", "rt-multi-thread", "signal"]
-
-[dependencies.tracing-macros]
-git = "https://github.com/tokio-rs/tracing.git"
 
 [dependencies.tracing-subscriber]
 version = "0.2.19"

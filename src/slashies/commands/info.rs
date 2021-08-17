@@ -31,7 +31,16 @@ impl<'a> Info {
         )
         .await?;
 
-        dbg!(click_data);
+        interaction
+            .update()?
+            .content(Some(
+                format!("You clicked {}", click_data.data.custom_id).as_str(),
+            ))?
+            .components(Some(&[]))?
+            .exec()
+            .await?
+            .model()
+            .await?;
 
         Ok(())
     }
