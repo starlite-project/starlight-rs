@@ -79,40 +79,24 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
         interaction: Interaction<'a>,
         user_id: UserId,
     ) -> Result<MessageComponentInteraction> {
+        let waiter = move |event: &Event| {
+            if let Event::InteractionCreate(interaction_create) = event {
+                if let DiscordInteraction::MessageComponent(ref button) = interaction_create.0 {
+                    if Self::COMPONENT_IDS.contains(&button.data.custom_id.as_str())
+                        && button.author_id().unwrap_or_default() == user_id
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            false
+        };
+
         let event = if let Some(guild_id) = interaction.command.guild_id {
-            state
-                .standby
-                .wait_for(guild_id, move |event: &Event| {
-                    if let Event::InteractionCreate(interaction_create) = event {
-                        match &interaction_create.0 {
-                            DiscordInteraction::MessageComponent(button) => {
-                                Self::COMPONENT_IDS.contains(&button.data.custom_id.as_str())
-                                    && button.author_id().unwrap_or_default() == user_id
-                            }
-                            _ => false,
-                        }
-                    } else {
-                        false
-                    }
-                })
-                .await?
+            state.standby.wait_for(guild_id, waiter).await?
         } else {
-            state
-                .standby
-                .wait_for_event(move |event: &Event| {
-                    if let Event::InteractionCreate(interaction_create) = event {
-                        match &interaction_create.0 {
-                            DiscordInteraction::MessageComponent(button) => {
-                                Self::COMPONENT_IDS.contains(&button.data.custom_id.as_str())
-                                    && button.author_id().unwrap_or_default() == user_id
-                            }
-                            _ => false,
-                        }
-                    } else {
-                        false
-                    }
-                })
-                .await?
+            state.standby.wait_for_event(waiter).await?
         };
 
         if let Event::InteractionCreate(interaction_create) = event {

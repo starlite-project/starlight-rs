@@ -1,5 +1,0 @@
-[package]
-name = "star-embed-builder"
-version = "0.1.0"
-edition = "2018"
-authors = ["Gryffon Bellish <owenbellish@gmail.com>"]

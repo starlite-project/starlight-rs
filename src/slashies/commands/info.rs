@@ -55,6 +55,7 @@ impl<'a> Info {
     async fn run_user(&self, interaction: Interaction<'a>) -> Result<()> {
         let response = Response::from("User info: todo");
 
+        // TODO: Find a way to not make this so long
         let user = interaction
             .command
             .data
