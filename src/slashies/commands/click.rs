@@ -55,7 +55,7 @@ impl SlashCommand<2> for Click {
                 )
                 .as_str(),
             ))?
-            .components(Some(&[]))?
+            .components(Self::EMPTY_COMPONENTS)?
             .exec()
             .await?;
 

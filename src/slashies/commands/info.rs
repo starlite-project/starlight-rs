@@ -7,10 +7,18 @@ use crate::{
 };
 use anyhow::Result;
 use async_trait::async_trait;
-use twilight_model::application::{
-    command::{BaseCommandOptionData, Command, CommandOption},
-    component::{button::ButtonStyle, Button},
-    interaction::ApplicationCommand,
+use twilight_embed_builder::{
+    image_source::ImageSourceUrlError, EmbedAuthorBuilder, EmbedBuilder, ImageSource,
+};
+use twilight_model::{
+    application::{
+        command::{BaseCommandOptionData, Command, CommandOption},
+        component::{button::ButtonStyle, Button},
+        interaction::ApplicationCommand,
+    },
+    channel::embed::EmbedAuthor,
+    guild::Member,
+    user::User,
 };
 
 #[derive(Debug, Clone)]
@@ -18,6 +26,20 @@ pub enum InfoType {
     Author,
     Bot,
     Guild,
+}
+
+impl InfoType {
+    pub const fn is_guild(&self) -> bool {
+        matches!(self, Self::Guild)
+    }
+
+    pub const fn is_bot(&self) -> bool {
+        matches!(self, Self::Bot)
+    }
+
+    pub const fn is_author(&self) -> bool {
+        matches!(self, Self::Author)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -53,8 +75,6 @@ impl<'a> Info {
     }
 
     async fn run_user(&self, interaction: Interaction<'a>) -> Result<()> {
-        let response = Response::from("User info: todo");
-
         let user = interaction
             .command
             .data
@@ -63,7 +83,26 @@ impl<'a> Info {
             .and_then(|data| data.users.get(0))
             .unwrap_or_else(|| crate::debug_unreachable!());
 
-        dbg!(user);
+        let member: Member = interaction
+            .state
+            .http
+            .guild_member(
+                interaction
+                    .command
+                    .guild_id
+                    .unwrap_or_else(|| crate::debug_unreachable!()),
+                user.id,
+            )
+            .exec()
+            .await?
+            .model()
+            .await?;
+
+        let embed_builder = EmbedBuilder::new().author(embed_author(&member)?);
+
+        let embed = embed_builder.build()?;
+
+        let response = Response::from(embed);
 
         interaction.response(response).await?;
 
@@ -81,7 +120,7 @@ impl SlashCommand<3> for Info {
             guild_id: None,
             name: String::from(Self::NAME),
             default_permission: None,
-            description: String::from("Gets info about a user, the guild, or myself!"),
+            description: String::from("Gets info about a user, the guild, or myself"),
             id: None,
             options: vec![CommandOption::User(BaseCommandOptionData {
                 description: String::from("The user to get info for"),
@@ -93,6 +132,14 @@ impl SlashCommand<3> for Info {
 
     async fn run(&self, state: State) -> Result<()> {
         let interaction = state.interaction(&self.0);
+
+        if interaction.command.guild_id.is_none() {
+            interaction
+                .response(Response::from("This command can only be ran in guilds").exec())
+                .await?;
+
+            return Ok(());
+        }
 
         if interaction.command.data.options.is_empty() {
             self.run_buttons(interaction).await
@@ -143,4 +190,39 @@ impl ClickCommand<3> for Info {
             crate::debug_unreachable!()
         }
     }
+}
+
+const fn member_name(member: &Member) -> &String {
+    match &member.nick {
+        Some(nick) => nick,
+        None => &member.user.name,
+    }
+}
+
+fn user_avatar(user: &User) -> String {
+    match &user.avatar {
+        Some(hash) => format!(
+            "https://cdn.discordapp.com/avatars/{}/{}.{}",
+            user.id,
+            hash,
+            if hash.starts_with("a_") { "gif" } else { "png" }
+        ),
+        None => format!(
+            "https://cdn.discordapp.com/embed/avatars/{}.png",
+            user.discriminator
+                .chars()
+                .last()
+                .unwrap()
+                .to_digit(10)
+                .unwrap()
+                % 5
+        ),
+    }
+}
+
+fn embed_author(member: &Member) -> Result<EmbedAuthor, ImageSourceUrlError> {
+    Ok(EmbedAuthorBuilder::new()
+        .name(member_name(member))
+        .icon_url(ImageSource::url(user_avatar(&member.user))?)
+        .build())
 }

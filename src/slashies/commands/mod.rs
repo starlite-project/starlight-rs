@@ -66,6 +66,8 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
 
     type Output;
 
+    const EMPTY_COMPONENTS: Option<&'static [Component]> = Some(&[]);
+
     fn define_buttons() -> Result<[Button; N], BuildError>;
 
     fn parse(interaction: Interaction, input: &str) -> Self::Output;
