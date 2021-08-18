@@ -1,0 +1,5 @@
+[package]
+name = "star-cache"
+edition = "2018"
+version = "0.1.0"
+authors = ["Gryffon Bellish <owenbellish@gmail.com>"]

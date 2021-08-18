@@ -7,7 +7,6 @@ use anyhow::Result;
 use async_trait::async_trait;
 use base64::encode;
 use click::Click;
-use info::Info;
 use ping::Ping;
 use std::{
     any::type_name,
@@ -28,12 +27,11 @@ use twilight_model::{
 };
 
 mod click;
-mod info;
 mod ping;
 
 #[must_use]
-pub fn get_slashies() -> [Command; 3] {
-    [Ping::define(), Click::define(), Info::define()]
+pub fn get_slashies() -> [Command; 2] {
+    [Ping::define(), Click::define()]
 }
 
 #[async_trait]
@@ -141,7 +139,6 @@ impl<T: SlashCommand<0>> !ClickCommand<0> for T {}
 pub enum Commands {
     Ping(Ping),
     Click(Click),
-    Info(Info),
 }
 
 impl Commands {
@@ -150,7 +147,6 @@ impl Commands {
         match command.data.name.as_str() {
             Ping::NAME => Some(Self::Ping(Ping(command))),
             Click::NAME => Some(Self::Click(Click(command))),
-            Info::NAME => Some(Self::Info(Info(command))),
             _ => None,
         }
     }
@@ -159,7 +155,6 @@ impl Commands {
         match self {
             Self::Ping(c) => c.run(state).await,
             Self::Click(c) => c.run(state).await,
-            Self::Info(c) => c.run(state).await,
         }
     }
 }
