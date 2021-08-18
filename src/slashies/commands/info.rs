@@ -1,7 +1,7 @@
 use super::{ClickCommand, SlashCommand};
 use crate::{
     components::{BuildError, ButtonBuilder, ComponentBuilder},
-    slashies::{interaction::Interaction, Response},
+    slashies::{commands::SlashError, interaction::Interaction, Response},
     state::State,
     InteractionAuthor,
 };
@@ -17,7 +17,8 @@ use twilight_model::{
         interaction::ApplicationCommand,
     },
     channel::embed::EmbedAuthor,
-    guild::Member,
+    guild::{Member, Role},
+    id::{GuildId, RoleId},
     user::User,
 };
 
@@ -79,20 +80,28 @@ impl<'a> Info {
             .and_then(|data| data.users.get(0))
             .unwrap_or_else(|| crate::debug_unreachable!());
 
-        let member: Member = interaction
+        let guild_id = interaction
+            .command
+            .guild_id
+            .unwrap_or_else(|| crate::debug_unreachable!());
+
+        let member: Member = crate::model!(interaction.state.http.guild_member(guild_id, user.id));
+
+        dbg!(&member.hoisted_role);
+
+        let role = interaction
             .state
-            .http
-            .guild_member(
-                interaction
-                    .command
-                    .guild_id
-                    .unwrap_or_else(|| crate::debug_unreachable!()),
-                user.id,
-            )
-            .exec()
-            .await?
-            .model()
-            .await?;
+            .cache
+            .role(member.hoisted_role.unwrap_or_else(|| guild_id.0.into()));
+
+        dbg!(role);
+
+        Self::get_role(
+            interaction,
+            guild_id,
+            member.hoisted_role.unwrap_or_else(|| guild_id.0.into()),
+        )
+        .await?;
 
         let embed_builder = EmbedBuilder::new().author(embed_author(&member)?);
 
@@ -103,6 +112,29 @@ impl<'a> Info {
         interaction.response(response).await?;
 
         Ok(())
+    }
+
+    async fn get_role(
+        interaction: Interaction<'a>,
+        guild_id: GuildId,
+        role_id: RoleId,
+    ) -> Result<()> {
+        let roles: Vec<Role> = crate::list_models!(interaction.state.http.roles(guild_id));
+
+        let role = roles
+            .iter()
+            .find(|role| role.id == role_id)
+            .ok_or(SlashError)?;
+
+        dbg!(role);
+
+        Ok(())
+    }
+
+    fn get_hoisted_role(mut roles: Vec<Role>) -> Option<Role> {
+        roles.sort();
+
+        roles.iter().cloned().filter(|role| role.hoist).next()
     }
 }
 

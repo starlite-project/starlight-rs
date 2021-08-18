@@ -3,7 +3,7 @@ use starlight_rs::state::{Config, StateBuilder};
 use tracing::{event, Level};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 use twilight_cache_inmemory::ResourceType;
-use twilight_gateway::{cluster::ShardScheme, EventTypeFlags};
+use twilight_gateway::cluster::ShardScheme;
 use twilight_model::gateway::Intents;
 
 #[cfg(windows)]
@@ -35,12 +35,8 @@ async fn main() -> Result<()> {
     let (client, events) = StateBuilder::new()
         .config(config)
         .intents(Intents::empty())
-        .cluster_builder(|builder| {
-            builder
-                .shard_scheme(ShardScheme::Auto)
-                .event_types(EventTypeFlags::READY | EventTypeFlags::INTERACTION_CREATE)
-        })
-        .cache_builder(|builder| builder.resource_types(ResourceType::empty()))
+        .cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))
+        .cache_builder(|builder| builder.resource_types(ResourceType::all()))
         .build()
         .await?;
 

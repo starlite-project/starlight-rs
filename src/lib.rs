@@ -30,7 +30,35 @@ macro_rules! debug_unreachable {
 
 #[macro_export]
 macro_rules! model {
-    ($request:expr) => {{
-        $request.exec().await?.model().await?
-    }};
+    ($request:expr) => {
+        crate::finish_request!($request, model)
+    };
+}
+
+#[macro_export]
+macro_rules! list_models {
+    ($request:expr) => {
+        crate::finish_request!($request, models)
+    }
+}
+
+#[macro_export]
+macro_rules! text {
+    ($request:expr) => {
+        crate::finish_request!($request, text)
+    };
+}
+
+#[macro_export]
+macro_rules! bytes {
+    ($request:expr) => {
+        crate::finish_request!($request, bytes)
+    }
+}
+
+#[macro_export]
+macro_rules! finish_request {
+    ($request:expr, $type:ident) => {
+        $request.exec().await?.$type().await?
+    };
 }

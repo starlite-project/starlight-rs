@@ -114,6 +114,17 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
 }
 
 #[derive(Debug)]
+pub struct SlashError;
+
+impl Display for SlashError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        f.write_str("an error occurred during the slash command's execution")
+    }
+}
+
+impl Error for SlashError {}
+
+#[derive(Debug)]
 pub struct ClickError;
 
 impl Display for ClickError {
