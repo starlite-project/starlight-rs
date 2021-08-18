@@ -27,3 +27,10 @@ macro_rules! debug_unreachable {
         }
     };
 }
+
+#[macro_export]
+macro_rules! model {
+    ($request:expr) => {{
+        $request.exec().await?.model().await?
+    }};
+}

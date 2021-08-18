@@ -60,16 +60,12 @@ impl<'a> Info {
         )
         .await?;
 
-        interaction
+        crate::model!(interaction
             .update()?
             .content(Some(
-                format!("You clicked {}", click_data.data.custom_id).as_str(),
+                format!("You clicked {}", click_data.data.custom_id).as_str()
             ))?
-            .components(Some(&[]))?
-            .exec()
-            .await?
-            .model()
-            .await?;
+            .components(Self::EMPTY_COMPONENTS)?);
 
         Ok(())
     }
