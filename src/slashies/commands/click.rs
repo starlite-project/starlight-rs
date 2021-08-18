@@ -2,7 +2,7 @@ use super::{ClickCommand, SlashCommand};
 use crate::{
     components::{BuildError, ButtonBuilder, ComponentBuilder},
     debug_unreachable,
-    slashies::Response,
+    slashies::{interaction::Interaction, Response},
     state::State,
     InteractionAuthor,
 };
@@ -51,7 +51,7 @@ impl SlashCommand<2> for Click {
             .content(Some(
                 format!(
                     "Success! You clicked {}",
-                    Self::parse(state, &click_data.data.custom_id)
+                    Self::parse(interaction, &click_data.data.custom_id)
                 )
                 .as_str(),
             ))?
@@ -67,18 +67,12 @@ impl SlashCommand<2> for Click {
 impl ClickCommand<2> for Click {
     type Output = String;
 
-    fn parse(_state: State, value: &str) -> Self::Output {
+    fn parse(_: Interaction<'_>, value: &str) -> Self::Output {
         let components = Self::define_buttons().unwrap_or_else(|_| debug_unreachable!());
 
         components
             .iter()
-            .find(|button| {
-                *button
-                    .custom_id
-                    .as_ref()
-                    .unwrap_or_else(|| debug_unreachable!())
-                    == value
-            })
+            .find(|button| button.custom_id.as_deref() == Some(value))
             .unwrap_or_else(|| debug_unreachable!())
             .label
             .clone()

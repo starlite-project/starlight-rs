@@ -60,8 +60,7 @@ impl<'a> Info {
             .data
             .resolved
             .as_ref()
-            .map(|data| data.users.get(0))
-            .flatten()
+            .and_then(|data| data.users.get(0))
             .unwrap_or_else(|| crate::debug_unreachable!());
 
         dbg!(user);
@@ -129,7 +128,7 @@ impl ClickCommand<3> for Info {
         Ok(buttons)
     }
 
-    fn parse(_: State, key: &str) -> Self::Output {
+    fn parse(_: Interaction<'_>, key: &str) -> Self::Output {
         let component_ids = Self::COMPONENT_IDS;
 
         let [author, bot, guild] = *component_ids;

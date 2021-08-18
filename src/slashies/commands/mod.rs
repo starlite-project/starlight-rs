@@ -68,7 +68,7 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
 
     fn define_buttons() -> Result<[Button; N], BuildError>;
 
-    fn parse(state: State, input: &str) -> Self::Output;
+    fn parse(interaction: Interaction, input: &str) -> Self::Output;
 
     fn components() -> Result<Vec<Component>, BuildError> {
         Ok(vec![Self::define_buttons()?.build_component()?])
