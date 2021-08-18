@@ -88,6 +88,7 @@ impl<'a> Info {
 
         let guild_roles: Vec<Role> = crate::list_models!(interaction.state.http.roles(guild_id));
 
+        // TODO: figure out if there's a way to not make this O(n^2)
         let mut roles = guild_roles
             .iter()
             .cloned()
