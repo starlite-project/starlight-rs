@@ -55,17 +55,14 @@ impl<'a> Info {
     async fn run_user(&self, interaction: Interaction<'a>) -> Result<()> {
         let response = Response::from("User info: todo");
 
-        // TODO: Find a way to not make this so long
         let user = interaction
             .command
             .data
             .resolved
             .as_ref()
-            .unwrap_or_else(|| crate::debug_unreachable!())
-            .users
-            .get(0)
-            .unwrap_or_else(|| crate::debug_unreachable!())
-            .clone();
+            .map(|data| data.users.get(0))
+            .flatten()
+            .unwrap_or_else(|| crate::debug_unreachable!());
 
         dbg!(user);
 
