@@ -1157,6 +1157,17 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 [[package]]
 name = "star-cache"
 version = "0.1.0"
+dependencies = [
+ "bitflags",
+ "dashmap",
+ "futures",
+ "serde",
+ "static_assertions",
+ "tokio",
+ "twilight-gateway",
+ "twilight-model",
+ "twilight-util",
+]
 
 [[package]]
 name = "starlight-rs"
@@ -1536,6 +1547,14 @@ dependencies = [
  "futures-util",
  "tokio",
  "tracing",
+ "twilight-model",
+]
+
+[[package]]
+name = "twilight-util"
+version = "0.6.0"
+source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
+dependencies = [
  "twilight-model",
 ]
 
