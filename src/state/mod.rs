@@ -13,9 +13,10 @@ use twilight_standby::Standby;
 
 mod builder;
 mod config;
-pub mod events;
+mod events;
+mod helper;
 
-pub use self::{builder::StateBuilder, config::Config};
+pub use self::{builder::StateBuilder, config::Config, helper::StateHelper};
 
 #[derive(Debug, Clone, Copy)]
 pub struct State(&'static Components, pub Config);
