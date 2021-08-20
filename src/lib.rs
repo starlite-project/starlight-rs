@@ -11,6 +11,7 @@ pub mod components;
 pub mod ext_traits;
 pub mod slashies;
 pub mod state;
+pub mod helpers;
 
 pub use ext_traits::*;
 
