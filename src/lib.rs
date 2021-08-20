@@ -4,14 +4,15 @@
 #![allow(
     clippy::missing_errors_doc,
     clippy::missing_panics_doc,
-    clippy::module_name_repetitions
+    clippy::module_name_repetitions,
+    clippy::struct_excessive_bools
 )]
 
 pub mod components;
 pub mod ext_traits;
+pub mod helpers;
 pub mod slashies;
 pub mod state;
-pub mod helpers;
 
 pub use ext_traits::*;
 
@@ -40,7 +41,7 @@ macro_rules! model {
 macro_rules! list_models {
     ($request:expr) => {
         crate::finish_request!($request, models)
-    }
+    };
 }
 
 #[macro_export]
@@ -54,7 +55,7 @@ macro_rules! text {
 macro_rules! bytes {
     ($request:expr) => {
         crate::finish_request!($request, bytes)
-    }
+    };
 }
 
 #[macro_export]
