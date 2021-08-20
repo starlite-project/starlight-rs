@@ -12,7 +12,10 @@ use twilight_model::{
 mod error;
 mod models;
 
-pub use self::{error::CacheHelperError, models::EmojiHelper};
+pub use self::{
+    error::CacheHelperError,
+    models::{EmojiHelper, MemberHelper},
+};
 
 pub type Result<T> = StdResult<T, CacheHelperError>;
 
@@ -143,6 +146,40 @@ impl<'a> CacheHelper<'a> {
                 Channel::Group(group) => Ok(group),
                 _ => Err(CacheHelperError::model_not_found()),
             }
+        }
+    }
+
+    pub async fn member(&self, guild_id: GuildId, user_id: UserId) -> Result<MemberHelper> {
+        if let Some(member) = self.state.cache.member(guild_id, user_id) {
+            Ok(member.into())
+        } else {
+            Ok(crate::model!(self.state.http.guild_member(guild_id, user_id)).into())
+        }
+    }
+
+    pub async fn members(&self, guild_id: GuildId) -> Result<Vec<MemberHelper>> {
+        if let Some(member_ids) = self.state.cache.guild_members(guild_id) {
+            let mut members = Vec::with_capacity(member_ids.len());
+            for member_id in member_ids.iter().copied() {
+                match self.state.cache.member(guild_id, member_id) {
+                    Some(member) => members.push(member.into()),
+                    None => break,
+                }
+            }
+
+            if members.len() == member_ids.len() {
+                Ok(members)
+            } else {
+                Ok(crate::list_models!(self.state.http.guild_members(guild_id))
+                    .into_iter()
+                    .map(MemberHelper::from)
+                    .collect())
+            }
+        } else {
+            Ok(crate::list_models!(self.state.http.guild_members(guild_id))
+                .into_iter()
+                .map(MemberHelper::from)
+                .collect())
         }
     }
 }
