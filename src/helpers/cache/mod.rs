@@ -3,8 +3,9 @@
 use crate::state::State;
 use std::result::Result as StdResult;
 use twilight_model::{
+    channel::{Channel, Group, GuildChannel, PrivateChannel},
     guild::Role,
-    id::{EmojiId, GuildId, RoleId, UserId},
+    id::{ChannelId, EmojiId, GuildId, RoleId, UserId},
     user::{CurrentUser, User},
 };
 
@@ -106,6 +107,42 @@ impl<'a> CacheHelper<'a> {
             Ok(user)
         } else {
             Ok(crate::model!(self.state.http.user(user_id)))
+        }
+    }
+
+    pub async fn guild_channel(&self, channel_id: ChannelId) -> Result<GuildChannel> {
+        if let Some(channel) = self.state.cache.guild_channel(channel_id) {
+            Ok(channel)
+        } else {
+            let model: Channel = crate::model!(self.state.http.channel(channel_id));
+            match model {
+                Channel::Guild(guild) => Ok(guild),
+                _ => Err(CacheHelperError::model_not_found()),
+            }
+        }
+    }
+
+    pub async fn private_channel(&self, channel_id: ChannelId) -> Result<PrivateChannel> {
+        if let Some(channel) = self.state.cache.private_channel(channel_id) {
+            Ok(channel)
+        } else {
+            let model: Channel = crate::model!(self.state.http.channel(channel_id));
+            match model {
+                Channel::Private(private) => Ok(private),
+                _ => Err(CacheHelperError::model_not_found()),
+            }
+        }
+    }
+
+    pub async fn group_channel(&self, channel_id: ChannelId) -> Result<Group> {
+        if let Some(channel) = self.state.cache.group(channel_id) {
+            Ok(channel)
+        } else {
+            let model: Channel = crate::model!(self.state.http.channel(channel_id));
+            match model {
+                Channel::Group(group) => Ok(group),
+                _ => Err(CacheHelperError::model_not_found()),
+            }
         }
     }
 }
