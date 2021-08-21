@@ -18,6 +18,9 @@ use twilight_model::{
     user::User,
 };
 
+const GUILD_ONLY_MESSAGE: &str = "This command can only be used in a guild";
+const ERROR_OCCURRED: &str = "An error occurred getting the user";
+
 #[derive(Debug, Clone)]
 pub struct Info(pub(super) ApplicationCommand);
 
@@ -50,7 +53,7 @@ impl SlashCommand<0> for Info {
             id
         } else {
             interaction
-                .response(Response::from("This command can only be used in a guild"))
+                .response(Response::from(GUILD_ONLY_MESSAGE))
                 .await?;
 
             return Ok(());
@@ -82,6 +85,8 @@ impl SlashCommand<0> for Info {
         let member = helper.member(guild_id, user.id).await?;
 
         let embed_builder = EmbedBuilder::new().author(embed_author(&member, user)?);
+
+        let _roles = helper.member_roles(guild_id, user.id).await?;
 
         interaction
             .response(Response::from(embed_builder.build()?))

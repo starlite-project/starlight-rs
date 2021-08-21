@@ -33,32 +33,26 @@ features = ["fmt", "ansi"]
 
 [dependencies.twilight-cache-inmemory]
 git = "https://github.com/twilight-rs/twilight.git"
-branch = "feature/message-components"
 default-features = false
 
 [dependencies.twilight-embed-builder]
 git = "https://github.com/twilight-rs/twilight.git"
-branch = "feature/message-components"
 
 [dependencies.twilight-gateway]
 git = "https://github.com/twilight-rs/twilight.git"
-branch = "feature/message-components"
 default-features = false
 features = ["zlib-simd", "metrics", "rustls", "tracing"]
 
 [dependencies.twilight-http]
 git = "https://github.com/twilight-rs/twilight.git"
-branch = "feature/message-components"
 default-features = false
 features = ["tracing", "simd-json", "rustls"]
 
 [dependencies.twilight-model]
 git = "https://github.com/twilight-rs/twilight.git"
-branch = "feature/message-components"
 
 [dependencies.twilight-standby]
 git = "https://github.com/twilight-rs/twilight.git"
-branch = "feature/message-components"
 features = ["tracing"]
 
 [dev-dependencies]

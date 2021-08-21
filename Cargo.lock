@@ -1447,7 +1447,7 @@ dependencies = [
 [[package]]
 name = "twilight-cache-inmemory"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
+source = "git+https://github.com/twilight-rs/twilight.git#0c0756b4608e24c03f2e5a77f483a9cf08291ced"
 dependencies = [
  "bitflags",
  "dashmap",
@@ -1458,15 +1458,15 @@ dependencies = [
 [[package]]
 name = "twilight-embed-builder"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
+source = "git+https://github.com/twilight-rs/twilight.git#0c0756b4608e24c03f2e5a77f483a9cf08291ced"
 dependencies = [
  "twilight-model",
 ]
 
 [[package]]
 name = "twilight-gateway"
-version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
+version = "0.6.1"
+source = "git+https://github.com/twilight-rs/twilight.git#0c0756b4608e24c03f2e5a77f483a9cf08291ced"
 dependencies = [
  "bitflags",
  "flate2",
@@ -1487,7 +1487,7 @@ dependencies = [
 [[package]]
 name = "twilight-gateway-queue"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
+source = "git+https://github.com/twilight-rs/twilight.git#0c0756b4608e24c03f2e5a77f483a9cf08291ced"
 dependencies = [
  "tokio",
  "tracing",
@@ -1496,8 +1496,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-http"
-version = "0.6.1"
-source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
+version = "0.6.2"
+source = "git+https://github.com/twilight-rs/twilight.git#0c0756b4608e24c03f2e5a77f483a9cf08291ced"
 dependencies = [
  "hyper",
  "hyper-rustls",
@@ -1513,8 +1513,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-model"
-version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
+version = "0.6.1"
+source = "git+https://github.com/twilight-rs/twilight.git#0c0756b4608e24c03f2e5a77f483a9cf08291ced"
 dependencies = [
  "bitflags",
  "serde",
@@ -1526,7 +1526,7 @@ dependencies = [
 [[package]]
 name = "twilight-standby"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git?branch=feature/message-components#8a9194f5e250b986d0e01d5dbd9b3fdaaca8f32e"
+source = "git+https://github.com/twilight-rs/twilight.git#0c0756b4608e24c03f2e5a77f483a9cf08291ced"
 dependencies = [
  "dashmap",
  "futures-util",
