@@ -11,8 +11,8 @@ use twilight_model::{
     user::{CurrentUser, User},
 };
 
-mod error;
-mod models;
+pub mod error;
+pub mod models;
 
 pub use self::{
     error::CacheHelperError,
@@ -193,5 +193,38 @@ impl<'a> CacheHelper<'a> {
                 .map(MemberHelper::from)
                 .collect())
         }
+    }
+
+    pub async fn member_highest_role(&self, guild_id: GuildId, user_id: UserId) -> Result<Role> {
+        if let Some(role_id) = self.cache().member_highest_role(guild_id, user_id) {
+            self.role(guild_id, role_id).await
+        } else {
+            let member = self.member(guild_id, user_id).await?;
+
+            let mut highest_role: Option<(i64, Role)> = None;
+
+            for role_id in member.roles.iter().copied() {
+                if let Ok(role) = self.role(guild_id, role_id).await {
+                    if let Some((position, ref highest)) = highest_role {
+                        if role.position < position
+                            || (role.position == position && role.id > highest.id)
+                        {
+                            continue;
+                        }
+                    }
+
+                    highest_role = Some((role.position, role))
+                }
+            }
+
+            match highest_role {
+                Some((_, role)) => Ok(role),
+                None => self.role(guild_id, guild_id.0.into()).await,
+            }
+        }
+    }
+
+    pub async fn member_roles(&self, guild_id: GuildId, user_id: UserId) -> Result<Vec<Role>> {
+        todo!()
     }
 }

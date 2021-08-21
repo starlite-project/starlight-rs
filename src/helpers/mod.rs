@@ -1,3 +1,3 @@
-mod cache;
+pub mod cache;
 
-pub use self::cache::CacheHelper;
+pub use self::cache::{models, CacheHelper};
