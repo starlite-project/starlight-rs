@@ -66,6 +66,7 @@ static_assertions = "1.1.0"
 
 [profile.release]
 lto = "fat"
+debug = true
 panic = "abort"
 
 [profile.bench]
