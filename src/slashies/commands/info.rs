@@ -1,20 +1,13 @@
 use super::SlashCommand;
-use crate::{
-    helpers::{cache::MemberHelper, CacheHelper},
-    slashies::Response,
-    state::State,
-};
+use crate::{helpers::CacheHelper, slashies::Response, state::State};
 use anyhow::Result;
 use async_trait::async_trait;
-use twilight_embed_builder::{
-    image_source::ImageSourceUrlError, EmbedAuthorBuilder, EmbedBuilder, ImageSource,
-};
+use twilight_embed_builder::{EmbedAuthorBuilder, EmbedBuilder, EmbedFooterBuilder, ImageSource};
 use twilight_model::{
     application::{
         command::{BaseCommandOptionData, Command, CommandOption},
         interaction::ApplicationCommand,
     },
-    channel::embed::EmbedAuthor,
     user::User,
 };
 
@@ -23,6 +16,10 @@ const ERROR_OCCURRED: &str = "An error occurred getting the user";
 
 #[derive(Debug, Clone)]
 pub struct Info(pub(super) ApplicationCommand);
+
+impl Info {
+    const BASE: EmbedBuilder = EmbedBuilder::new();
+}
 
 #[async_trait]
 impl SlashCommand<0> for Info {
@@ -84,9 +81,27 @@ impl SlashCommand<0> for Info {
 
         let member = helper.member(guild_id, user.id).await?;
 
-        let embed_builder = EmbedBuilder::new().author(embed_author(&member, user)?);
+        let mut roles = helper.member_roles(guild_id, user.id).await?;
 
-        let _roles = helper.member_roles(guild_id, user.id).await?;
+        roles.reverse();
+
+        let mut embed_builder = Self::BASE
+            .author(
+                EmbedAuthorBuilder::new()
+                    .name(member.nick.as_ref().map_or(&user.name, |nick| nick)),
+            )
+            .thumbnail(ImageSource::url(user_avatar(user))?)
+            .footer(EmbedFooterBuilder::new(format!("ID: {}", user.id)));
+
+        let user_color = roles
+            .iter()
+            .map(|role| role.color)
+            .find(|color| color != &0);
+
+        embed_builder = match user_color {
+            Some(color) if color != 0 => embed_builder.color(color),
+            _ => embed_builder,
+        };
 
         interaction
             .response(Response::from(embed_builder.build()?))
@@ -96,40 +111,24 @@ impl SlashCommand<0> for Info {
     }
 }
 
-const fn member_name<'a>(member: &'a MemberHelper, user: &'a User) -> &'a String {
-    match &member.nick {
-        Some(nick) => nick,
-        None => &user.name,
-    }
-}
-
-fn avatar(user: &User) -> String {
-    match &user.avatar {
-        Some(hash) => format!(
+fn user_avatar(user: &User) -> String {
+    if let Some(hash) = &user.avatar {
+        format!(
             "https://cdn.discordapp.com/avatars/{}/{}.{}",
             user.id,
             hash,
             if hash.starts_with("a_") { "gif" } else { "png" }
-        ),
-        None => format!(
+        )
+    } else {
+        format!(
             "https://cdn.discordapp.com/embed/avatars/{}.png",
             user.discriminator
                 .chars()
                 .last()
-                .unwrap()
+                .unwrap_or_else(|| crate::debug_unreachable!())
                 .to_digit(10)
-                .unwrap()
+                .unwrap_or_else(|| crate::debug_unreachable!())
                 % 5
-        ),
+        )
     }
-}
-
-fn embed_author<'a>(
-    member: &'a MemberHelper,
-    user: &'a User,
-) -> Result<EmbedAuthor, ImageSourceUrlError> {
-    Ok(EmbedAuthorBuilder::new()
-        .name(member_name(member, user))
-        .icon_url(ImageSource::url(avatar(user))?)
-        .build())
 }

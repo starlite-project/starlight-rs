@@ -14,14 +14,20 @@ use tokio::signal::unix::{signal, SignalKind};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let log_filter_layer = EnvFilter::try_from_default_env()
-        .or_else(|_| EnvFilter::try_new("info"))?
-        .add_directive("starlight_rs[act]=debug".parse()?)
-        .add_directive("starlight_rs=trace".parse()?);
+    let mut log_filter_layer =
+        EnvFilter::try_from_default_env().or_else(|_| EnvFilter::try_new("info"))?;
     let log_fmt_layer = fmt::layer()
         .pretty()
         .with_thread_ids(true)
         .with_thread_names(true);
+
+    log_filter_layer = if cfg!(debug_assertions) {
+        log_filter_layer
+            .add_directive("starlight_rs[act]=debug".parse()?)
+            .add_directive("starlight_rs=trace".parse()?)
+    } else {
+        log_filter_layer.add_directive("starlight_rs=info".parse()?)
+    };
 
     tracing_subscriber::registry()
         .with(log_filter_layer)
