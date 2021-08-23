@@ -69,3 +69,8 @@ panic = "abort"
 
 [profile.bench]
 lto = "fat"
+
+[workspace]
+members = [
+    "./test"
+]

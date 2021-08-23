@@ -2,6 +2,7 @@ use super::SlashCommand;
 use crate::{helpers::CacheHelper, slashies::Response, state::State};
 use anyhow::Result;
 use async_trait::async_trait;
+use chrono::Utc;
 use twilight_embed_builder::{EmbedAuthorBuilder, EmbedBuilder, EmbedFooterBuilder, ImageSource};
 use twilight_model::{
     application::{
@@ -91,7 +92,8 @@ impl SlashCommand<0> for Info {
                     .name(member.nick.as_ref().map_or(&user.name, |nick| nick)),
             )
             .thumbnail(ImageSource::url(user_avatar(user))?)
-            .footer(EmbedFooterBuilder::new(format!("ID: {}", user.id)));
+            .footer(EmbedFooterBuilder::new(format!("ID: {}", user.id)))
+            .timestamp(format!("{:?}", Utc::now()));
 
         let user_color = roles
             .iter()

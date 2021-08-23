@@ -1,0 +1,18 @@
+[package]
+name = "star-test"
+version = "0.1.0"
+edition = "2018"
+authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
+
+[dependencies.chrono]
+version = "0.4"
+default-features = false
+features = ["std", "clock", "serde"]
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "date_time"
+harness = false
+path = "benches/date_time.rs"
