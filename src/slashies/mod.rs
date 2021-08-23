@@ -59,7 +59,7 @@ impl Response {
     }
 
     pub fn allowed_mentions<F: FnOnce(AllowedMentionsBuilder) -> AllowedMentionsBuilder>(
-        self,
+        mut self,
         builder: F,
     ) -> Self {
         self.0.allowed_mentions = Some(builder(AllowedMentionsBuilder::new()).build());
