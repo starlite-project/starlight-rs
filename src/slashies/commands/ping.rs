@@ -35,7 +35,7 @@ impl SlashCommand<0> for Ping {
             .sum::<Duration>()
             / state.cluster.shards().len().try_into()?;
 
-        let mut response = match ping.as_millis() {
+        let response = match ping.as_millis() {
             0 => Response::from("Pong! Couldn't quite get average latency"),
             ping => {
                 Response::new().message(format!("Pong! Average latency is {} milliseconds", ping))

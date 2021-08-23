@@ -10,7 +10,10 @@ use twilight_model::{
         component::{Component, ComponentType},
         interaction::application_command::ApplicationCommand,
     },
-    channel::{embed::Embed, message::MessageFlags},
+    channel::{
+        embed::Embed,
+        message::{allowed_mentions::AllowedMentionsBuilder, AllowedMentions, MessageFlags},
+    },
 };
 
 pub mod commands;
@@ -39,68 +42,77 @@ impl Response {
         InteractionResponse::DeferredChannelMessageWithSource(Self::BASE)
     }
 
-    pub fn add_component(&mut self, component: Component) -> Self {
+    pub fn add_component(self, component: Component) -> Self {
         self.add_components(vec![component])
     }
 
     #[allow(clippy::option_if_let_else)]
-    pub fn add_components(&mut self, components: Vec<Component>) -> Self {
+    pub fn add_components(mut self, components: Vec<Component>) -> Self {
         let components = Self::check_components(components);
         if let Some(ref mut current) = self.0.components {
             current.extend(components);
 
-            self.clone()
+            self
         } else {
             self.set_components(components)
         }
     }
 
-    pub fn set_components(&mut self, components: Vec<Component>) -> Self {
+    pub fn allowed_mentions<F: FnOnce(AllowedMentionsBuilder) -> AllowedMentionsBuilder>(
+        self,
+        builder: F,
+    ) -> Self {
+        self.0.allowed_mentions = builder(AllowedMentionsBuilder::new()).build();
+
+        self
+    }
+
+    pub fn set_components(mut self, components: Vec<Component>) -> Self {
         let components = Self::check_components(components);
         self.0.components = Some(components);
-        self.clone()
+        self
     }
 
-    pub fn clear_components(&mut self) -> Self {
+    pub fn clear_components(mut self) -> Self {
         self.0.components = None;
 
-        self.clone()
+        self
     }
 
-    pub fn message<T: AsRef<str>>(&mut self, content: T) -> Self {
+    pub fn message<T: AsRef<str>>(mut self, content: T) -> Self {
         if content.as_ref().is_empty() {
             panic!("empty message not allowed");
         }
 
         self.0.content = Some(content.as_ref().to_owned());
 
-        self.clone()
+        self
     }
 
-    pub fn embeds(&mut self, embeds: Vec<Embed>) -> Self {
+    pub fn embeds(mut self, embeds: Vec<Embed>) -> Self {
         if embeds.is_empty() {
             panic!("empty embeds not allowed");
         }
 
         self.0.embeds.extend(embeds);
 
-        self.clone()
+        self
     }
 
-    pub fn embed(&mut self, embed: Embed) -> Self {
+    pub fn embed(self, embed: Embed) -> Self {
         self.embeds(vec![embed])
     }
 
-    pub fn flags(&mut self, flags: MessageFlags) -> Self {
+    pub fn flags(mut self, flags: MessageFlags) -> Self {
         self.0.flags = self
             .0
             .flags
             .map_or(Some(flags), |current_flags| Some(flags | current_flags));
 
-        self.clone()
+        self
     }
 
-    pub fn ephemeral(&mut self) -> Self {
+    pub fn ephemeral(self) -> Self {
         self.flags(MessageFlags::EPHEMERAL)
     }
 

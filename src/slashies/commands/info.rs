@@ -4,6 +4,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use chrono::Utc;
 use twilight_embed_builder::{EmbedAuthorBuilder, EmbedBuilder, EmbedFooterBuilder, ImageSource};
+use twilight_mention::Mention;
 use twilight_model::{
     application::{
         command::{BaseCommandOptionData, Command, CommandOption},
@@ -87,10 +88,12 @@ impl SlashCommand<0> for Info {
         roles.reverse();
 
         let mut embed_builder = Self::BASE
-            .author(
-                EmbedAuthorBuilder::new()
-                    .name(member.nick.as_ref().map_or(&user.name, |nick| nick)),
-            )
+            .author(EmbedAuthorBuilder::new().name(format!(
+                "{name}#{discriminator} - {mention}",
+                name = user.name,
+                discriminator = user.discriminator,
+                mention = user.mention()
+            )))
             .thumbnail(ImageSource::url(user_avatar(user))?)
             .footer(EmbedFooterBuilder::new(format!("ID: {}", user.id)))
             .timestamp(format!("{:?}", Utc::now()));
@@ -106,7 +109,10 @@ impl SlashCommand<0> for Info {
         };
 
         interaction
-            .response(Response::from(embed_builder.build()?))
+            .response(
+                Response::from(embed_builder.build()?)
+                    .build_allowed_mentions(|builder| builder.replied_user()),
+            )
             .await?;
 
         Ok(())
