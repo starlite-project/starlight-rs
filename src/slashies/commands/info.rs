@@ -3,7 +3,7 @@ use crate::{helpers::CacheHelper, slashies::Response, state::State};
 use anyhow::Result;
 use async_trait::async_trait;
 use chrono::Utc;
-use twilight_embed_builder::{EmbedAuthorBuilder, EmbedBuilder, EmbedFooterBuilder, ImageSource};
+use twilight_embed_builder::{EmbedBuilder, EmbedFooterBuilder, ImageSource};
 use twilight_mention::Mention;
 use twilight_model::{
     application::{
@@ -81,20 +81,20 @@ impl SlashCommand<0> for Info {
 
         let helper = CacheHelper::new(&interaction.state);
 
-        let member = helper.member(guild_id, user.id).await?;
+        // let member = helper.member(guild_id, user.id).await?;
 
         let mut roles = helper.member_roles(guild_id, user.id).await?;
 
         roles.reverse();
 
         let mut embed_builder = Self::BASE
-            .author(EmbedAuthorBuilder::new().name(format!(
-                "{name}#{discriminator} - {mention}",
+            .thumbnail(ImageSource::url(user_avatar(user))?)
+            .description(format!(
+                "**{name}#{discriminator}** - {mention}",
                 name = user.name,
                 discriminator = user.discriminator,
                 mention = user.mention()
-            )))
-            .thumbnail(ImageSource::url(user_avatar(user))?)
+            ))
             .footer(EmbedFooterBuilder::new(format!("ID: {}", user.id)))
             .timestamp(format!("{:?}", Utc::now()));
 
@@ -111,7 +111,7 @@ impl SlashCommand<0> for Info {
         interaction
             .response(
                 Response::from(embed_builder.build()?)
-                    .allowed_mentions(|builder| builder.replied_user()),
+                    .allowed_mentions(|builder| builder.replied_user().user_ids([user.id])),
             )
             .await?;
 

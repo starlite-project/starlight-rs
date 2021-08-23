@@ -12,7 +12,7 @@ use twilight_model::{
     },
     channel::{
         embed::Embed,
-        message::{allowed_mentions::AllowedMentionsBuilder, AllowedMentions, MessageFlags},
+        message::{allowed_mentions::AllowedMentionsBuilder, MessageFlags},
     },
 };
 
