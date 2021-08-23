@@ -62,7 +62,7 @@ impl Response {
         self,
         builder: F,
     ) -> Self {
-        self.0.allowed_mentions = builder(AllowedMentionsBuilder::new()).build();
+        self.0.allowed_mentions = Some(builder(AllowedMentionsBuilder::new()).build());
 
         self
     }
