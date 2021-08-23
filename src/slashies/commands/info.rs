@@ -111,7 +111,7 @@ impl SlashCommand<0> for Info {
         interaction
             .response(
                 Response::from(embed_builder.build()?)
-                    .build_allowed_mentions(|builder| builder.replied_user()),
+                    .allowed_mentions(|builder| builder.replied_user()),
             )
             .await?;
 
