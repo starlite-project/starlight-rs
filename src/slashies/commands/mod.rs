@@ -9,6 +9,7 @@ use base64::encode;
 use click::Click;
 use info::Info;
 use ping::Ping;
+use stats::Stats;
 use std::{
 	any::type_name,
 	error::Error,
@@ -30,19 +31,25 @@ use twilight_model::{
 mod click;
 mod info;
 mod ping;
+mod stats;
 
 #[must_use]
-pub fn get_slashies() -> [Command; 3] {
-	[Ping::define(), Click::define(), Info::define()]
+pub fn get_slashies() -> [Command; 4] {
+	[
+		Ping::define(),
+		Click::define(),
+		Info::define(),
+		Stats::define(),
+	]
 }
 
 #[async_trait]
 pub trait SlashCommand<const N: usize> {
 	const NAME: &'static str;
 
-	async fn run(&self, state: State) -> Result<()>;
-
 	fn define() -> Command;
+
+	async fn run(&self, state: State) -> Result<()>;
 }
 
 #[async_trait]
@@ -142,6 +149,7 @@ pub enum Commands {
 	Ping(Ping),
 	Click(Click),
 	Info(Info),
+	Stats(Stats),
 }
 
 impl Commands {
@@ -151,6 +159,7 @@ impl Commands {
 			Ping::NAME => Some(Self::Ping(Ping(command))),
 			Click::NAME => Some(Self::Click(Click(command))),
 			Info::NAME => Some(Self::Info(Info(command))),
+			Stats::NAME => Some(Self::Stats(Stats(command))),
 			_ => None,
 		}
 	}
@@ -160,6 +169,7 @@ impl Commands {
 			Self::Ping(c) => c.run(state).await,
 			Self::Click(c) => c.run(state).await,
 			Self::Info(c) => c.run(state).await,
+			Self::Stats(c) => c.run(state).await,
 		}
 	}
 }
