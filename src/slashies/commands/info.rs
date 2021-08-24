@@ -93,6 +93,8 @@ impl SlashCommand<0> for Info {
 
         let current_user_enum = UserOrCurrentUser::from(&current_user);
 
+        let user_enum = UserOrCurrentUser::from(user);
+
         let created_at_formatted = Utc
             .timestamp_millis(created_at_timestamp)
             .format(Self::FORMAT_TYPE)
@@ -109,12 +111,13 @@ impl SlashCommand<0> for Info {
         roles.reverse();
 
         let mut embed_builder = Self::BASE
-            .thumbnail(ImageSource::url(user_avatar(&user.into()))?)
+            .thumbnail(ImageSource::url(user_avatar(&user_enum))?)
             .description(format!(
-                "**{name}#{discriminator}** - {mention}",
+                "**{name}#{discriminator}** - {mention} - [Avatar]({avatar})",
                 name = user.name,
                 discriminator = user.discriminator,
-                mention = user.mention()
+                mention = user.mention(),
+                avatar = user_avatar(&user_enum)
             ))
             .footer(
                 EmbedFooterBuilder::new(format!("ID: {}", user.id))
@@ -167,6 +170,7 @@ impl SlashCommand<0> for Info {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum UserOrCurrentUser<'a> {
     CurrentUser(&'a CurrentUser),
     User(&'a User),
