@@ -63,6 +63,11 @@ git = "https://github.com/twilight-rs/twilight.git"
 git = "https://github.com/twilight-rs/twilight.git"
 features = ["tracing"]
 
+[dependencies.twilight-util]
+git = "https://github.com/twilight-rs/twilight.git"
+default-features = false
+features = ["snowflake"]
+
 [dev-dependencies]
 static_assertions = "1.1.0"
 

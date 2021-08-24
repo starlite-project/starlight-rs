@@ -2,16 +2,18 @@ use super::SlashCommand;
 use crate::{helpers::CacheHelper, slashies::Response, state::State};
 use anyhow::Result;
 use async_trait::async_trait;
-use chrono::Utc;
-use twilight_embed_builder::{EmbedBuilder, EmbedFooterBuilder, ImageSource};
+use chrono::{DateTime, TimeZone, Utc};
+use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder, EmbedFooterBuilder, ImageSource};
 use twilight_mention::Mention;
 use twilight_model::{
     application::{
         command::{BaseCommandOptionData, Command, CommandOption},
         interaction::ApplicationCommand,
     },
-    user::User,
+    id::UserId,
+    user::{CurrentUser, User},
 };
+use twilight_util::snowflake::Snowflake;
 
 const GUILD_ONLY_MESSAGE: &str = "This command can only be used in a guild";
 const ERROR_OCCURRED: &str = "An error occurred getting the user";
@@ -21,6 +23,8 @@ pub struct Info(pub(super) ApplicationCommand);
 
 impl Info {
     const BASE: EmbedBuilder = EmbedBuilder::new();
+
+    const FORMAT_TYPE: &'static str = "%D, %r";
 }
 
 #[async_trait]
@@ -81,21 +85,42 @@ impl SlashCommand<0> for Info {
 
         let helper = CacheHelper::new(&interaction.state);
 
-        // let member = helper.member(guild_id, user.id).await?;
+        let member = helper.member(guild_id, user.id).await?;
+
+        let created_at_timestamp = user.id.timestamp();
+
+        let current_user = helper.current_user().await?;
+
+        let current_user_enum = UserOrCurrentUser::from(&current_user);
+
+        let created_at_formatted = Utc
+            .timestamp_millis(created_at_timestamp)
+            .format(Self::FORMAT_TYPE)
+            .to_string();
+
+        let joined_at_timestamp: Option<String> = member.joined_at.map(|timestamp| {
+            let parsed: DateTime<Utc> = timestamp.parse().expect("failed to parse into datetime");
+
+            parsed.format(Self::FORMAT_TYPE).to_string()
+        });
 
         let mut roles = helper.member_roles(guild_id, user.id).await?;
 
         roles.reverse();
 
         let mut embed_builder = Self::BASE
-            .thumbnail(ImageSource::url(user_avatar(user))?)
+            .thumbnail(ImageSource::url(user_avatar(&user.into()))?)
             .description(format!(
                 "**{name}#{discriminator}** - {mention}",
                 name = user.name,
                 discriminator = user.discriminator,
                 mention = user.mention()
             ))
-            .footer(EmbedFooterBuilder::new(format!("ID: {}", user.id)))
+            .footer(
+                EmbedFooterBuilder::new(format!("ID: {}", user.id))
+                    .icon_url(ImageSource::url(user_avatar(&current_user_enum))?),
+            )
+            .field(EmbedFieldBuilder::new("Created At", created_at_formatted))
             .timestamp(format!("{:?}", Utc::now()));
 
         let user_color = roles
@@ -106,6 +131,31 @@ impl SlashCommand<0> for Info {
         embed_builder = match user_color {
             Some(color) if color != 0 => embed_builder.color(color),
             _ => embed_builder,
+        };
+
+        embed_builder = if let Some(joined_timestamp) = joined_at_timestamp {
+            embed_builder.field(EmbedFieldBuilder::new("Joined At", joined_timestamp))
+        } else {
+            embed_builder
+        };
+
+        embed_builder = if roles.len() == 1
+            && roles
+                .get(0)
+                .unwrap_or_else(|| crate::debug_unreachable!())
+                .id
+                == guild_id.0.into()
+        {
+            embed_builder
+        } else {
+            embed_builder.field(EmbedFieldBuilder::new(
+                format!("Roles ({})", roles.len()),
+                roles
+                    .iter()
+                    .map(|role| role.mention().to_string())
+                    .collect::<Vec<_>>()
+                    .join(" "),
+            ))
         };
 
         interaction
@@ -119,18 +169,58 @@ impl SlashCommand<0> for Info {
     }
 }
 
-fn user_avatar(user: &User) -> String {
-    if let Some(hash) = &user.avatar {
+enum UserOrCurrentUser<'a> {
+    CurrentUser(&'a CurrentUser),
+    User(&'a User),
+}
+
+impl<'a> UserOrCurrentUser<'a> {
+    fn avatar(&self) -> Option<String> {
+        match *self {
+            Self::CurrentUser(user) => user.avatar.clone(),
+            Self::User(user) => user.avatar.clone(),
+        }
+    }
+
+    fn id(&self) -> UserId {
+        match *self {
+            Self::CurrentUser(user) => user.id,
+            Self::User(user) => user.id,
+        }
+    }
+
+    fn discriminator(&self) -> String {
+        match *self {
+            Self::CurrentUser(user) => user.discriminator.clone(),
+            Self::User(user) => user.discriminator.clone(),
+        }
+    }
+}
+
+impl<'a> From<&'a CurrentUser> for UserOrCurrentUser<'a> {
+    fn from(current_user: &'a CurrentUser) -> Self {
+        Self::CurrentUser(current_user)
+    }
+}
+
+impl<'a> From<&'a User> for UserOrCurrentUser<'a> {
+    fn from(user: &'a User) -> Self {
+        Self::User(user)
+    }
+}
+
+fn user_avatar(user: &UserOrCurrentUser) -> String {
+    if let Some(hash) = &user.avatar() {
         format!(
             "https://cdn.discordapp.com/avatars/{}/{}.{}",
-            user.id,
+            user.id(),
             hash,
             if hash.starts_with("a_") { "gif" } else { "png" }
         )
     } else {
         format!(
             "https://cdn.discordapp.com/embed/avatars/{}.png",
-            user.discriminator
+            user.discriminator()
                 .chars()
                 .last()
                 .unwrap_or_else(|| crate::debug_unreachable!())

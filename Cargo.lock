@@ -1178,6 +1178,7 @@ dependencies = [
  "twilight-mention",
  "twilight-model",
  "twilight-standby",
+ "twilight-util",
 ]
 
 [[package]]
@@ -1543,6 +1544,14 @@ dependencies = [
  "futures-util",
  "tokio",
  "tracing",
+ "twilight-model",
+]
+
+[[package]]
+name = "twilight-util"
+version = "0.6.0"
+source = "git+https://github.com/twilight-rs/twilight.git#0c0756b4608e24c03f2e5a77f483a9cf08291ced"
+dependencies = [
  "twilight-model",
 ]
 

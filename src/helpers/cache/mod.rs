@@ -55,6 +55,11 @@ impl<'a> CacheHelper<'a> {
     }
 
     #[instrument(level = "info", skip(self))]
+    pub async fn everyone_role(&self, guild_id: GuildId) -> Result<Role> {
+        self.role(guild_id, guild_id.0.into()).await
+    }
+
+    #[instrument(level = "info", skip(self))]
     pub async fn role(&self, guild_id: GuildId, role_id: RoleId) -> Result<Role> {
         if let Some(role) = self.cache().role(role_id) {
             info!("getting role from cache");
@@ -243,11 +248,9 @@ impl<'a> CacheHelper<'a> {
             .cloned()
             .collect();
 
-        roles.push(self.role(guild_id, guild_id.0.into()).await?);
-
-        if roles.len() == 1 {
+        if roles.is_empty() {
             info!("returning default \"@everyone\" role");
-            return Ok(roles);
+            return Ok(vec![self.everyone_role(guild_id).await?]);
         }
 
         roles.sort();
