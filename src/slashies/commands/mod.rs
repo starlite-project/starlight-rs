@@ -1,7 +1,7 @@
 use super::interaction::Interaction;
 use crate::{
-    components::{BuildError, ComponentBuilder},
-    state::State,
+	components::{BuildError, ComponentBuilder},
+	state::State,
 };
 use anyhow::Result;
 use async_trait::async_trait;
@@ -10,21 +10,21 @@ use click::Click;
 use info::Info;
 use ping::Ping;
 use std::{
-    any::type_name,
-    error::Error,
-    fmt::{Display, Formatter, Result as FmtResult},
-    lazy::Lazy,
+	any::type_name,
+	error::Error,
+	fmt::{Display, Formatter, Result as FmtResult},
+	lazy::Lazy,
 };
 use twilight_model::{
-    application::{
-        command::Command,
-        component::{Button, Component},
-        interaction::{
-            ApplicationCommand, Interaction as DiscordInteraction, MessageComponentInteraction,
-        },
-    },
-    gateway::event::Event,
-    id::UserId,
+	application::{
+		command::Command,
+		component::{Button, Component},
+		interaction::{
+			ApplicationCommand, Interaction as DiscordInteraction, MessageComponentInteraction,
+		},
+	},
+	gateway::event::Event,
+	id::UserId,
 };
 
 mod click;
@@ -33,93 +33,93 @@ mod ping;
 
 #[must_use]
 pub fn get_slashies() -> [Command; 3] {
-    [Ping::define(), Click::define(), Info::define()]
+	[Ping::define(), Click::define(), Info::define()]
 }
 
 #[async_trait]
 pub trait SlashCommand<const N: usize> {
-    const NAME: &'static str;
+	const NAME: &'static str;
 
-    async fn run(&self, state: State) -> Result<()>;
+	async fn run(&self, state: State) -> Result<()>;
 
-    fn define() -> Command;
+	fn define() -> Command;
 }
 
 #[async_trait]
 pub trait ClickCommand<const N: usize>: SlashCommand<N> {
-    const COMPONENT_IDS: Lazy<[&'static str; N]> = Lazy::new(|| {
-        let mut array = [""; N];
+	const COMPONENT_IDS: Lazy<[&'static str; N]> = Lazy::new(|| {
+		let mut array = [""; N];
 
-        let name = type_name::<Self>()
-            .split("::")
-            .last()
-            .unwrap_or_else(|| crate::debug_unreachable!());
+		let name = type_name::<Self>()
+			.split("::")
+			.last()
+			.unwrap_or_else(|| crate::debug_unreachable!());
 
-        let encoded = encode(name);
+		let encoded = encode(name);
 
-        for (i, val) in array.iter_mut().enumerate() {
-            *val = Box::leak(Box::new(format!("{}_{}", encoded, i)));
-        }
+		for (i, val) in array.iter_mut().enumerate() {
+			*val = Box::leak(Box::new(format!("{}_{}", encoded, i)));
+		}
 
-        array
-    });
+		array
+	});
 
-    type Output;
+	type Output;
 
-    const EMPTY_COMPONENTS: Option<&'static [Component]> = Some(&[]);
+	const EMPTY_COMPONENTS: Option<&'static [Component]> = Some(&[]);
 
-    fn define_buttons() -> Result<[Button; N], BuildError>;
+	fn define_buttons() -> Result<[Button; N], BuildError>;
 
-    fn parse(interaction: Interaction, input: &str) -> Self::Output;
+	fn parse(interaction: Interaction, input: &str) -> Self::Output;
 
-    fn components() -> Result<Vec<Component>, BuildError> {
-        Ok(vec![Self::define_buttons()?.build_component()?])
-    }
+	fn components() -> Result<Vec<Component>, BuildError> {
+		Ok(vec![Self::define_buttons()?.build_component()?])
+	}
 
-    async fn wait_for_click<'a>(
-        state: State,
-        interaction: Interaction<'a>,
-        user_id: UserId,
-    ) -> Result<MessageComponentInteraction> {
-        let waiter = move |event: &Event| {
-            if let Event::InteractionCreate(interaction_create) = event {
-                if let DiscordInteraction::MessageComponent(ref button) = interaction_create.0 {
-                    if Self::COMPONENT_IDS.contains(&button.data.custom_id.as_str())
-                        && button.author_id().unwrap_or_default() == user_id
-                    {
-                        return true;
-                    }
-                }
-            }
+	async fn wait_for_click<'a>(
+		state: State,
+		interaction: Interaction<'a>,
+		user_id: UserId,
+	) -> Result<MessageComponentInteraction> {
+		let waiter = move |event: &Event| {
+			if let Event::InteractionCreate(interaction_create) = event {
+				if let DiscordInteraction::MessageComponent(ref button) = interaction_create.0 {
+					if Self::COMPONENT_IDS.contains(&button.data.custom_id.as_str())
+						&& button.author_id().unwrap_or_default() == user_id
+					{
+						return true;
+					}
+				}
+			}
 
-            false
-        };
+			false
+		};
 
-        let event = if let Some(guild_id) = interaction.command.guild_id {
-            state.standby.wait_for(guild_id, waiter).await?
-        } else {
-            state.standby.wait_for_event(waiter).await?
-        };
+		let event = if let Some(guild_id) = interaction.command.guild_id {
+			state.standby.wait_for(guild_id, waiter).await?
+		} else {
+			state.standby.wait_for_event(waiter).await?
+		};
 
-        if let Event::InteractionCreate(interaction_create) = event {
-            if let DiscordInteraction::MessageComponent(comp) = interaction_create.0 {
-                Ok(*comp)
-            } else {
-                Err(ClickError.into())
-            }
-        } else {
-            Err(ClickError.into())
-        }
-    }
+		if let Event::InteractionCreate(interaction_create) = event {
+			if let DiscordInteraction::MessageComponent(comp) = interaction_create.0 {
+				Ok(*comp)
+			} else {
+				Err(ClickError.into())
+			}
+		} else {
+			Err(ClickError.into())
+		}
+	}
 }
 
 #[derive(Debug)]
 pub struct SlashError;
 
 impl Display for SlashError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        f.write_str("an error occurred during the slash command's execution")
-    }
+	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+		f.write_str("an error occurred during the slash command's execution")
+	}
 }
 
 impl Error for SlashError {}
@@ -128,9 +128,9 @@ impl Error for SlashError {}
 pub struct ClickError;
 
 impl Display for ClickError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        f.write_str("an error occurred getting data from the interaction")
-    }
+	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+		f.write_str("an error occurred getting data from the interaction")
+	}
 }
 
 impl Error for ClickError {}
@@ -139,27 +139,27 @@ impl<T: SlashCommand<0>> !ClickCommand<0> for T {}
 
 #[derive(Debug, Clone)]
 pub enum Commands {
-    Ping(Ping),
-    Click(Click),
-    Info(Info),
+	Ping(Ping),
+	Click(Click),
+	Info(Info),
 }
 
 impl Commands {
-    #[must_use]
-    pub fn r#match(command: ApplicationCommand) -> Option<Self> {
-        match command.data.name.as_str() {
-            Ping::NAME => Some(Self::Ping(Ping(command))),
-            Click::NAME => Some(Self::Click(Click(command))),
-            Info::NAME => Some(Self::Info(Info(command))),
-            _ => None,
-        }
-    }
+	#[must_use]
+	pub fn r#match(command: ApplicationCommand) -> Option<Self> {
+		match command.data.name.as_str() {
+			Ping::NAME => Some(Self::Ping(Ping(command))),
+			Click::NAME => Some(Self::Click(Click(command))),
+			Info::NAME => Some(Self::Info(Info(command))),
+			_ => None,
+		}
+	}
 
-    pub async fn run(&self, state: State) -> Result<()> {
-        match self {
-            Self::Ping(c) => c.run(state).await,
-            Self::Click(c) => c.run(state).await,
-            Self::Info(c) => c.run(state).await,
-        }
-    }
+	pub async fn run(&self, state: State) -> Result<()> {
+		match self {
+			Self::Ping(c) => c.run(state).await,
+			Self::Click(c) => c.run(state).await,
+			Self::Info(c) => c.run(state).await,
+		}
+	}
 }
