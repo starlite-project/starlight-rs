@@ -133,11 +133,9 @@ impl SlashCommand<0> for Info {
             _ => embed_builder,
         };
 
-        embed_builder = if let Some(joined_timestamp) = joined_at_timestamp {
+        embed_builder = joined_at_timestamp.map_or(embed_builder.clone(), |joined_timestamp| {
             embed_builder.field(EmbedFieldBuilder::new("Joined At", joined_timestamp))
-        } else {
-            embed_builder
-        };
+        });
 
         embed_builder = if roles.len() == 1
             && roles
@@ -175,24 +173,24 @@ enum UserOrCurrentUser<'a> {
 }
 
 impl<'a> UserOrCurrentUser<'a> {
-    fn avatar(&self) -> Option<String> {
+    const fn avatar(&self) -> &'a Option<String> {
         match *self {
-            Self::CurrentUser(user) => user.avatar.clone(),
-            Self::User(user) => user.avatar.clone(),
+            Self::CurrentUser(user) => &user.avatar,
+            Self::User(user) => &user.avatar,
         }
     }
 
-    fn id(&self) -> UserId {
+    const fn id(&self) -> UserId {
         match *self {
             Self::CurrentUser(user) => user.id,
             Self::User(user) => user.id,
         }
     }
 
-    fn discriminator(&self) -> String {
+    const fn discriminator(&self) -> &'a String {
         match *self {
-            Self::CurrentUser(user) => user.discriminator.clone(),
-            Self::User(user) => user.discriminator.clone(),
+            Self::CurrentUser(user) => &user.discriminator,
+            Self::User(user) => &user.discriminator,
         }
     }
 }

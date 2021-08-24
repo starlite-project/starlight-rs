@@ -42,11 +42,13 @@ impl Response {
         InteractionResponse::DeferredChannelMessageWithSource(Self::BASE)
     }
 
+    #[must_use]
     pub fn add_component(self, component: Component) -> Self {
         self.add_components(vec![component])
     }
 
     #[allow(clippy::option_if_let_else)]
+    #[must_use]
     pub fn add_components(mut self, components: Vec<Component>) -> Self {
         let components = Self::check_components(components);
         if let Some(ref mut current) = self.0.components {
@@ -67,12 +69,15 @@ impl Response {
         self
     }
 
+    #[must_use]
     pub fn set_components(mut self, components: Vec<Component>) -> Self {
         let components = Self::check_components(components);
         self.0.components = Some(components);
         self
     }
 
+    #[must_use]
+    #[allow(clippy::missing_const_for_fn)]
     pub fn clear_components(mut self) -> Self {
         self.0.components = None;
 
@@ -89,6 +94,7 @@ impl Response {
         self
     }
 
+    #[must_use]
     pub fn embeds(mut self, embeds: Vec<Embed>) -> Self {
         if embeds.is_empty() {
             panic!("empty embeds not allowed");
@@ -99,10 +105,12 @@ impl Response {
         self
     }
 
+    #[must_use]
     pub fn embed(self, embed: Embed) -> Self {
         self.embeds(vec![embed])
     }
 
+    #[must_use]
     pub fn flags(mut self, flags: MessageFlags) -> Self {
         self.0.flags = self
             .0
@@ -112,6 +120,7 @@ impl Response {
         self
     }
 
+    #[must_use]
     pub fn ephemeral(self) -> Self {
         self.flags(MessageFlags::EPHEMERAL)
     }
