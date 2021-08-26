@@ -8,6 +8,7 @@ use std::{
 	error::Error,
 	fmt::{Display, Error as FmtError, Formatter, Result as FmtResult},
 };
+use twilight_embed_builder::EmbedBuilder;
 use twilight_model::application::{command::Command, interaction::ApplicationCommand};
 
 #[derive(Debug)]
@@ -92,16 +93,11 @@ impl SlashCommand<0> for Stats {
 
 		let binary_size = Bytes::try_from(crate::get_binary_metadata()?.len())?;
 
-		dbg!(binary_size);
+		let embed = EmbedBuilder::new()
+			.color(crate::helpers::STARLIGHT_PRIMARY_COLOR.to_decimal())
+			.title("Hey");
 
-		let pid = std::process::id();
-
-		interaction
-			.response(Response::from(format!(
-				"Binary size: {}\nProcess ID: {}",
-				binary_size, pid
-			)))
-			.await?;
+		interaction.response(Response::from(embed.build()?)).await?;
 
 		Ok(())
 	}

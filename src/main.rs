@@ -12,10 +12,6 @@ use tokio::signal::windows::ctrl_c;
 #[cfg(unix)]
 use tokio::signal::unix::{signal, SignalKind};
 
-#[global_allocator]
-static GLOBAL: starlight_rs::Trallocator<std::alloc::System> =
-	starlight_rs::Trallocator::new(std::alloc::System);
-
 #[tokio::main]
 async fn main() -> Result<()> {
 	let mut log_filter_layer =

@@ -132,7 +132,7 @@ impl SlashCommand<0> for Info {
 			.find(|color| color != &0);
 
 		embed_builder = match user_color {
-			Some(color) if color != 0 => embed_builder.color(color),
+			Some(color) if color != 0 => embed_builder.color(dbg!(color)),
 			_ => embed_builder,
 		};
 

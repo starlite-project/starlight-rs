@@ -1,4 +1,4 @@
-#![feature(negative_impls, once_cell, const_fn_trait_bounds)]
+#![feature(negative_impls, once_cell)]
 #![warn(clippy::pedantic, clippy::nursery, clippy::suspicious)]
 #![deny(clippy::all)]
 #![allow(
@@ -9,11 +9,9 @@
 )]
 
 use std::{
-	alloc::{GlobalAlloc, Layout},
 	fs::Metadata,
 	io::Result,
 	path::Path,
-	sync::atomic::{AtomicUsize, Ordering},
 };
 
 pub mod components;
@@ -37,34 +35,6 @@ pub fn get_binary_metadata() -> Result<Metadata> {
 		))
 		.canonicalize()?
 		.metadata()
-}
-
-pub struct Trallocator<A: GlobalAlloc>(pub A, AtomicUsize);
-
-impl<A: GlobalAlloc> Trallocator<A> {
-	pub const fn new(a: A) -> Self {
-		Self(a, AtomicUsize::new(0))
-	}
-
-	pub fn reset(&self) {
-		self.1.store(0, Ordering::SeqCst);
-	}
-
-	pub fn get(&self) -> usize {
-		self.1.load(Ordering::SeqCst)
-	}
-}
-
-unsafe impl<A: GlobalAlloc> GlobalAlloc for Trallocator<A> {
-	unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-		self.1.fetch_add(layout.size(), Ordering::SeqCst);
-		self.0.alloc(layout)
-	}
-
-	unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-		self.0.dealloc(ptr, layout);
-		self.1.fetch_sub(layout.size(), Ordering::SeqCst);
-	}
 }
 
 #[macro_export]
