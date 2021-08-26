@@ -12,11 +12,12 @@ use tokio::signal::windows::ctrl_c;
 #[cfg(unix)]
 use tokio::signal::unix::{signal, SignalKind};
 
+#[global_allocator]
+static GLOBAL: starlight_rs::Trallocator<std::alloc::System> =
+	starlight_rs::Trallocator::new(std::alloc::System);
+
 #[tokio::main]
 async fn main() -> Result<()> {
-
-	dbg!(starlight_rs::get_binary_metadata()?.len());
-
 	let mut log_filter_layer =
 		EnvFilter::try_from_default_env().or_else(|_| EnvFilter::try_new("info"))?;
 	let log_fmt_layer = fmt::layer()

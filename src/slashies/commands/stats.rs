@@ -1,63 +1,70 @@
 use super::SlashCommand;
-use crate::state::State;
+use crate::{slashies::Response, state::State};
 use anyhow::Result;
 use async_trait::async_trait;
-use std::fmt::{Display, Formatter, Result as FmtResult};
+use std::{
+	cmp::min,
+	convert::TryFrom,
+	error::Error,
+	fmt::{Display, Error as FmtError, Formatter, Result as FmtResult},
+};
 use twilight_model::application::{command::Command, interaction::ApplicationCommand};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-enum BinarySize {
-	Bytes(u64),
-	Kilo(u64),
-	Mega(u64),
-	Giga(u64),
-}
+#[derive(Debug)]
+struct ConvertError(u64);
 
-impl Display for BinarySize {
+impl Display for ConvertError {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-		match *self {
-			Self::Bytes(bytes) => {
-				bytes.fmt(f)?;
-				f.write_str(" bytes")
-			}
-			Self::Kilo(bytes) => {
-				bytes.fmt(f)?;
-				f.write_str(" KB")
-			}
-			Self::Mega(bytes) => {
-				bytes.fmt(f)?;
-				f.write_str(" MB")
-			}
-			Self::Giga(bytes) => {
-				bytes.fmt(f)?;
-				f.write_str(" GB")
-			}
-		}
+		f.write_str("cannot convert ")?;
+		Display::fmt(&self.0, f)?;
+		f.write_str(" to f64")
 	}
 }
 
-impl From<u64> for BinarySize {
-	fn from(bytes: u64) -> Self {
-		if (bytes / 1024) == 0 {
-			Self::Bytes(bytes)
-		} else if (bytes / 1024 / 1024) == 0 {
-			Self::Kilo(bytes / 1024)
-		} else if (bytes / 1024 / 1024 / 1024) == 0 {
-			Self::Mega(bytes / 1024 / 1024)
-		} else {
-			Self::Giga(bytes / 1024 / 1024 / 1024)
+impl Error for ConvertError {}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct Bytes(f64);
+
+impl Bytes {
+	const UNITS: [&'static str; 9] = ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+}
+
+impl Display for Bytes {
+	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+		let negative = if self.0.is_sign_positive() { "" } else { "-" };
+		let num = self.0.abs();
+		if num < 1.0 {
+			Display::fmt(&negative, f)?;
+			Display::fmt(&num, f)?;
+			return f.write_str(" B");
 		}
+		let delimiter = 1000_f64;
+		let exponent = min(
+			(num.ln() / delimiter.ln()).floor() as i32,
+			(Self::UNITS.len() - 1) as i32,
+		);
+		let pretty_bytes = format!("{:.2}", num / delimiter.powi(exponent))
+			.parse::<f64>()
+			.map_err(|_| FmtError)?
+			* 1.0;
+		let unit = Self::UNITS[exponent as usize];
+		Display::fmt(&negative, f)?;
+		Display::fmt(&pretty_bytes, f)?;
+		f.write_str(" ")?;
+		Display::fmt(&unit, f)
 	}
 }
 
-impl Into<u64> for BinarySize {
-	fn into(self) -> u64 {
-		match self {
-			Self::Bytes(bytes) => bytes,
-			Self::Kilo(bytes) => bytes * 1024,
-			Self::Mega(bytes) => bytes * 1024 * 1024,
-			Self::Giga(bytes) => bytes * 1024 * 1024 * 1024,
+impl TryFrom<u64> for Bytes {
+	type Error = ConvertError;
+
+	fn try_from(value: u64) -> Result<Self, Self::Error> {
+		let result = value as f64;
+		if result as u64 != value {
+			return Err(ConvertError(value));
 		}
+		Ok(Self(result))
 	}
 }
 
@@ -83,58 +90,19 @@ impl SlashCommand<0> for Stats {
 	async fn run(&self, state: State) -> Result<()> {
 		let interaction = state.interaction(&self.0);
 
-		let binary_size: BinarySize = crate::get_binary_metadata()?.len().into();
+		let binary_size = Bytes::try_from(crate::get_binary_metadata()?.len())?;
+
+		dbg!(binary_size);
 
 		let pid = std::process::id();
 
+		interaction
+			.response(Response::from(format!(
+				"Binary size: {}\nProcess ID: {}",
+				binary_size, pid
+			)))
+			.await?;
+
 		Ok(())
-	}
-}
-
-#[cfg(test)]
-mod tests {
-	use super::BinarySize;
-	use static_assertions::assert_impl_all;
-	use std::{
-		fmt::{Debug, Display},
-		hash::Hash,
-	};
-
-	assert_impl_all!(
-		BinarySize: Clone,
-		Copy,
-		Debug,
-		Display,
-		Eq,
-		Hash,
-		Ord,
-		PartialEq,
-		PartialOrd
-	);
-
-	const BYTES: u64 = 512;
-	const KILO: u64 = 2048;
-	const MEGA: u64 = 3_145_728;
-	const GIGA: u64 = 10_737_418_240;
-
-	#[test]
-	fn from_u64() {
-		assert_eq!(BinarySize::from(BYTES), BinarySize::Bytes(512));
-		assert_eq!(BinarySize::from(KILO), BinarySize::Kilo(2));
-		assert_eq!(BinarySize::from(MEGA), BinarySize::Mega(3));
-		assert_eq!(BinarySize::from(GIGA), BinarySize::Giga(10));
-	}
-
-	#[test]
-	fn into_u64() {
-		let bytes: u64 = BinarySize::Bytes(BYTES).into();
-		let kilo: u64 = BinarySize::Kilo(2).into();
-		let mega: u64 = BinarySize::Mega(3).into();
-		let giga: u64 = BinarySize::Giga(10).into();
-
-		assert_eq!(bytes, BYTES);
-		assert_eq!(kilo, KILO);
-		assert_eq!(mega, MEGA);
-		assert_eq!(giga, GIGA);
 	}
 }

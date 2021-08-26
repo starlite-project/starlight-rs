@@ -153,6 +153,12 @@ impl From<&str> for Response {
 	}
 }
 
+impl From<String> for Response {
+	fn from(message: String) -> Self {
+		Self::new().message(message.as_str())
+	}
+}
+
 impl From<Embed> for Response {
 	fn from(embed: Embed) -> Self {
 		Self::new().embed(embed)
