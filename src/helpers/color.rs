@@ -25,11 +25,18 @@ impl Color {
 	}
 
 	pub const fn to_decimal(self) -> u32 {
-		u32::from_be_bytes([0, self.r(), self.g(), self.b()])
+		// u32::from_be_bytes([0, self.r(), self.g(), self.b()])
+		let r = self.r() as u32;
+		let g = self.g() as u32;
+		let b = self.b() as u32;
+
+		(r << 16) + (g << 8) + b
 	}
 
 	pub const fn from_decimal(decimal: u32) -> Self {
-		let [_, r, g, b] = decimal.to_be_bytes();
+		let r = ((decimal & 0x00ff0000) >> 16) as u8;
+		let g = ((decimal & 0x0000ff00) >> 8) as u8;
+		let b = (decimal & 0x000000ff) as u8;
 		Self(r, g, b)
 	}
 }

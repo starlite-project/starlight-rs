@@ -95,7 +95,7 @@ impl SlashCommand<0> for Stats {
 
 		let embed = EmbedBuilder::new()
 			.color(crate::helpers::STARLIGHT_PRIMARY_COLOR.to_decimal())
-			.title("Hey");
+			.title(format!("Binary size: {}", binary_size));
 
 		interaction.response(Response::from(embed.build()?)).await?;
 

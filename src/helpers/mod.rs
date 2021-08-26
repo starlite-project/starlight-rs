@@ -14,7 +14,12 @@ mod tests {
 	use super::{STARLIGHT_PRIMARY_COLOR, STARLIGHT_SECONDARY_COLOR};
 
 	#[test]
+	fn secondary_color() {
+		assert_eq!(STARLIGHT_SECONDARY_COLOR.to_decimal(), 14286926);
+	}
+
+	#[test]
 	fn primary_color() {
-		assert_eq!(STARLIGHT_PRIMARY_COLOR.to_decimal(), 14286926)
+		assert_eq!(STARLIGHT_PRIMARY_COLOR.to_decimal(), 8666532);
 	}
 }
