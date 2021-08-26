@@ -8,11 +8,7 @@
 	clippy::struct_excessive_bools
 )]
 
-use std::{
-	fs::Metadata,
-	io::Result,
-	path::Path,
-};
+use std::{fs::Metadata, io::Result, path::Path};
 
 pub mod components;
 pub mod ext_traits;

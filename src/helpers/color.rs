@@ -8,24 +8,28 @@ use std::fmt::{Formatter, Result as FmtResult};
 pub struct Color(u8, u8, u8);
 
 impl Color {
+	#[must_use]
 	pub const fn new(r: u8, g: u8, b: u8) -> Self {
 		Self(r, g, b)
 	}
 
+	#[must_use]
 	pub const fn r(self) -> u8 {
 		self.0
 	}
 
+	#[must_use]
 	pub const fn g(self) -> u8 {
 		self.1
 	}
 
+	#[must_use]
 	pub const fn b(self) -> u8 {
 		self.2
 	}
 
+	#[must_use]
 	pub const fn to_decimal(self) -> u32 {
-		// u32::from_be_bytes([0, self.r(), self.g(), self.b()])
 		let r = self.r() as u32;
 		let g = self.g() as u32;
 		let b = self.b() as u32;
@@ -33,10 +37,12 @@ impl Color {
 		(r << 16) + (g << 8) + b
 	}
 
+	#[allow(clippy::cast_possible_truncation)]
+	#[must_use]
 	pub const fn from_decimal(decimal: u32) -> Self {
-		let r = ((decimal & 0x00ff0000) >> 16) as u8;
-		let g = ((decimal & 0x0000ff00) >> 8) as u8;
-		let b = (decimal & 0x000000ff) as u8;
+		let r = ((decimal & 0x00ff_0000) >> 16) as u8;
+		let g = ((decimal & 0x0000_ff00) >> 8) as u8;
+		let b = (decimal & 0x0000_00ff) as u8;
 		Self(r, g, b)
 	}
 }

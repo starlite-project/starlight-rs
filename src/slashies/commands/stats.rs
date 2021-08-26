@@ -32,6 +32,11 @@ impl Bytes {
 }
 
 impl Display for Bytes {
+	#[allow(
+		clippy::cast_sign_loss,
+		clippy::cast_possible_truncation,
+		clippy::cast_possible_wrap
+	)]
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		let negative = if self.0.is_sign_positive() { "" } else { "-" };
 		let num = self.0.abs();
@@ -42,7 +47,7 @@ impl Display for Bytes {
 		}
 		let delimiter = 1000_f64;
 		let exponent = min(
-			(num.ln() / delimiter.ln()).floor() as i32,
+			num.log(delimiter).floor() as i32,
 			(Self::UNITS.len() - 1) as i32,
 		);
 		let pretty_bytes = format!("{:.2}", num / delimiter.powi(exponent))
@@ -60,6 +65,11 @@ impl Display for Bytes {
 impl TryFrom<u64> for Bytes {
 	type Error = ConvertError;
 
+	#[allow(
+		clippy::cast_sign_loss,
+		clippy::cast_possible_truncation,
+		clippy::cast_precision_loss
+	)]
 	fn try_from(value: u64) -> Result<Self, Self::Error> {
 		let result = value as f64;
 		if result as u64 != value {
