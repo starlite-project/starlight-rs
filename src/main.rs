@@ -7,7 +7,7 @@ use twilight_gateway::cluster::ShardScheme;
 use twilight_model::gateway::Intents;
 
 #[cfg(windows)]
-use tokio::signal::windows::ctrl_c;
+use tokio::signal::windows::{ctrl_break, ctrl_c};
 
 #[cfg(unix)]
 use tokio::signal::unix::{signal, SignalKind};
@@ -50,9 +50,11 @@ async fn main() -> Result<()> {
 
 	#[cfg(windows)]
 	{
-		let mut signal = ctrl_c()?;
+		let mut sig_c = ctrl_c()?;
+		let mut sig_break = ctrl_break()?;
 		tokio::select! {
-			_ = signal.recv() => event!(Level::INFO, "received SIGINT"),
+			_ = sig_c.recv() => event!(Level::INFO, "received SIGINT"),
+			_ = sig_break.recv() => event!(Level::INFO, "received SIGBREAK"),
 			_ = client.process(events) => (),
 		};
 	}

@@ -1,5 +1,8 @@
 use super::SlashCommand;
-use crate::{slashies::Response, state::State};
+use crate::{
+	slashies::{interaction::Interaction, Response},
+	state::State,
+};
 use anyhow::Result;
 use async_trait::async_trait;
 use std::{
@@ -10,7 +13,7 @@ use std::{
 	fs::metadata,
 };
 use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
-use twilight_embed_builder::EmbedBuilder;
+use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder};
 use twilight_model::application::{command::Command, interaction::ApplicationCommand};
 
 #[derive(Debug)]
@@ -84,6 +87,38 @@ impl TryFrom<u64> for Bytes {
 #[derive(Debug, Clone)]
 pub struct Stats(pub(super) ApplicationCommand);
 
+impl Stats {
+	fn statistics(&self, interaction: Interaction) -> String {
+		let cache_stats = interaction.state.cache.stats();
+
+		let channels_size = {
+			let current_guild_count = interaction
+				.state
+				.cache
+				.guild_channels(interaction.command.guild_id.unwrap_or_default())
+				.unwrap_or_default()
+				.len();
+
+			cache_stats.groups() + cache_stats.private_channels() + current_guild_count
+		};
+
+		let guilds = cache_stats.guilds();
+		let users = cache_stats.users();
+
+		let rustc_version = {
+			let mut version = crate::build_info::RUSTC_VERSION.to_string();
+
+			let range = version.find('(').unwrap_or(version.len());
+
+			version.replace_range(range.., "");
+
+			version
+		};
+
+		format!("**• Users:** {users}\n**• Servers:** {guilds}\n**• Channels:** {channels}\n**• Starlight version:** {crate_version}\n**• Rust version:** {rust_version}", users = users, guilds = guilds, channels = channels_size, crate_version = crate::build_info::PKG_VERSION, rust_version = rustc_version)
+	}
+}
+
 #[async_trait]
 impl SlashCommand<0> for Stats {
 	const NAME: &'static str = "stats";
@@ -112,12 +147,17 @@ impl SlashCommand<0> for Stats {
 
 		let binary_size = Bytes::try_from(metadata(binary_path)?.len())?;
 
+		let runtime = state.runtime.elapsed();
+		let now = chrono::Utc::now();
+
+		dbg!(runtime - now);
+		dbg!(runtime);
+
 		let embed = EmbedBuilder::new()
 			.color(crate::helpers::STARLIGHT_PRIMARY_COLOR.to_decimal())
-			.title(format!(
-				"Binary size: {binary_size}",
-				binary_size = binary_size,
-			));
+			.field(EmbedFieldBuilder::new("Statistics", self.statistics(interaction)))
+			.field(EmbedFieldBuilder::new("Uptime", String::from("todo")))
+			.field(EmbedFieldBuilder::new("Server Usage", String::from("todo")));
 
 		interaction.response(Response::from(embed.build()?)).await?;
 

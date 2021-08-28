@@ -4,6 +4,7 @@ use std::ops::Deref;
 use crate::slashies::{commands::get_slashies, interaction::Interaction};
 use anyhow::Result;
 use futures::StreamExt;
+use tokio::time::Instant;
 use tracing::{event, Level};
 use twilight_cache_inmemory::InMemoryCache as Cache;
 use twilight_gateway::{cluster::Events, Cluster, Event};
@@ -93,4 +94,5 @@ pub struct Components {
 	pub cluster: Cluster,
 	pub http: HttpClient,
 	pub standby: Standby,
+	pub runtime: Instant
 }

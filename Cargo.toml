@@ -72,6 +72,9 @@ features = ["snowflake"]
 [dev-dependencies]
 static_assertions = "1.1.0"
 
+[build-dependencies]
+built = "0.5"
+
 [profile.release]
 lto = "fat"
 panic = "abort"

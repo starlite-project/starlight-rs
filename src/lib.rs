@@ -16,6 +16,10 @@ pub mod state;
 
 pub use ext_traits::*;
 
+pub mod build_info {
+	include!(concat!(env!("OUT_DIR"), "/built.rs"));
+}
+
 #[macro_export]
 macro_rules! debug_unreachable {
 	() => {

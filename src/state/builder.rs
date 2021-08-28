@@ -1,6 +1,7 @@
 use super::Config;
 use super::{Components, State};
 use anyhow::{Context, Result};
+use tokio::time::Instant;
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
 use twilight_gateway::{
 	cluster::{ClusterBuilder, Events},
@@ -110,6 +111,7 @@ impl StateBuilder {
 			cluster: cluster.0,
 			standby,
 			http,
+			runtime: Instant::now(),
 		}));
 
 		Ok((

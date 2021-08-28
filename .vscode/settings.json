@@ -6,5 +6,6 @@
         "unresolved-proc-macro"
     ],
     "rust-analyzer.assist.importEnforceGranularity": true,
-    "rust-analyzer.assist.importGranularity": "crate"
+    "rust-analyzer.assist.importGranularity": "crate",
+    "rust-analyzer.cargo.runBuildScripts": true
 }
