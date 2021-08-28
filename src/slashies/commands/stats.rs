@@ -7,7 +7,9 @@ use std::{
 	convert::TryFrom,
 	error::Error,
 	fmt::{Display, Error as FmtError, Formatter, Result as FmtResult},
+	fs::metadata,
 };
+use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
 use twilight_embed_builder::EmbedBuilder;
 use twilight_model::application::{command::Command, interaction::ApplicationCommand};
 
@@ -101,11 +103,21 @@ impl SlashCommand<0> for Stats {
 	async fn run(&self, state: State) -> Result<()> {
 		let interaction = state.interaction(&self.0);
 
-		let binary_size = Bytes::try_from(crate::get_binary_metadata()?.len())?;
+		let system = System::new_all();
+		let current_process = system
+			.process(get_current_pid().expect("failed to get pid"))
+			.unwrap_or_else(|| crate::debug_unreachable!());
+
+		let binary_path = current_process.exe();
+
+		let binary_size = Bytes::try_from(metadata(binary_path)?.len())?;
 
 		let embed = EmbedBuilder::new()
 			.color(crate::helpers::STARLIGHT_PRIMARY_COLOR.to_decimal())
-			.title(format!("Binary size: {}", binary_size));
+			.title(format!(
+				"Binary size: {binary_size}",
+				binary_size = binary_size,
+			));
 
 		interaction.response(Response::from(embed.build()?)).await?;
 

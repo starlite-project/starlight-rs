@@ -8,8 +8,6 @@
 	clippy::struct_excessive_bools
 )]
 
-use std::{fs::Metadata, io::Result, path::Path};
-
 pub mod components;
 pub mod ext_traits;
 pub mod helpers;
@@ -17,21 +15,6 @@ pub mod slashies;
 pub mod state;
 
 pub use ext_traits::*;
-
-pub fn get_binary_metadata() -> Result<Metadata> {
-	Path::new("./target")
-		.join(if cfg!(debug_assertions) {
-			"debug"
-		} else {
-			"release"
-		})
-		.join(format!(
-			"starlight-rs{}",
-			if cfg!(windows) { ".exe" } else { "" }
-		))
-		.canonicalize()?
-		.metadata()
-}
 
 #[macro_export]
 macro_rules! debug_unreachable {
