@@ -12,6 +12,7 @@ use std::{
 	fmt::{Display, Error as FmtError, Formatter, Result as FmtResult},
 	fs::metadata,
 };
+use chrono::Duration;
 use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
 use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder};
 use twilight_model::application::{command::Command, interaction::ApplicationCommand};
@@ -117,6 +118,16 @@ impl Stats {
 
 		format!("**\u{2022} Users:** {users}\n**\u{2022} Servers:** {guilds}\n**\u{2022} Channels:** {channels}\n**\u{2022} Starlight version:** {crate_version}\n**\u{2022} Rust version:** {rust_version}", users = users, guilds = guilds, channels = channels_size, crate_version = crate::build_info::PKG_VERSION, rust_version = rustc_version)
 	}
+
+	fn uptime(interaction: Interaction) -> Result<String> {
+		// let host_uptime = star_utils::uptime()?;
+
+		let host_uptime = Duration::from_std(star_utils::uptime()?)?;
+
+		println!("{}", host_uptime);
+
+		Ok(format!("todo"))
+	}
 }
 
 #[async_trait]
@@ -158,7 +169,7 @@ impl SlashCommand<0> for Stats {
 				"Statistics",
 				Self::statistics(interaction),
 			))
-			.field(EmbedFieldBuilder::new("Uptime", String::from("todo")))
+			.field(EmbedFieldBuilder::new("Uptime", Self::uptime(interaction)?))
 			.field(EmbedFieldBuilder::new("Server Usage", String::from("todo")));
 
 		interaction.response(Response::from(embed.build()?)).await?;
