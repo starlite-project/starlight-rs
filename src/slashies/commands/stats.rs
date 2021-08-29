@@ -88,7 +88,7 @@ impl TryFrom<u64> for Bytes {
 pub struct Stats(pub(super) ApplicationCommand);
 
 impl Stats {
-	fn statistics(&self, interaction: Interaction) -> String {
+	fn statistics(interaction: Interaction) -> String {
 		let cache_stats = interaction.state.cache.stats();
 
 		let channels_size = {
@@ -108,14 +108,14 @@ impl Stats {
 		let rustc_version = {
 			let mut version = crate::build_info::RUSTC_VERSION.to_string();
 
-			let range = version.find('(').unwrap_or(version.len());
+			let range = version.find('(').unwrap_or_else(|| version.len())..;
 
-			version.replace_range(range.., "");
+			version.replace_range(range, "");
 
 			version
 		};
 
-		format!("**• Users:** {users}\n**• Servers:** {guilds}\n**• Channels:** {channels}\n**• Starlight version:** {crate_version}\n**• Rust version:** {rust_version}", users = users, guilds = guilds, channels = channels_size, crate_version = crate::build_info::PKG_VERSION, rust_version = rustc_version)
+		format!("**\u{2022} Users:** {users}\n**\u{2022} Servers:** {guilds}\n**\u{2022} Channels:** {channels}\n**\u{2022} Starlight version:** {crate_version}\n**\u{2022} Rust version:** {rust_version}", users = users, guilds = guilds, channels = channels_size, crate_version = crate::build_info::PKG_VERSION, rust_version = rustc_version)
 	}
 }
 
@@ -145,17 +145,19 @@ impl SlashCommand<0> for Stats {
 
 		let binary_path = current_process.exe();
 
-		let binary_size = Bytes::try_from(metadata(binary_path)?.len())?;
+		let _binary_size = Bytes::try_from(metadata(binary_path)?.len())?;
 
-		let runtime = state.runtime.elapsed();
-		let now = chrono::Utc::now();
+		let _memory_usage = Bytes::try_from(star_utils::memory()?)?;
 
-		dbg!(runtime - now);
-		dbg!(runtime);
+		dbg!(_memory_usage);
+		dbg!(_binary_size);
 
 		let embed = EmbedBuilder::new()
 			.color(crate::helpers::STARLIGHT_PRIMARY_COLOR.to_decimal())
-			.field(EmbedFieldBuilder::new("Statistics", self.statistics(interaction)))
+			.field(EmbedFieldBuilder::new(
+				"Statistics",
+				Self::statistics(interaction),
+			))
 			.field(EmbedFieldBuilder::new("Uptime", String::from("todo")))
 			.field(EmbedFieldBuilder::new("Server Usage", String::from("todo")));
 

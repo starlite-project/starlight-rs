@@ -29,6 +29,9 @@ default-features = false
 features = ["derive"]
 version = "1.0.127"
 
+[dependencies.star-utils]
+git = "https://github.com/PyroTechniac/starlight-rs-utils.git"
+
 [dependencies.tokio]
 version = "1"
 features = ["macros", "rt-multi-thread", "signal"]
