@@ -94,5 +94,5 @@ pub struct Components {
 	pub cluster: Cluster,
 	pub http: HttpClient,
 	pub standby: Standby,
-	pub runtime: Instant
+	pub runtime: Instant,
 }
