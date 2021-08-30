@@ -12,6 +12,7 @@ use std::{
 	error::Error,
 	fmt::{Display, Error as FmtError, Formatter, Result as FmtResult},
 	fs::metadata,
+	lazy::Lazy,
 	time::Duration as StdDuration,
 };
 use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
@@ -20,6 +21,25 @@ use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder};
 use twilight_model::application::{command::Command, interaction::ApplicationCommand};
 
 const DOT: &str = "\u{2022}";
+
+#[cfg(debug_assertions)]
+const BUILD_TYPE: &str = "Debug";
+
+#[cfg(not(debug_assertions))]
+const BUILD_TYPE: &str = "Release";
+
+const BUILD_SIZE: Lazy<Bytes> = Lazy::new(|| {
+	let system = System::new_all();
+
+	let process = system
+		.process(get_current_pid().expect("failed to get pid"))
+		.expect("failed to get process");
+
+	let path = process.exe();
+
+	Bytes::try_from(metadata(path).expect("failed to get metadata").len())
+		.expect("failed to get byte size")
+});
 
 #[derive(Debug)]
 struct ConvertError(u64);
@@ -55,7 +75,7 @@ impl Display for Bytes {
 			Display::fmt(&num, f)?;
 			return f.write_str(" B");
 		}
-		let delimiter = 1000_f64;
+		let delimiter = 1024_f64;
 		let exponent = min(
 			num.log(delimiter).floor() as i32,
 			(Self::UNITS.len() - 1) as i32,
@@ -163,7 +183,7 @@ impl Stats {
 			version
 		};
 
-		format!("**{dot} Users:** {users}\n**{dot} Servers:** {guilds}\n**{dot} Channels:** {channels}\n**{dot} Starlight:** {crate_version}\n**{dot} Rust:** {rust_version}", users = users, guilds = guilds, channels = channels_size, crate_version = crate::build_info::PKG_VERSION, rust_version = rustc_version, dot = DOT)
+		format!("**{dot} Users:** {users}\n**{dot} Servers:** {guilds}\n**{dot} Channels:** {channels}\n**{dot} Starlight:** {crate_version}\n**{dot} Rust:** {rust_version}\n**{dot} Build type:** {build_type}", users = users, guilds = guilds, channels = channels_size, crate_version = crate::build_info::PKG_VERSION, rust_version = rustc_version, dot = DOT, build_type = BUILD_TYPE)
 	}
 
 	fn uptime(interaction: Interaction) -> Result<String> {
@@ -192,12 +212,9 @@ impl Stats {
 		tokio::time::sleep(StdDuration::from_millis(200)).await;
 		let cpu_usage = f64::from(process.cpu_usage()) / cpu_count;
 
-		let binary_path = process.exe();
-		let binary_size = Bytes::try_from(metadata(binary_path)?.len())?;
-
 		let memory_usage = Bytes::try_from(star_utils::memory()?)?;
 
-		Ok(format!("**{dot} CPU Usage:** {cpu_usage:.2}\n**{dot} Memory usage:** {memory_usage}\n**{dot} Binary size:** {binary_size}", dot = DOT, cpu_usage = cpu_usage, memory_usage = memory_usage, binary_size = binary_size))
+		Ok(format!("**{dot} CPU Usage:** {cpu_usage:.2}\n**{dot} Memory usage:** {memory_usage}\n**{dot} Binary size:** {binary_size}", dot = DOT, cpu_usage = cpu_usage, memory_usage = memory_usage, binary_size = *BUILD_SIZE))
 	}
 }
 
