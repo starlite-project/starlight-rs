@@ -42,13 +42,6 @@ macro_rules! model {
 }
 
 #[macro_export]
-macro_rules! list_models {
-	($request:expr) => {
-		crate::finish_request!($request, models)
-	};
-}
-
-#[macro_export]
 macro_rules! text {
 	($request:expr) => {
 		crate::finish_request!($request, text)

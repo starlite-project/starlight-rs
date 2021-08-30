@@ -5,17 +5,21 @@ use crate::{
 };
 use anyhow::Result;
 use async_trait::async_trait;
+use chrono::Duration;
 use std::{
 	cmp::min,
-	convert::TryFrom,
+	convert::{TryFrom, TryInto},
 	error::Error,
 	fmt::{Display, Error as FmtError, Formatter, Result as FmtResult},
 	fs::metadata,
+	time::Duration as StdDuration,
 };
-use chrono::Duration;
 use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
+use time::OutOfRangeError;
 use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder};
 use twilight_model::application::{command::Command, interaction::ApplicationCommand};
+
+const DOT: &str = "\u{2022}";
 
 #[derive(Debug)]
 struct ConvertError(u64);
@@ -85,6 +89,49 @@ impl TryFrom<u64> for Bytes {
 	}
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+struct Uptime(Duration);
+
+impl Display for Uptime {
+	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+		if self.0.num_weeks() > 0 {
+			Display::fmt(&self.0.num_weeks(), f)?;
+			f.write_str(" weeks ")?;
+			Display::fmt(&(self.0.num_days() - (self.0.num_weeks() * 7)), f)?;
+			f.write_str(" days")
+		} else if self.0.num_days() > 0 && self.0.num_days() <= 7 {
+			Display::fmt(&self.0.num_days(), f)?;
+			f.write_str(" days ")?;
+			Display::fmt(&(self.0.num_hours() - (self.0.num_days() * 24)), f)?;
+			f.write_str(" hours")
+		} else if self.0.num_hours() > 0 && self.0.num_hours() <= 24 {
+			Display::fmt(&self.0.num_hours(), f)?;
+			f.write_str(" hours ")?;
+			Display::fmt(&(self.0.num_minutes() - (self.0.num_hours() * 60)), f)?;
+			f.write_str(" minutes")
+		} else {
+			Display::fmt(&self.0.num_minutes(), f)?;
+			f.write_str(" minutes ")?;
+			Display::fmt(&(self.0.num_seconds() - (self.0.num_minutes() * 60)), f)?;
+			f.write_str(" seconds")
+		}
+	}
+}
+
+impl From<Duration> for Uptime {
+	fn from(duration: Duration) -> Self {
+		Self(duration)
+	}
+}
+
+impl TryFrom<StdDuration> for Uptime {
+	type Error = OutOfRangeError;
+
+	fn try_from(value: StdDuration) -> Result<Self, Self::Error> {
+		Ok(Self(Duration::from_std(value)?))
+	}
+}
+
 #[derive(Debug, Clone)]
 pub struct Stats(pub(super) ApplicationCommand);
 
@@ -116,17 +163,40 @@ impl Stats {
 			version
 		};
 
-		format!("**\u{2022} Users:** {users}\n**\u{2022} Servers:** {guilds}\n**\u{2022} Channels:** {channels}\n**\u{2022} Starlight version:** {crate_version}\n**\u{2022} Rust version:** {rust_version}", users = users, guilds = guilds, channels = channels_size, crate_version = crate::build_info::PKG_VERSION, rust_version = rustc_version)
+		format!("**{dot} Users:** {users}\n**{dot} Servers:** {guilds}\n**{dot} Channels:** {channels}\n**{dot} Starlight:** {crate_version}\n**{dot} Rust:** {rust_version}", users = users, guilds = guilds, channels = channels_size, crate_version = crate::build_info::PKG_VERSION, rust_version = rustc_version, dot = DOT)
 	}
 
 	fn uptime(interaction: Interaction) -> Result<String> {
-		// let host_uptime = star_utils::uptime()?;
+		let host_uptime: Uptime = star_utils::uptime()?.try_into()?;
 
-		let host_uptime = Duration::from_std(star_utils::uptime()?)?;
+		let bot_uptime: Uptime = interaction.state.runtime.elapsed().try_into()?;
 
-		println!("{}", host_uptime);
+		Ok(format!(
+			"**{dot} Host:** {host_uptime}\n** {dot}Client:** {bot_uptime}",
+			host_uptime = host_uptime,
+			bot_uptime = bot_uptime,
+			dot = DOT
+		))
+	}
 
-		Ok(format!("todo"))
+	async fn server_usage<'a>(interaction: Interaction<'a>) -> Result<String> {
+		let cpu_count = num_cpus::get_physical() as f64;
+		let system = System::new_all();
+
+		let process = system
+			.process(get_current_pid().expect("failed to get pid"))
+			.expect("failed to get current process");
+
+		process.cpu_usage();
+		tokio::time::sleep(StdDuration::from_millis(200)).await;
+		let cpu_usage = f64::from(process.cpu_usage()) / cpu_count;
+
+		let binary_path = process.exe();
+		let binary_size = Bytes::try_from(metadata(binary_path)?.len())?;
+
+		let memory_usage = Bytes::try_from(star_utils::memory()?)?;
+
+		Ok(format!("**{dot} CPU Usage:** {cpu_usage:.2}\n**{dot} Memory usage:** {memory_usage}\n**{dot} Binary size:** {binary_size}", dot = DOT, cpu_usage = cpu_usage, memory_usage = memory_usage, binary_size = binary_size))
 	}
 }
 
@@ -149,20 +219,6 @@ impl SlashCommand<0> for Stats {
 	async fn run(&self, state: State) -> Result<()> {
 		let interaction = state.interaction(&self.0);
 
-		let system = System::new_all();
-		let current_process = system
-			.process(get_current_pid().expect("failed to get pid"))
-			.unwrap_or_else(|| crate::debug_unreachable!());
-
-		let binary_path = current_process.exe();
-
-		let _binary_size = Bytes::try_from(metadata(binary_path)?.len())?;
-
-		let _memory_usage = Bytes::try_from(star_utils::memory()?)?;
-
-		dbg!(_memory_usage);
-		dbg!(_binary_size);
-
 		let embed = EmbedBuilder::new()
 			.color(crate::helpers::STARLIGHT_PRIMARY_COLOR.to_decimal())
 			.field(EmbedFieldBuilder::new(
@@ -170,7 +226,10 @@ impl SlashCommand<0> for Stats {
 				Self::statistics(interaction),
 			))
 			.field(EmbedFieldBuilder::new("Uptime", Self::uptime(interaction)?))
-			.field(EmbedFieldBuilder::new("Server Usage", String::from("todo")));
+			.field(EmbedFieldBuilder::new(
+				"Server Usage",
+				Self::server_usage(interaction)?,
+			));
 
 		interaction.response(Response::from(embed.build()?)).await?;
 

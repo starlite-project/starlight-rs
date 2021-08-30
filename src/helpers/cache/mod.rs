@@ -66,7 +66,7 @@ impl<'a> CacheHelper<'a> {
 			Ok(role)
 		} else {
 			info!("getting role from http");
-			let models: Vec<Role> = crate::list_models!(self.http().roles(guild_id));
+			let models: Vec<Role> = crate::model!(self.http().roles(guild_id));
 			models
 				.iter()
 				.find(|role| role.id == role_id)
@@ -91,11 +91,11 @@ impl<'a> CacheHelper<'a> {
 				Ok(roles)
 			} else {
 				info!("getting roles from http");
-				Ok(crate::list_models!(self.http().roles(guild_id)))
+				Ok(crate::model!(self.http().roles(guild_id)))
 			}
 		} else {
 			info!("getting roles from http");
-			Ok(crate::list_models!(self.http().roles(guild_id)))
+			Ok(crate::model!(self.http().roles(guild_id)))
 		}
 	}
 
@@ -126,14 +126,14 @@ impl<'a> CacheHelper<'a> {
 				Ok(emojis)
 			} else {
 				info!("getting emojis from http");
-				Ok(crate::list_models!(self.http().emojis(guild_id))
+				Ok(crate::model!(self.http().emojis(guild_id))
 					.into_iter()
 					.map(EmojiHelper::from)
 					.collect())
 			}
 		} else {
 			info!("getting emojis from http");
-			Ok(crate::list_models!(self.http().emojis(guild_id))
+			Ok(crate::model!(self.http().emojis(guild_id))
 				.into_iter()
 				.map(EmojiHelper::from)
 				.collect())
@@ -223,14 +223,14 @@ impl<'a> CacheHelper<'a> {
 				Ok(members)
 			} else {
 				info!("getting members from http");
-				Ok(crate::list_models!(self.http().guild_members(guild_id))
+				Ok(crate::model!(self.http().guild_members(guild_id))
 					.into_iter()
 					.map(MemberHelper::from)
 					.collect())
 			}
 		} else {
 			info!("getting members from http");
-			Ok(crate::list_models!(self.http().guild_members(guild_id))
+			Ok(crate::model!(self.http().guild_members(guild_id))
 				.into_iter()
 				.map(MemberHelper::from)
 				.collect())
