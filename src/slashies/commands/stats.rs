@@ -179,7 +179,7 @@ impl Stats {
 		))
 	}
 
-	async fn server_usage<'a>(interaction: Interaction<'a>) -> Result<String> {
+	async fn server_usage() -> Result<String> {
 		let cpu_count = num_cpus::get_physical() as f64;
 		let system = System::new_all();
 
@@ -228,7 +228,7 @@ impl SlashCommand<0> for Stats {
 			.field(EmbedFieldBuilder::new("Uptime", Self::uptime(interaction)?))
 			.field(EmbedFieldBuilder::new(
 				"Server Usage",
-				Self::server_usage(interaction).await?,
+				Self::server_usage().await?,
 			));
 
 		interaction.response(Response::from(embed.build()?)).await?;
