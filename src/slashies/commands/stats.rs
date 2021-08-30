@@ -228,7 +228,7 @@ impl SlashCommand<0> for Stats {
 			.field(EmbedFieldBuilder::new("Uptime", Self::uptime(interaction)?))
 			.field(EmbedFieldBuilder::new(
 				"Server Usage",
-				Self::server_usage(interaction)?,
+				Self::server_usage(interaction).await?,
 			));
 
 		interaction.response(Response::from(embed.build()?)).await?;
