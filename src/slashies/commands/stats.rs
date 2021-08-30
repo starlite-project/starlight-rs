@@ -179,6 +179,7 @@ impl Stats {
 		))
 	}
 
+	#[allow(clippy::cast_precision_loss)]
 	async fn server_usage() -> Result<String> {
 		let cpu_count = num_cpus::get_physical() as f64;
 		let system = System::new_all();
