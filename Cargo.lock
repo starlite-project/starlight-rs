@@ -1326,7 +1326,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "starlight-rs"
+name = "starlight"
 version = "0.1.0"
 dependencies = [
  "anyhow",
