@@ -53,8 +53,8 @@ async fn main() -> Result<()> {
 		let mut sig_c = ctrl_c()?;
 		let mut sig_break = ctrl_break()?;
 		tokio::select! {
-			_ = sig_c.recv() => event!(Level::INFO, "received SIGINT"),
-			_ = sig_break.recv() => event!(Level::INFO, "received SIGBREAK"),
+			_ = sig_c.recv() => event!(Level::INFO, "received CTRLC"),
+			_ = sig_break.recv() => event!(Level::INFO, "received CTRLBREAK"),
 			_ = client.process(events) => (),
 		};
 	}

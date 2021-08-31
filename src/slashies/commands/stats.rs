@@ -28,6 +28,7 @@ const BUILD_TYPE: &str = "Debug";
 #[cfg(not(debug_assertions))]
 const BUILD_TYPE: &str = "Release";
 
+#[allow(clippy::declare_interior_mutable_const)]
 const BUILD_SIZE: Lazy<Bytes> = Lazy::new(|| {
 	let system = System::new_all();
 
@@ -183,7 +184,7 @@ impl Stats {
 			version
 		};
 
-		format!("**{dot} Users:** {users}\n**{dot} Servers:** {guilds}\n**{dot} Channels:** {channels}\n**{dot} Starlight:** {crate_version}\n**{dot} Rust:** {rust_version}\n**{dot} Build type:** {build_type}", users = users, guilds = guilds, channels = channels_size, crate_version = crate::build_info::PKG_VERSION, rust_version = rustc_version, dot = DOT, build_type = BUILD_TYPE)
+		format!("**{dot} Users:** {users}\n**{dot} Servers:** {guilds}\n**{dot} Channels:** {channels}\n**{dot} Rust:** {rust_version}\n**{dot} Build type:** {build_type}", users = users, guilds = guilds, channels = channels_size, rust_version = rustc_version, dot = DOT, build_type = BUILD_TYPE)
 	}
 
 	fn uptime(interaction: Interaction) -> Result<String> {
@@ -199,7 +200,7 @@ impl Stats {
 		))
 	}
 
-	#[allow(clippy::cast_precision_loss)]
+	#[allow(clippy::cast_precision_loss, clippy::borrow_interior_mutable_const)]
 	async fn server_usage() -> Result<String> {
 		let cpu_count = num_cpus::get_physical() as f64;
 		let system = System::new_all();
@@ -210,11 +211,11 @@ impl Stats {
 
 		process.cpu_usage();
 		tokio::time::sleep(StdDuration::from_millis(200)).await;
-		let cpu_usage = f64::from(process.cpu_usage()) / cpu_count;
+		let cpu_usage = (f64::from(process.cpu_usage()) / cpu_count) * 100.0;
 
 		let memory_usage = Bytes::try_from(star_utils::memory()?)?;
 
-		Ok(format!("**{dot} CPU Usage:** {cpu_usage:.2}\n**{dot} Memory usage:** {memory_usage}\n**{dot} Binary size:** {binary_size}", dot = DOT, cpu_usage = cpu_usage, memory_usage = memory_usage, binary_size = *BUILD_SIZE))
+		Ok(format!("**{dot} CPU Usage:** {cpu_usage:.2}%\n**{dot} Memory usage:** {memory_usage}\n**{dot} Binary size:** {binary_size}", dot = DOT, cpu_usage = cpu_usage, memory_usage = memory_usage, binary_size = *BUILD_SIZE))
 	}
 }
 

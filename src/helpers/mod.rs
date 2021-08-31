@@ -15,11 +15,11 @@ mod tests {
 
 	#[test]
 	fn secondary_color() {
-		assert_eq!(STARLIGHT_SECONDARY_COLOR.to_decimal(), 14286926);
+		assert_eq!(STARLIGHT_SECONDARY_COLOR.to_decimal(), 14_286_926);
 	}
 
 	#[test]
 	fn primary_color() {
-		assert_eq!(STARLIGHT_PRIMARY_COLOR.to_decimal(), 8666532);
+		assert_eq!(STARLIGHT_PRIMARY_COLOR.to_decimal(), 8_666_532);
 	}
 }

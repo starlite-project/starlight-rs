@@ -136,7 +136,7 @@ mod tests {
 
 	#[test]
 	fn from_decimal() {
-		let decimal = 16777215;
+		let decimal = 16_777_215;
 		let expected = Color::new(255, 255, 255);
 
 		assert_eq!(Color::from_decimal(decimal), expected);
@@ -145,7 +145,7 @@ mod tests {
 	#[test]
 	fn to_decimal() {
 		let color = Color::new(255, 255, 255);
-		let expected = 16777215;
+		let expected = 16_777_215;
 
 		assert_eq!(color.to_decimal(), expected);
 	}
