@@ -1,3 +1,5 @@
+cargo-features = ["strip"]
+
 [package]
 name = "starlight-rs"
 version = "0.1.0"
@@ -83,6 +85,7 @@ built = "0.5"
 [profile.release]
 lto = "fat"
 panic = "abort"
+strip = true
 
 [profile.bench]
 lto = "fat"
