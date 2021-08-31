@@ -159,14 +159,13 @@ dependencies = [
  "num-integer",
  "num-traits",
  "serde",
- "time",
  "winapi 0.3.9",
 ]
 
 [[package]]
 name = "clap"
 version = "3.0.0-beta.4"
-source = "git+https://github.com/clap-rs/clap.git#15b9ff1a24ea5e9432e744296ccc1d2285826c3f"
+source = "git+https://github.com/clap-rs/clap.git#dae86f456ef26645947ac3f452a02a819adccc79"
 dependencies = [
  "atty",
  "bitflags",
@@ -183,7 +182,7 @@ dependencies = [
 [[package]]
 name = "clap_derive"
 version = "3.0.0-beta.4"
-source = "git+https://github.com/clap-rs/clap.git#15b9ff1a24ea5e9432e744296ccc1d2285826c3f"
+source = "git+https://github.com/clap-rs/clap.git#dae86f456ef26645947ac3f452a02a819adccc79"
 dependencies = [
  "heck",
  "proc-macro-error",
@@ -542,12 +541,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hex"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
-
-[[package]]
 name = "http"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -865,9 +858,9 @@ dependencies = [
 
 [[package]]
 name = "os_str_bytes"
-version = "3.1.0"
+version = "4.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6acbef58a60fe69ab50510a55bc8cdd4d6cf2283d27ad338f54cb52747a9cf2d"
+checksum = "324abb24c96ea09b7da6aaf68fad1be6242da1042e6f433ee929c26d8fba475b"
 
 [[package]]
 name = "percent-encoding"
@@ -962,21 +955,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b9f5105d4fdaab20335ca9565e106a5d9b82b6219b5ba735731124ac6711d23d"
 dependencies = [
  "unicode-xid",
-]
-
-[[package]]
-name = "procfs"
-version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95e344cafeaeefe487300c361654bcfc85db3ac53619eeccced29f5ea18c4c70"
-dependencies = [
- "bitflags",
- "byteorder",
- "chrono",
- "flate2",
- "hex",
- "lazy_static",
- "libc",
 ]
 
 [[package]]
@@ -1316,11 +1294,10 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 [[package]]
 name = "star-utils"
 version = "0.1.0"
-source = "git+https://github.com/PyroTechniac/starlight-rs-utils.git#bb8e80e0fe9f5dcde55bb23436bb705929562c3a"
+source = "git+https://github.com/PyroTechniac/starlight-rs-utils.git#28714f0e33c17088d4aee14edd32df780bbe8386"
 dependencies = [
  "kernel32-sys",
- "libc",
- "procfs",
+ "sysinfo",
  "win-bindings",
  "windows",
 ]
@@ -1469,9 +1446,9 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "1.10.1"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92036be488bb6594459f2e03b60e42df6f937fe6ca5c5ffdcb539c6b84dc40f5"
+checksum = "b4efe6fc2395938c8155973d7be49fe8d03a843726e285e100a8a383cc0154ce"
 dependencies = [
  "autocfg",
  "bytes",
@@ -1960,7 +1937,7 @@ dependencies = [
 [[package]]
 name = "win-bindings"
 version = "0.1.0"
-source = "git+https://github.com/PyroTechniac/starlight-rs-utils.git#bb8e80e0fe9f5dcde55bb23436bb705929562c3a"
+source = "git+https://github.com/PyroTechniac/starlight-rs-utils.git#28714f0e33c17088d4aee14edd32df780bbe8386"
 dependencies = [
  "windows",
 ]

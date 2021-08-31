@@ -191,14 +191,10 @@ impl Stats {
 		let system = System::new();
 		let bot_uptime: Uptime = interaction.state.runtime.elapsed().try_into()?;
 
-		let host_uptime: Uptime = {
-			let uptime = system.uptime().try_into()?;
-
-			Duration::seconds(uptime).into()
-		};
+		let host_uptime: Uptime = StdDuration::from_secs(system.uptime()).try_into()?;
 
 		Ok(format!(
-			"**{dot} Host:** {host_uptime}\n** {dot}Client:** {bot_uptime}",
+			"**{dot} Host:** {host_uptime}\n**{dot} Client:** {bot_uptime}",
 			host_uptime = host_uptime,
 			bot_uptime = bot_uptime,
 			dot = DOT
