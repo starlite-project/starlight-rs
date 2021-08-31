@@ -229,7 +229,11 @@ impl Stats {
 
 		let memory_usage = Bytes::try_from(star_utils::memory()?)?;
 
-		Ok(format!("**{dot} CPU Usage:** {cpu_usage:.2}%\n**{dot} Memory usage:** {memory_usage}\n**{dot} Binary size:** {binary_size}", dot = DOT, cpu_usage = cpu_usage, memory_usage = memory_usage, binary_size = *BUILD_SIZE))
+		if cfg!(windows) {
+			Ok(format!("**{dot} CPU Usage:** {cpu_usage:.2}%\n**{dot} Memory usage:** {memory_usage}\n**{dot} Binary size:** {binary_size}", dot = DOT, cpu_usage = cpu_usage, memory_usage = memory_usage, binary_size = *BUILD_SIZE))
+		} else {
+			Ok(format!("**{dot} CPU Usage:** {cpu_usage:.2}%\n**{dot} Memory Allocated:** {memory_usage}\n**{dot} Binary size:** {binary_size}", dot = DOT, cpu_usage = cpu_usage, memory_usage = memory_usage, binary_size = *BUILD_SIZE))
+		}
 	}
 }
 
