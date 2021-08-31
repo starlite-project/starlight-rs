@@ -17,7 +17,6 @@ dotenv = "0.15.0"
 futures = "0.3.17"
 num_cpus = "1"
 sysinfo = "0.20.2"
-time = "0.1.44"
 tracing = "0.1.26"
 
 [dependencies.chrono]

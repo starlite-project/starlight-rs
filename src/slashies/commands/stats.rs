@@ -16,7 +16,6 @@ use std::{
 	time::Duration as StdDuration,
 };
 use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
-use time::OutOfRangeError;
 use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder};
 use twilight_model::application::{command::Command, interaction::ApplicationCommand};
 
@@ -41,6 +40,17 @@ const BUILD_SIZE: Lazy<Bytes> = Lazy::new(|| {
 	Bytes::try_from(metadata(path).expect("failed to get metadata").len())
 		.expect("failed to get byte size")
 });
+
+#[derive(Debug)]
+struct OutOfRangeError;
+
+impl Display for OutOfRangeError {
+	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+		f.write_str("source duration value is out of range for the target type")
+	}
+}
+
+impl Error for OutOfRangeError {}
 
 #[derive(Debug)]
 struct ConvertError(u64);
@@ -149,7 +159,10 @@ impl TryFrom<StdDuration> for Uptime {
 	type Error = OutOfRangeError;
 
 	fn try_from(value: StdDuration) -> Result<Self, Self::Error> {
-		Ok(Self(Duration::from_std(value)?))
+		match Duration::from_std(value) {
+			Ok(duration) => Ok(Self(duration)),
+			Err(_) => Err(OutOfRangeError),
+		}
 	}
 }
 
