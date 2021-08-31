@@ -188,9 +188,14 @@ impl Stats {
 	}
 
 	fn uptime(interaction: Interaction) -> Result<String> {
-		let host_uptime: Uptime = star_utils::uptime()?.try_into()?;
-
+		let system = System::new();
 		let bot_uptime: Uptime = interaction.state.runtime.elapsed().try_into()?;
+
+		let host_uptime: Uptime = {
+			let uptime = system.uptime().try_into()?;
+
+			Duration::seconds(uptime).into()
+		};
 
 		Ok(format!(
 			"**{dot} Host:** {host_uptime}\n** {dot}Client:** {bot_uptime}",
