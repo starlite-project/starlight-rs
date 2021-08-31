@@ -159,6 +159,7 @@ dependencies = [
  "num-integer",
  "num-traits",
  "serde",
+ "time",
  "winapi 0.3.9",
 ]
 
@@ -539,6 +540,12 @@ checksum = "62b467343b94ba476dcb2500d242dadbb39557df889310ac77c5d99100aaac33"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "hex"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
 name = "http"
@@ -958,6 +965,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "procfs"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab8809e0c18450a2db0f236d2a44ec0b4c1412d0eb936233579f0990faa5d5cd"
+dependencies = [
+ "bitflags",
+ "byteorder",
+ "chrono",
+ "flate2",
+ "hex",
+ "lazy_static",
+ "libc",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1294,10 +1316,11 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 [[package]]
 name = "star-utils"
 version = "0.1.0"
-source = "git+https://github.com/PyroTechniac/starlight-rs-utils.git#28714f0e33c17088d4aee14edd32df780bbe8386"
+source = "git+https://github.com/PyroTechniac/starlight-rs-utils.git#4a1be7b15e0d8e73999545ce3b87b6b5c7fc0585"
 dependencies = [
  "kernel32-sys",
- "sysinfo",
+ "libc",
+ "procfs",
  "win-bindings",
  "windows",
 ]
@@ -1415,6 +1438,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8018d24e04c95ac8790716a5987d0fec4f8b27249ffa0f7d33f1369bdfb88cbd"
 dependencies = [
  "once_cell",
+]
+
+[[package]]
+name = "time"
+version = "0.1.43"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ca8a50ef2360fbd1eeb0ecd46795a87a19024eb4b53c5dc916ca1fd95fe62438"
+dependencies = [
+ "libc",
+ "winapi 0.3.9",
 ]
 
 [[package]]
@@ -1835,9 +1868,9 @@ dependencies = [
 
 [[package]]
 name = "wasi"
-version = "0.10.0+wasi-snapshot-preview1"
+version = "0.10.2+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a143597ca7c7793eff794def352d41792a93c481eb1042423ff7ff72ba2c31f"
+checksum = "fd6fbd9a79829dd1ad0cc20627bf1ed606756a7f77edff7b66b7064f9cb327c6"
 
 [[package]]
 name = "wasm-bindgen"
@@ -1925,7 +1958,7 @@ dependencies = [
 [[package]]
 name = "win-bindings"
 version = "0.1.0"
-source = "git+https://github.com/PyroTechniac/starlight-rs-utils.git#28714f0e33c17088d4aee14edd32df780bbe8386"
+source = "git+https://github.com/PyroTechniac/starlight-rs-utils.git#4a1be7b15e0d8e73999545ce3b87b6b5c7fc0585"
 dependencies = [
  "windows",
 ]
