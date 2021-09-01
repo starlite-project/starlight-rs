@@ -1,10 +1,14 @@
 use anyhow::Result;
 use starlight::state::{Config, StateBuilder};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use tokio::runtime::Builder;
 use tracing::{event, Level};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 use twilight_cache_inmemory::ResourceType;
 use twilight_gateway::cluster::ShardScheme;
 use twilight_model::gateway::Intents;
+
+static ATOMIC_ID: AtomicUsize = AtomicUsize::new(1);
 
 #[cfg(windows)]
 use tokio::signal::windows::{ctrl_break, ctrl_c};
@@ -12,8 +16,23 @@ use tokio::signal::windows::{ctrl_break, ctrl_c};
 #[cfg(unix)]
 use tokio::signal::unix::{signal, SignalKind};
 
-#[tokio::main]
-async fn main() -> Result<()> {
+fn main() -> Result<()> {
+	Builder::new_multi_thread()
+		.enable_all()
+		.thread_name_fn(|| {
+			let id = ATOMIC_ID.fetch_add(1, Ordering::SeqCst);
+			format!("starlight-pool-{}", id)
+		})
+		.on_thread_stop(|| {
+			ATOMIC_ID.fetch_sub(1, Ordering::SeqCst);
+		})
+		.build()?
+		.block_on(run())?;
+
+	Ok(())
+}
+
+async fn run() -> Result<()> {
 	let mut log_filter_layer =
 		EnvFilter::try_from_default_env().or_else(|_| EnvFilter::try_new("info"))?;
 	let log_fmt_layer = fmt::layer()

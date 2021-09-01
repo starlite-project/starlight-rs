@@ -1344,6 +1344,7 @@ dependencies = [
  "sysinfo",
  "tokio",
  "tracing",
+ "tracing-log",
  "tracing-subscriber",
  "twilight-cache-inmemory",
  "twilight-embed-builder",
