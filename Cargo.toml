@@ -43,7 +43,7 @@ git = "https://github.com/PyroTechniac/starlight-rs-utils.git"
 
 [dependencies.tokio]
 version = "1"
-features = ["macros", "rt-multi-thread", "signal"]
+features = ["macros", "rt-multi-thread", "signal", "fs"]
 
 [dependencies.tracing-subscriber]
 version = "0.2.19"
