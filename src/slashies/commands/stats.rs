@@ -66,6 +66,7 @@ impl Display for ConvertError {
 impl Error for ConvertError {}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
+#[repr(transparent)]
 struct Bytes(f64);
 
 impl Bytes {

@@ -1,9 +1,12 @@
 #![allow(dead_code)]
-use std::ops::Deref;
-
 use crate::slashies::{commands::get_slashies, interaction::Interaction};
 use anyhow::Result;
 use futures::StreamExt;
+use heed::Env;
+use std::{
+	fmt::{Debug, Formatter, Result as FmtResult},
+	ops::Deref,
+};
 use tokio::time::Instant;
 use tracing::{event, Level};
 use twilight_cache_inmemory::InMemoryCache as Cache;
@@ -19,16 +22,16 @@ mod events;
 pub use self::{builder::StateBuilder, config::Config};
 
 #[derive(Debug, Clone, Copy)]
-pub struct State(&'static Components, pub Config);
+pub struct State(&'static Components);
 
 impl State {
 	pub async fn connect(self) -> Result<()> {
-		let id = self.1.get_user_id()?.into();
+		let id = self.0.config.get_user_id()?.into();
 		self.http.set_application_id(id);
 
-		if self.1.remove_slash_commands {
+		if self.0.config.remove_slash_commands {
 			event!(Level::INFO, "removing all slash commands");
-			if let Some(guild_id) = self.1.guild_id {
+			if let Some(guild_id) = self.0.config.guild_id {
 				self.http.set_guild_commands(guild_id, &[])?.exec().await
 			} else {
 				self.http.set_global_commands(&[])?.exec().await
@@ -38,7 +41,7 @@ impl State {
 		};
 
 		event!(Level::INFO, "setting slash commands");
-		if let Some(guild_id) = self.1.guild_id {
+		if let Some(guild_id) = self.0.config.guild_id {
 			self.http
 				.set_guild_commands(guild_id, &get_slashies())?
 				.exec()
@@ -88,11 +91,27 @@ impl Deref for State {
 	}
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Components {
 	pub cache: Cache,
 	pub cluster: Cluster,
 	pub http: HttpClient,
 	pub standby: Standby,
 	pub runtime: Instant,
+	pub config: Config,
+	pub database: Env,
+}
+
+impl Debug for Components {
+	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+		f.debug_struct("Components")
+			.field("cache", &self.cache)
+			.field("cluster", &self.cluster)
+			.field("http", &self.http)
+			.field("standby", &self.standby)
+			.field("runtime", &self.runtime)
+			.field("config", &self.config)
+			.field("database", "..")
+			.finish()
+	}
 }

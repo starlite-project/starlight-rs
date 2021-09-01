@@ -1,6 +1,8 @@
 use super::Config;
 use super::{Components, State};
 use anyhow::{Context, Result};
+use heed::EnvOpenOptions;
+use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
 use tokio::time::Instant;
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
 use twilight_gateway::{
@@ -17,6 +19,7 @@ pub struct StateBuilder {
 	http: Option<HttpBuilder>,
 	intents: Option<Intents>,
 	config: Option<Config>,
+	database: Option<EnvOpenOptions>,
 }
 
 impl StateBuilder {
@@ -28,6 +31,7 @@ impl StateBuilder {
 			http: None,
 			intents: None,
 			config: None,
+			database: None,
 		}
 	}
 
@@ -39,6 +43,15 @@ impl StateBuilder {
 
 	pub const fn intents(mut self, intents: Intents) -> Self {
 		self.intents = Some(intents);
+
+		self
+	}
+
+	pub fn database_builder<F>(mut self, database_fn: F) -> Self
+	where
+		F: FnOnce(EnvOpenOptions) -> EnvOpenOptions,
+	{
+		self.database = Some(database_fn(EnvOpenOptions::new()));
 
 		self
 	}
@@ -96,6 +109,20 @@ impl StateBuilder {
 	}
 
 	pub async fn build(self) -> Result<(State, Events)> {
+		let env_path = {
+			let system = System::new_all();
+
+			let mut exe_path = system
+				.process(get_current_pid().expect("failed to get pid"))
+				.expect("failed to get process")
+				.exe()
+				.to_path_buf();
+
+			exe_path.pop();
+
+			exe_path
+		};
+
 		let token = self.config.unwrap_or_default().token.to_owned();
 		let http_builder = self.http.unwrap_or_default();
 		let cluster_builder = self.cluster.context("Need cluster to build state").unwrap();
@@ -112,11 +139,14 @@ impl StateBuilder {
 			standby,
 			http,
 			runtime: Instant::now(),
+			config: self.config.unwrap_or_default(),
+			database: self
+				.database
+				.unwrap_or_else(EnvOpenOptions::new)
+				.open(env_path)
+				.unwrap(),
 		}));
 
-		Ok((
-			State(components, self.config.unwrap_or_default()),
-			cluster.1,
-		))
+		Ok((State(components), cluster.1))
 	}
 }
