@@ -74,7 +74,7 @@ impl State {
 	}
 
 	pub fn shutdown(self) {
-		self.cluster.down();
+		self.0.cluster.down();
 	}
 
 	pub fn handle_event(&self, event: &Event) {

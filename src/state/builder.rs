@@ -3,7 +3,7 @@ use super::{Components, State};
 use anyhow::{Context, Result};
 use heed::EnvOpenOptions;
 use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
-use tokio::{time::Instant, fs::create_dir_all};
+use tokio::{fs::create_dir_all, time::Instant};
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
 use twilight_gateway::{
 	cluster::{ClusterBuilder, Events},
@@ -121,6 +121,8 @@ impl StateBuilder {
 			exe_path.pop();
 
 			exe_path.push("star-db.mdb");
+
+			create_dir_all(&exe_path).await?;
 
 			exe_path
 		};
