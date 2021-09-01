@@ -111,7 +111,7 @@ impl Debug for Components {
 			.field("standby", &self.standby)
 			.field("runtime", &self.runtime)
 			.field("config", &self.config)
-			.field("database", "..")
+			.field("database", &"..")
 			.finish()
 	}
 }
