@@ -2,11 +2,7 @@
 use crate::slashies::{commands::get_slashies, interaction::Interaction};
 use anyhow::Result;
 use futures::StreamExt;
-use heed::Env;
-use std::{
-	fmt::{Debug, Formatter, Result as FmtResult},
-	ops::Deref,
-};
+use std::ops::Deref;
 use tokio::time::Instant;
 use tracing::{event, Level};
 use twilight_cache_inmemory::InMemoryCache as Cache;
@@ -91,7 +87,7 @@ impl Deref for State {
 	}
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Components {
 	pub cache: Cache,
 	pub cluster: Cluster,
@@ -99,19 +95,4 @@ pub struct Components {
 	pub standby: Standby,
 	pub runtime: Instant,
 	pub config: Config,
-	pub database: Env,
-}
-
-impl Debug for Components {
-	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-		f.debug_struct("Components")
-			.field("cache", &self.cache)
-			.field("cluster", &self.cluster)
-			.field("http", &self.http)
-			.field("standby", &self.standby)
-			.field("runtime", &self.runtime)
-			.field("config", &self.config)
-			.field("database", &"..")
-			.finish()
-	}
 }

@@ -28,11 +28,6 @@ features = ["std", "clock", "serde"]
 [dependencies.clap]
 git = "https://github.com/clap-rs/clap.git"
 
-[dependencies.heed]
-version = "0.11"
-default-features = false
-features = ["lmdb", "serde-bincode"]
-
 [dependencies.serde]
 default-features = false
 features = ["derive"]
