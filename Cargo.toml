@@ -28,6 +28,9 @@ features = ["std", "clock", "serde"]
 [dependencies.clap]
 git = "https://github.com/clap-rs/clap.git"
 
+[dependencies.constella]
+git = "https://github.com/PyroTechniac/constella.git"
+
 [dependencies.serde]
 default-features = false
 features = ["derive"]
