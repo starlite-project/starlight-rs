@@ -9,6 +9,7 @@
 )]
 
 pub mod components;
+pub mod persistence;
 pub mod ext_traits;
 pub mod helpers;
 pub mod slashies;

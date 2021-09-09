@@ -36,6 +36,10 @@ default-features = false
 features = ["derive"]
 version = "1.0.130"
 
+[dependencies.structsy]
+git = "https://gitlab.com/tglman/structsy.git"
+features = ["serde_info"]
+
 [dependencies.star-utils]
 git = "https://github.com/PyroTechniac/starlight-rs-utils.git"
 
