@@ -1,5 +1,5 @@
 use twilight_http::{
-	request::application::{InteractionError, UpdateOriginalResponse},
+	request::application::{interaction::UpdateOriginalResponse, InteractionError},
 	Error,
 };
 use twilight_model::application::{callback::InteractionResponse, interaction::ApplicationCommand};

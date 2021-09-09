@@ -9,7 +9,7 @@ use crate::{
 use anyhow::Result;
 use async_trait::async_trait;
 use twilight_model::application::{
-	command::Command,
+	command::{Command, CommandType},
 	component::{button::ButtonStyle, Button},
 	interaction::ApplicationCommand,
 };
@@ -30,6 +30,7 @@ impl SlashCommand<2> for Click {
 			id: None,
 			name: String::from(Self::NAME),
 			options: vec![],
+			kind: CommandType::ChatInput,
 		}
 	}
 

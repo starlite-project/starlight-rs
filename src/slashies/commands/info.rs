@@ -7,7 +7,7 @@ use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder, EmbedFooterBuilder
 use twilight_mention::Mention;
 use twilight_model::{
 	application::{
-		command::{BaseCommandOptionData, Command, CommandOption},
+		command::{BaseCommandOptionData, Command, CommandOption, CommandType},
 		interaction::ApplicationCommand,
 	},
 	id::UserId,
@@ -46,6 +46,7 @@ impl SlashCommand<0> for Info {
 				),
 				required: false,
 			})],
+			kind: CommandType::ChatInput,
 		}
 	}
 

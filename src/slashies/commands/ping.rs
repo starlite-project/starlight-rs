@@ -3,7 +3,10 @@ use crate::{slashies::Response, state::State};
 use anyhow::Result;
 use async_trait::async_trait;
 use std::{convert::TryInto, time::Duration};
-use twilight_model::application::{command::Command, interaction::ApplicationCommand};
+use twilight_model::application::{
+	command::{Command, CommandType},
+	interaction::ApplicationCommand,
+};
 
 #[derive(Debug, Clone)]
 pub struct Ping(pub(super) ApplicationCommand);
@@ -21,6 +24,7 @@ impl SlashCommand<0> for Ping {
 			id: None,
 			name: String::from(Self::NAME),
 			options: vec![],
+			kind: CommandType::ChatInput,
 		}
 	}
 

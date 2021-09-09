@@ -17,7 +17,10 @@ use std::{
 };
 use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
 use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder};
-use twilight_model::application::{command::Command, interaction::ApplicationCommand};
+use twilight_model::application::{
+	command::{Command, CommandType},
+	interaction::ApplicationCommand,
+};
 
 const DOT: &str = "\u{2022}";
 
@@ -251,6 +254,7 @@ impl SlashCommand<0> for Stats {
 			description: String::from("Get the stats for the bot"),
 			id: None,
 			options: vec![],
+			kind: CommandType::ChatInput,
 		}
 	}
 
