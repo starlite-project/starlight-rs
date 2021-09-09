@@ -12,16 +12,16 @@ license = "MIT"
 [dependencies]
 anyhow = "1.0.43"
 async-trait = "0.1.51"
-base64 = "0.13"
+base64 = "0.13.0"
 dotenv = "0.15.0"
 futures = "0.3.17"
-num_cpus = "1"
-sysinfo = "0.20.2"
+num_cpus = "1.13.0"
+sysinfo = "0.20.3"
 tracing = "0.1.26"
-tracing-log = "0.1"
+tracing-log = "0.1.2"
 
 [dependencies.chrono]
-version = "0.4"
+version = "0.4.19"
 default-features = false
 features = ["std", "clock", "serde"]
 
@@ -34,17 +34,17 @@ git = "https://github.com/PyroTechniac/constella.git"
 [dependencies.serde]
 default-features = false
 features = ["derive"]
-version = "1.0.127"
+version = "1.0.130"
 
 [dependencies.star-utils]
 git = "https://github.com/PyroTechniac/starlight-rs-utils.git"
 
 [dependencies.tokio]
-version = "1"
+version = "1.11.0"
 features = ["macros", "rt-multi-thread", "signal", "fs"]
 
 [dependencies.tracing-subscriber]
-version = "0.2.19"
+version = "0.2.20"
 features = ["fmt", "ansi"]
 
 [dependencies.twilight-cache-inmemory]
@@ -83,7 +83,7 @@ features = ["snowflake"]
 static_assertions = "1.1.0"
 
 [build-dependencies]
-built = "0.5"
+built = "0.5.1"
 
 [profile.release]
 lto = "fat"
