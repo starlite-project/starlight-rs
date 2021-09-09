@@ -1,5 +1,8 @@
 #![allow(dead_code)]
-use crate::slashies::{commands::get_slashies, interaction::Interaction};
+use crate::{
+	persistence::Database,
+	slashies::{commands::get_slashies, interaction::Interaction},
+};
 use anyhow::Result;
 use futures::StreamExt;
 use std::ops::Deref;
@@ -95,4 +98,5 @@ pub struct Components {
 	pub standby: Standby,
 	pub runtime: Instant,
 	pub config: Config,
+	pub database: Database,
 }

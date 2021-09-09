@@ -1,5 +1,5 @@
-use super::Config;
-use super::{Components, State};
+use super::{Components, Config, State};
+use crate::persistence::Database;
 use anyhow::{Context, Result};
 use tokio::time::Instant;
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
@@ -113,6 +113,7 @@ impl StateBuilder {
 			http,
 			runtime: Instant::now(),
 			config: self.config.unwrap_or_default(),
+			database: Database::default(),
 		}));
 
 		Ok((State(components), cluster.1))
