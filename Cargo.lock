@@ -216,7 +216,15 @@ checksum = "fb58b6451e8c2a812ad979ed1d83378caa5e927eef2622017a45f251457c2c9d"
 [[package]]
 name = "constella"
 version = "0.1.0"
-source = "git+https://github.com/PyroTechniac/constella.git#4afe8f5f6fefea0d0ab6e5bf5a10211a3e518467"
+dependencies = [
+ "structsy 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "twilight-model",
+]
+
+[[package]]
+name = "constella"
+version = "0.1.0"
+source = "git+https://github.com/PyroTechniac/constella.git#a7d7144b646eb9b129884f53f508eb4e972601ed"
 dependencies = [
  "structsy 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "twilight-model",
@@ -1525,7 +1533,7 @@ dependencies = [
  "built",
  "chrono",
  "clap",
- "constella",
+ "constella 0.1.0 (git+https://github.com/PyroTechniac/constella.git)",
  "dotenv",
  "futures",
  "num_cpus",

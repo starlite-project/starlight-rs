@@ -103,3 +103,6 @@ opt-level = 3
 
 [profile.bench]
 lto = "fat"
+
+[workspace]
+members = ["./constella"]
