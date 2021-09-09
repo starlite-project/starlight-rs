@@ -36,6 +36,6 @@ impl Default for Database {
 
 impl Debug for Database {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-		f.debug_tuple("Database").field(&"..").finish()
+		f.debug_tuple("Database").field(&"_").finish()
 	}
 }
