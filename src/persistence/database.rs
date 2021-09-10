@@ -3,7 +3,7 @@ use anyhow::Result;
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 use structsy::Structsy;
 use sysinfo::ProcessExt;
-use tracing::{event, Level};
+use tracing::{event, Level, instrument};
 
 macro_rules! define {
 	($db: expr, $($structs: ty),*) => {
@@ -20,6 +20,7 @@ macro_rules! define {
 pub struct Database(Structsy);
 
 impl Database {
+	#[instrument]
 	pub fn open() -> Result<Self> {
 		let db_path = {
 			let process = crate::utils::get_current_process()?;

@@ -113,7 +113,7 @@ impl StateBuilder {
 			http,
 			runtime: Instant::now(),
 			config: self.config.unwrap_or_default(),
-			database: Database::default(),
+			database: Database::open()?,
 		}));
 
 		Ok((State(components), cluster.1))
