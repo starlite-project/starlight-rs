@@ -1,3 +1,4 @@
+#![feature(doc_cfg)]
 #![deny(clippy::all)]
 #![warn(clippy::pedantic, clippy::nursery, clippy::suspicious)]
 

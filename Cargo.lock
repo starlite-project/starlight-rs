@@ -222,15 +222,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "constella"
-version = "0.1.0"
-source = "git+https://github.com/PyroTechniac/constella.git#a7d7144b646eb9b129884f53f508eb4e972601ed"
-dependencies = [
- "structsy 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "twilight-model",
-]
-
-[[package]]
 name = "core-foundation"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1533,7 +1524,7 @@ dependencies = [
  "built",
  "chrono",
  "clap",
- "constella 0.1.0 (git+https://github.com/PyroTechniac/constella.git)",
+ "constella",
  "dotenv",
  "futures",
  "num_cpus",
