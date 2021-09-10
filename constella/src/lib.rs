@@ -27,7 +27,7 @@ pub trait Describer {
 	fn description() -> Description;
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct Data<V, T> {
 	inner: V,
 	_marker: PhantomData<T>,
