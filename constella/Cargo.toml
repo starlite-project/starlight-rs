@@ -4,8 +4,8 @@ version = "0.1.0"
 authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
 edition = "2018"
 
-[dependencies]
-structsy = "0.3"
+[dependencies.structsy]
+git = "https://gitlab.com/tglman/structsy.git"
 
 [dependencies.twilight-model]
 git = "https://github.com/twilight-rs/twilight.git"

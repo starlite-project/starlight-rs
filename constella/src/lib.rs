@@ -116,15 +116,15 @@ impl<V: Clone, T> Clone for Data<V, T> {
 impl<V: Copy, T> Copy for Data<V, T> {}
 
 impl<V: PartialEq, T> PartialEq<V> for Data<V, T> {
-    fn eq(&self, other: &V) -> bool {
-        self.inner.eq(other)
-    }
+	fn eq(&self, other: &V) -> bool {
+		self.inner.eq(other)
+	}
 }
 
 impl<V: PartialOrd, T> PartialOrd<V> for Data<V, T> {
-    fn partial_cmp(&self, other: &V) -> Option<Ordering> {
-        self.inner.partial_cmp(other)
-    }
+	fn partial_cmp(&self, other: &V) -> Option<Ordering> {
+		self.inner.partial_cmp(other)
+	}
 }
 
 unsafe impl<V: Send, T> Send for Data<V, T> {}
@@ -132,33 +132,33 @@ unsafe impl<V: Sync, T> Sync for Data<V, T> {}
 
 #[cfg(test)]
 mod tests {
-    use super::{Data, Transformer};
+	use super::{Data, Transformer};
 
-    #[derive(Debug, Default, Clone, Copy, PartialEq)]
-    struct Id(pub u64);
+	#[derive(Debug, Default, Clone, Copy, PartialEq)]
+	struct Id(pub u64);
 
-    impl Transformer for Id {
-        type DataType = u64;
+	impl Transformer for Id {
+		type DataType = u64;
 
-        fn transform(&self) -> Self::DataType {
-            self.0
-        }
+		fn transform(&self) -> Self::DataType {
+			self.0
+		}
 
-        fn revert(value: &Self::DataType) -> Self {
-            Self(*value)
-        }
-    }
+		fn revert(value: &Self::DataType) -> Self {
+			Self(*value)
+		}
+	}
 
-    #[test]
-    fn persistent_embedded() {
-        let value = Id::default();
+	#[test]
+	fn persistent_embedded() {
+		let value = Id::default();
 
-        let wrapper = Data::from(value);
+		let wrapper = Data::from(value);
 
-        assert_eq!(wrapper, 0);
+		assert_eq!(wrapper, 0);
 
-        let value_reverted = wrapper.value();
+		let value_reverted = wrapper.value();
 
-        assert_eq!(value_reverted, value);
-    }
+		assert_eq!(value_reverted, value);
+	}
 }

@@ -1,3 +1,3 @@
 mod guild;
 
-pub use self::guild::{GuildSettings, GuildKey};
+pub use self::guild::{GuildKey, GuildSettings};
