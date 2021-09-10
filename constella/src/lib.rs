@@ -8,9 +8,10 @@ use std::{
 	io::{Read, Write},
 	marker::PhantomData,
 };
-use structsy::{PersistentEmbedded, SRes};
+use structsy::{PersistentEmbedded, SRes, internal::{Description, EmbeddedDescription, EmbeddedFilterBuilder, FilterDefinition}};
 
-mod implementors;
+mod describer_impls;
+mod transformer_impls;
 
 pub trait Transformer {
 	type DataType: PersistentEmbedded;
@@ -18,6 +19,10 @@ pub trait Transformer {
 	fn transform(&self) -> Self::DataType;
 
 	fn revert(value: &Self::DataType) -> Self;
+}
+
+pub trait Describer {
+	fn description() -> Description;
 }
 
 pub struct Data<V, T> {
@@ -67,6 +72,20 @@ where
 	fn write(&self, write: &mut dyn Write) -> SRes<()> {
 		self.inner.write(write)
 	}
+}
+
+impl<V, T> EmbeddedDescription for Data<V, T>
+where
+	V: PersistentEmbedded,
+	T: Transformer<DataType = V> + Describer,
+{
+	fn get_description() -> Description {
+		T::description()
+	}
+}
+
+impl<V, T> FilterDefinition for Data<V, T> where T: Describer {
+	type Filter = EmbeddedFilterBuilder<Self>;
 }
 
 impl<V, T> From<T> for Data<V, T>

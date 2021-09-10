@@ -8,6 +8,8 @@ pub type GuildKey = DataTransformer<GuildId>;
 pub struct GuildSettings {
 	#[index(mode = "exclusive")]
 	raw_id: u64,
+	pub id: GuildKey,
 }
 
-impl GuildSettings {}
+impl GuildSettings {
+}
