@@ -42,8 +42,8 @@ async fn run() -> Result<()> {
 
 	log_filter_layer = if cfg!(debug_assertions) {
 		log_filter_layer
-			.add_directive("starlight_rs[act]=debug".parse()?)
-			.add_directive("starlight_rs=trace".parse()?)
+			.add_directive("starlight[act]=debug".parse()?)
+			.add_directive("starlight=trace".parse()?)
 	} else {
 		log_filter_layer.add_directive("starlight_rs=info".parse()?)
 	};

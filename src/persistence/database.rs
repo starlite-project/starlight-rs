@@ -1,15 +1,15 @@
-use super::settings::GuildSettings;
+use super::settings::{GuildHelper, GuildSettings};
 use anyhow::Result;
-use std::fmt::{Debug, Formatter, Result as FmtResult};
+use std::{fmt::{Debug, Formatter, Result as FmtResult}, ops::Deref};
 use structsy::Structsy;
 use sysinfo::ProcessExt;
-use tracing::{event, Level, instrument};
+use tracing::{event, Level};
 
 macro_rules! define {
 	($db: expr, $($structs: ty),*) => {
 		$(
 			if !$db.is_defined::<$structs>()? {
-				event!(Level::DEBUG, "Defining struct {}", stringify!($structs));
+				event!(Level::DEBUG, "defining struct {}", stringify!($structs));
 				$db.define::<$structs>()?;
 			}
 		)*
@@ -20,7 +20,6 @@ macro_rules! define {
 pub struct Database(Structsy);
 
 impl Database {
-	#[instrument]
 	pub fn open() -> Result<Self> {
 		let db_path = {
 			let process = crate::utils::get_current_process()?;
@@ -31,7 +30,7 @@ impl Database {
 
 			path.push("star-db.stry");
 
-			event!(Level::DEBUG, path = %path.display(), "Using database at path");
+			event!(Level::DEBUG, path = %path.display(), "database location");
 
 			path
 		};
@@ -41,6 +40,10 @@ impl Database {
 		define!(db, GuildSettings);
 
 		Ok(Self(db))
+	}
+
+	pub fn guilds(&self) -> GuildHelper {
+		GuildHelper::new(self)
 	}
 }
 
@@ -53,5 +56,13 @@ impl Default for Database {
 impl Debug for Database {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		f.debug_tuple("Database").field(&"_").finish()
+	}
+}
+
+impl Deref for Database {
+	type Target = Structsy;
+
+	fn deref(&self) -> &Self::Target {
+		&self.0
 	}
 }
