@@ -3,6 +3,7 @@
 #![warn(clippy::pedantic, clippy::nursery, clippy::suspicious)]
 
 use std::{
+	cmp::Ordering,
 	fmt::{Debug, Formatter, Result as FmtResult},
 	hash::{Hash, Hasher},
 	io::{Read, Write},
@@ -12,6 +13,8 @@ use structsy::{
 	internal::{Description, EmbeddedDescription, EmbeddedFilterBuilder, FilterDefinition},
 	PersistentEmbedded, SRes,
 };
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize, Serializer};
 
 mod describer_impls;
 mod transformer_impls;
@@ -149,12 +152,41 @@ where
 	}
 }
 
+impl<V, T> PartialOrd<T> for Data<V, T>
+where
+	T: Transformer<DataType = V> + PartialOrd,
+{
+	fn partial_cmp(&self, other: &T) -> Option<Ordering> {
+		self.value().partial_cmp(other)
+	}
+}
+
 impl<V, T> Hash for Data<V, T>
 where
 	T: Transformer<DataType = V> + Hash,
 {
 	fn hash<H: Hasher>(&self, state: &mut H) {
 		self.value().hash(state);
+	}
+}
+
+impl<V, T> Serialize for Data<V, T>
+where T: Transformer<DataType = V> + Serialize {
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+	where
+			S: Serializer {
+		self.value().serialize(serializer)
+	}
+}
+
+impl<'de, V, T> Deserialize<'de> for Data<V, T> 
+where T: Transformer<DataType = V> + Deserialize<'de> {
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+	where
+			D: serde::Deserializer<'de> {
+		let value = T::deserialize(deserializer)?;
+
+		Ok(Self::from(value))
 	}
 }
 

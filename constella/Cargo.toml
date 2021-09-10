@@ -4,6 +4,11 @@ version = "0.1.0"
 authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
 edition = "2018"
 
+[dependencies.serde]
+version = "1"
+default-features = false
+optional = true
+
 [dependencies.structsy]
 git = "https://gitlab.com/tglman/structsy.git"
 
