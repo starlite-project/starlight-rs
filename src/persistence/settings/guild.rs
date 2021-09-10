@@ -12,4 +12,13 @@ pub struct GuildSettings {
 }
 
 impl GuildSettings {
+	pub fn new(guild_id: GuildId) -> Self {
+		let id = GuildKey::from(guild_id);
+		let raw_id = id.raw();
+
+		Self {
+			raw_id,
+			id
+		}
+	}
 }

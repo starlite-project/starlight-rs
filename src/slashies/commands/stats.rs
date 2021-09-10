@@ -221,11 +221,7 @@ impl Stats {
 	#[allow(clippy::cast_precision_loss, clippy::borrow_interior_mutable_const)]
 	async fn server_usage() -> Result<String> {
 		let cpu_count = num_cpus::get_physical() as f64;
-		let system = System::new_all();
-
-		let process = system
-			.process(get_current_pid().expect("failed to get pid"))
-			.expect("failed to get current process");
+		let process = crate::utils::get_current_process()?;
 
 		process.cpu_usage();
 		tokio::time::sleep(StdDuration::from_millis(200)).await;

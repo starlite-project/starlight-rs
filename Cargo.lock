@@ -1446,6 +1446,7 @@ dependencies = [
  "dotenv",
  "futures",
  "num_cpus",
+ "once_cell",
  "serde",
  "star-utils",
  "static_assertions",

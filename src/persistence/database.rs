@@ -1,7 +1,20 @@
+use super::settings::GuildSettings;
 use anyhow::Result;
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 use structsy::Structsy;
-use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
+use sysinfo::ProcessExt;
+use tracing::{event, Level};
+
+macro_rules! define {
+	($db: expr, $($structs: ty),*) => {
+		$(
+			if !$db.is_defined::<$structs>()? {
+				event!(Level::DEBUG, "Defining struct {}", stringify!($structs));
+				$db.define::<$structs>()?;
+			}
+		)*
+	}
+}
 
 #[derive(Clone)]
 pub struct Database(Structsy);
@@ -9,11 +22,7 @@ pub struct Database(Structsy);
 impl Database {
 	pub fn open() -> Result<Self> {
 		let db_path = {
-			let system = System::new();
-
-			let process = system
-				.process(get_current_pid().expect("failed to get pid"))
-				.expect("failed to get process");
+			let process = crate::utils::get_current_process()?;
 
 			let mut path = process.exe().to_path_buf();
 
@@ -21,10 +30,16 @@ impl Database {
 
 			path.push("star-db.stry");
 
+			event!(Level::DEBUG, path = %path.display(), "Using database at path");
+
 			path
 		};
 
-		Ok(Self(Structsy::open(db_path)?))
+		let db = Structsy::open(db_path)?;
+
+		define!(db, GuildSettings);
+
+		Ok(Self(db))
 	}
 }
 

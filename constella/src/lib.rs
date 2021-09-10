@@ -2,6 +2,8 @@
 #![deny(clippy::all)]
 #![warn(clippy::pedantic, clippy::nursery, clippy::suspicious)]
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{
 	cmp::Ordering,
 	fmt::{Debug, Formatter, Result as FmtResult},
@@ -13,8 +15,6 @@ use structsy::{
 	internal::{Description, EmbeddedDescription, EmbeddedFilterBuilder, FilterDefinition},
 	PersistentEmbedded, SRes,
 };
-#[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize, Serializer};
 
 mod describer_impls;
 mod transformer_impls;
@@ -31,6 +31,7 @@ pub trait Describer {
 	fn description() -> Description;
 }
 
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct Data<V, T> {
 	inner: V,
 	_marker: PhantomData<T>,
@@ -51,6 +52,10 @@ where
 
 	pub fn data(&self) -> &V {
 		&self.inner
+	}
+
+	pub fn raw(self) -> V {
+		self.inner
 	}
 
 	pub fn value(&self) -> T {
@@ -170,20 +175,30 @@ where
 	}
 }
 
+#[cfg(feature = "serde")]
+#[doc(cfg(feature = "serde"))]
 impl<V, T> Serialize for Data<V, T>
-where T: Transformer<DataType = V> + Serialize {
+where
+	T: Transformer<DataType = V> + Serialize,
+{
 	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
 	where
-			S: Serializer {
+		S: Serializer,
+	{
 		self.value().serialize(serializer)
 	}
 }
 
-impl<'de, V, T> Deserialize<'de> for Data<V, T> 
-where T: Transformer<DataType = V> + Deserialize<'de> {
+#[cfg(feature = "serde")]
+#[doc(cfg(feature = "serde"))]
+impl<'de, V, T> Deserialize<'de> for Data<V, T>
+where
+	T: Transformer<DataType = V> + Deserialize<'de>,
+{
 	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
 	where
-			D: serde::Deserializer<'de> {
+		D: Deserializer<'de>,
+	{
 		let value = T::deserialize(deserializer)?;
 
 		Ok(Self::from(value))
