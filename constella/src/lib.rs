@@ -4,6 +4,7 @@
 
 use std::{
 	fmt::{Debug, Formatter, Result as FmtResult},
+	hash::{Hash, Hasher},
 	io::{Read, Write},
 	marker::PhantomData,
 };
@@ -27,7 +28,6 @@ pub trait Describer {
 	fn description() -> Description;
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct Data<V, T> {
 	inner: V,
 	_marker: PhantomData<T>,
@@ -149,6 +149,15 @@ where
 	}
 }
 
+impl<V, T> Hash for Data<V, T>
+where
+	T: Transformer<DataType = V> + Hash,
+{
+	fn hash<H: Hasher>(&self, state: &mut H) {
+		self.value().hash(state);
+	}
+}
+
 unsafe impl<V: Send, T> Send for Data<V, T> {}
 unsafe impl<V: Sync, T> Sync for Data<V, T> {}
 
@@ -177,6 +186,6 @@ mod tests {
 
 		let wrapper = Data::from(value);
 
-		assert_eq!(wrapper.data(), 0);
+		assert_eq!(*wrapper.data(), 0);
 	}
 }
