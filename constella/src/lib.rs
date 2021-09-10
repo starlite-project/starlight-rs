@@ -3,12 +3,14 @@
 #![warn(clippy::pedantic, clippy::nursery, clippy::suspicious)]
 
 use std::{
-	cmp::Ordering,
 	fmt::{Debug, Formatter, Result as FmtResult},
 	io::{Read, Write},
 	marker::PhantomData,
 };
-use structsy::{PersistentEmbedded, SRes, internal::{Description, EmbeddedDescription, EmbeddedFilterBuilder, FilterDefinition}};
+use structsy::{
+	internal::{Description, EmbeddedDescription, EmbeddedFilterBuilder, FilterDefinition},
+	PersistentEmbedded, SRes,
+};
 
 mod describer_impls;
 mod transformer_impls;
@@ -25,6 +27,7 @@ pub trait Describer {
 	fn description() -> Description;
 }
 
+#[derive(PartialEq)]
 pub struct Data<V, T> {
 	inner: V,
 	_marker: PhantomData<T>,
@@ -84,7 +87,10 @@ where
 	}
 }
 
-impl<V, T> FilterDefinition for Data<V, T> where T: Describer {
+impl<V, T> FilterDefinition for Data<V, T>
+where
+	T: Describer,
+{
 	type Filter = EmbeddedFilterBuilder<Self>;
 }
 
@@ -134,15 +140,12 @@ impl<V: Clone, T> Clone for Data<V, T> {
 
 impl<V: Copy, T> Copy for Data<V, T> {}
 
-impl<V: PartialEq, T> PartialEq<V> for Data<V, T> {
-	fn eq(&self, other: &V) -> bool {
-		self.inner.eq(other)
-	}
-}
-
-impl<V: PartialOrd, T> PartialOrd<V> for Data<V, T> {
-	fn partial_cmp(&self, other: &V) -> Option<Ordering> {
-		self.inner.partial_cmp(other)
+impl<V, T> PartialEq<T> for Data<V, T>
+where
+	T: Transformer<DataType = V> + PartialEq,
+{
+	fn eq(&self, other: &T) -> bool {
+		self.value().eq(other)
 	}
 }
 
@@ -174,10 +177,6 @@ mod tests {
 
 		let wrapper = Data::from(value);
 
-		assert_eq!(wrapper, 0);
-
-		let value_reverted = wrapper.value();
-
-		assert_eq!(value_reverted, value);
+		assert_eq!(wrapper.data(), 0);
 	}
 }
