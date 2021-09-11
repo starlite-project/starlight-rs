@@ -9,6 +9,7 @@ use base64::encode;
 use click::Click;
 use info::Info;
 use ping::Ping;
+use settings::Settings;
 use stats::Stats;
 use std::{
 	any::type_name,
@@ -31,15 +32,17 @@ use twilight_model::{
 mod click;
 mod info;
 mod ping;
+mod settings;
 mod stats;
 
 #[must_use]
-pub fn get_slashies() -> [Command; 4] {
+pub fn get_slashies() -> [Command; 5] {
 	[
 		Ping::define(),
 		Click::define(),
 		Info::define(),
 		Stats::define(),
+		Settings::define(),
 	]
 }
 
@@ -150,6 +153,7 @@ pub enum Commands {
 	Click(Click),
 	Info(Info),
 	Stats(Stats),
+	Settings(Settings)
 }
 
 impl Commands {
@@ -160,6 +164,7 @@ impl Commands {
 			Click::NAME => Some(Self::Click(Click(command))),
 			Info::NAME => Some(Self::Info(Info(command))),
 			Stats::NAME => Some(Self::Stats(Stats(command))),
+			Settings::NAME => Some(Self::Settings(Settings(command))),
 			_ => None,
 		}
 	}
@@ -170,6 +175,7 @@ impl Commands {
 			Self::Click(c) => c.run(state).await,
 			Self::Info(c) => c.run(state).await,
 			Self::Stats(c) => c.run(state).await,
+			Self::Settings(c) => c.run(state).await
 		}
 	}
 }

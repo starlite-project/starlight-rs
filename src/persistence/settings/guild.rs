@@ -28,7 +28,9 @@ impl GuildSettings {
 	}
 }
 
-impl Settings for GuildSettings {}
+impl Settings for GuildSettings {
+	type Id = GuildKey;
+}
 
 #[derive(Debug, Clone, Copy)]
 pub struct GuildHelper<'db> {
@@ -44,18 +46,14 @@ impl<'db> GuildHelper<'db> {
 impl SettingsHelper for GuildHelper<'_> {
 	type Target = GuildSettings;
 
-	type Id = GuildKey;
-
-	fn get(&self, id: &Self::Id) -> Option<Self::Target> {
+	fn get(&self, id: GuildKey) -> Option<Self::Target> {
 		let query = self.db.query::<Self::Target>();
 
 		let iter: StructsyIter<'static, (Ref<GuildSettings>, GuildSettings)> =
-			query.by_id(*id).into_iter();
+			query.by_id(id).into_iter();
 
 		for (_, settings) in iter {
-			if settings.raw_id != id.raw() {
-				continue;
-			} else {
+			if settings.raw_id == id.raw() {
 				return Some(settings);
 			}
 		}
@@ -63,7 +61,7 @@ impl SettingsHelper for GuildHelper<'_> {
 		None
 	}
 
-	fn create(&self, id: &Self::Id) -> SRes<Self::Target> {
+	fn create(&self, id: GuildKey) -> SRes<Self::Target> {
 		let mut tx = self.db.begin()?;
 
 		let guild_settings = GuildSettings::new(id.value());

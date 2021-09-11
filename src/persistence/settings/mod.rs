@@ -1,25 +1,25 @@
 mod guild;
 
-use structsy::{Persistent, SRes};
+use structsy::{internal::PersistentEmbedded, Persistent, SRes};
 
-pub use self::guild::{GuildKey, GuildSettings, GuildHelper};
+pub use self::guild::{GuildHelper, GuildKey, GuildSettings};
 
-pub trait Settings: Persistent {}
+pub trait Settings: Persistent {
+	type Id: PersistentEmbedded + Copy;
+}
 
 pub trait SettingsHelper {
-    type Target: Settings;
-    type Id;
+	type Target: Settings;
 
-    fn get(&self, id: &Self::Id) -> Option<Self::Target>;
+	fn get(&self, id: <Self::Target as Settings>::Id) -> Option<Self::Target>;
 
-    fn create(&self, id: &Self::Id) -> SRes<Self::Target>;
+	fn create(&self, id: <Self::Target as Settings>::Id) -> SRes<Self::Target>;
 
-    fn acquire(&self, id: &Self::Id) -> SRes<Self::Target> {
-        // self.get(id).unwrap_or_else(|| self.create(id))
-        if let Some(existing) = self.get(id) {
-            Ok(existing)
-        } else {
-            self.create(id)
-        }
-    }
+	fn acquire(&self, id: <Self::Target as Settings>::Id) -> SRes<Self::Target> {
+		if let Some(existing) = self.get(id) {
+			Ok(existing)
+		} else {
+			self.create(id)
+		}
+	}
 }

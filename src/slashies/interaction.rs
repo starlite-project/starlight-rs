@@ -4,7 +4,7 @@ use twilight_http::{
 };
 use twilight_model::application::{callback::InteractionResponse, interaction::ApplicationCommand};
 
-use crate::state::State;
+use crate::{persistence::Database, state::State};
 
 use super::Response;
 
@@ -41,5 +41,9 @@ impl<'a> Interaction<'a> {
 		self.state
 			.http
 			.update_interaction_original(&self.command.token)
+	}
+
+	pub fn database(&'a self) -> &'a Database {
+		&self.state.database
 	}
 }
