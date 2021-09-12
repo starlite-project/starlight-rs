@@ -1,5 +1,5 @@
 use super::SlashCommand;
-use crate::{helpers::CacheHelper, slashies::Response, state::State};
+use crate::{helpers::CacheHelper, slashies::Response, state::State, utils::constants::SlashiesErrorMessages};
 use anyhow::Result;
 use async_trait::async_trait;
 use chrono::{DateTime, TimeZone, Utc};
@@ -14,9 +14,6 @@ use twilight_model::{
 	user::{CurrentUser, User},
 };
 use twilight_util::snowflake::Snowflake;
-
-const GUILD_ONLY_MESSAGE: &str = "This command can only be used in a guild";
-const ERROR_OCCURRED: &str = "An error occurred getting the user";
 
 #[derive(Debug, Clone)]
 pub struct Info(pub(super) ApplicationCommand);
@@ -57,7 +54,7 @@ impl SlashCommand<0> for Info {
 			id
 		} else {
 			interaction
-				.response(Response::from(GUILD_ONLY_MESSAGE))
+				.response(Response::error(SlashiesErrorMessages::GuildOnly))
 				.await?;
 
 			return Ok(());
@@ -73,13 +70,13 @@ impl SlashCommand<0> for Info {
 				user
 			} else {
 				interaction
-					.response(Response::from("An error occurred getting the user"))
+					.response(Response::error(SlashiesErrorMessages::CantGetUser))
 					.await?;
 				return Ok(());
 			}
 		} else {
 			interaction
-				.response(Response::from("An error occurred getting the user"))
+				.response(Response::error(SlashiesErrorMessages::CantGetUser))
 				.await?;
 			return Ok(());
 		};

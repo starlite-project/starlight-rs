@@ -9,7 +9,7 @@
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{
 	cmp::Ordering,
-	fmt::{Debug, Formatter, Result as FmtResult},
+	fmt::{Debug, Formatter, Result as FmtResult, Display},
 	hash::{Hash, Hasher},
 	io::{Read, Write},
 	marker::PhantomData,
@@ -117,12 +117,19 @@ where
 	}
 }
 
-impl<V: Debug, T> Debug for Data<V, T> {
+impl<V, T> Debug for Data<V, T>
+where
+	T: Transformer<DataType = V> + Debug,
+{
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-		f.debug_struct("Data")
-			.field("inner", &self.inner)
-			.field("_marker", &"_")
-			.finish()
+		// It's a smart pointer, so we don't want to reveal the inner workings
+		self.value().fmt(f)
+	}
+}
+
+impl<V, T> Display for Data<V, T> where T: Transformer<DataType = V> + Display {
+	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+		self.value().fmt(f)
 	}
 }
 

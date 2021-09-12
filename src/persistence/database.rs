@@ -1,4 +1,4 @@
-use super::settings::{GuildHelper, GuildSettings};
+use super::settings::{ GuildSettings, SettingsHelper};
 use anyhow::Result;
 use std::{fmt::{Debug, Formatter, Result as FmtResult}, ops::Deref};
 use structsy::Structsy;
@@ -42,9 +42,13 @@ impl Database {
 		Ok(Self(db))
 	}
 
-	pub fn guilds(&self) -> GuildHelper {
-		GuildHelper::new(self)
+	pub fn helper<'db, T: SettingsHelper<'db>>(&'db self) -> T {
+		T::new(self)
 	}
+
+	// pub fn guilds(&self) -> GuildHelper {
+	// 	GuildHelper::new(self)
+	// }
 }
 
 impl Default for Database {

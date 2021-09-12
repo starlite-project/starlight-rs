@@ -2,7 +2,7 @@
 
 use self::commands::Commands;
 use super::{components::ActionRowBuilder, state::State};
-use crate::components::ComponentBuilder;
+use crate::{components::ComponentBuilder, utils::constants::SlashiesErrorMessages};
 use tracing::{event, instrument, Level};
 use twilight_model::{
 	application::{
@@ -123,6 +123,10 @@ impl Response {
 	#[must_use]
 	pub fn ephemeral(self) -> Self {
 		self.flags(MessageFlags::EPHEMERAL)
+	}
+
+	pub fn error(message: SlashiesErrorMessages) -> InteractionResponse {
+		Self::from(message.to_string()).exec()
 	}
 
 	#[must_use]

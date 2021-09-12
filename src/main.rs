@@ -8,6 +8,7 @@ use twilight_cache_inmemory::ResourceType;
 use twilight_gateway::cluster::ShardScheme;
 use twilight_model::gateway::Intents;
 
+// One because the main thread is technically first, so this has to be +1
 static ATOMIC_ID: AtomicUsize = AtomicUsize::new(1);
 
 #[cfg(windows)]
@@ -20,7 +21,10 @@ fn main() -> Result<()> {
 	Builder::new_multi_thread()
 		.enable_all()
 		.thread_name_fn(|| {
-			let id = ATOMIC_ID.fetch_add(1, Ordering::SeqCst);
+			let id = {
+				ATOMIC_ID.fetch_add(1, Ordering::SeqCst);
+				ATOMIC_ID.load(Ordering::SeqCst)
+			};
 			format!("starlight-pool-{}", id)
 		})
 		.on_thread_stop(|| {

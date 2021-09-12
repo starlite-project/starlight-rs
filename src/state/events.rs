@@ -82,7 +82,11 @@ mod internal {
 		clippy::wildcard_imports,
 		clippy::unused_async
 	)]
-	use crate::{persistence::settings::SettingsHelper, slashies, state::State};
+	use crate::{
+		persistence::settings::{GuildHelper, SettingsHelper},
+		slashies,
+		state::State,
+	};
 	use anyhow::Result;
 	use tracing::{event, Level};
 	use twilight_model::{
@@ -165,7 +169,7 @@ mod internal {
 	}
 
 	pub(super) async fn guild_create(state: State, created_guild: GuildCreate) -> Result<()> {
-		let guild_helper = state.database.guilds();
+		let guild_helper = state.database.helper::<GuildHelper>();
 
 		guild_helper.acquire(created_guild.id.into())?;
 

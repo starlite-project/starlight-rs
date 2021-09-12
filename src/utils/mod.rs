@@ -2,6 +2,8 @@ use std::{error::Error, fmt::{Display, Formatter, Result as FmtResult}};
 use once_cell::sync::Lazy;
 use sysinfo::{Process, System, SystemExt, get_current_pid};
 
+pub mod constants;
+
 #[derive(Debug)]
 pub struct UtilError {
 	source: Option<Box<dyn Error + Send + Sync>>,

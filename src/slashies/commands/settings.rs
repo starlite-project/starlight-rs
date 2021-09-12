@@ -1,5 +1,10 @@
 use super::SlashCommand;
-use crate::{persistence::settings::SettingsHelper, slashies::Response, state::State};
+use crate::{
+	persistence::settings::{GuildHelper, GuildKey, SettingsHelper},
+	slashies::Response,
+	state::State,
+	utils::constants::SlashiesErrorMessages,
+};
 use anyhow::Result;
 use async_trait::async_trait;
 use twilight_model::application::{
@@ -30,13 +35,24 @@ impl SlashCommand<0> for Settings {
 	async fn run(&self, state: State) -> Result<()> {
 		let interaction = state.interaction(&self.0);
 
-        let settings = interaction.database().guilds().acquire(interaction.command.guild_id.unwrap_or_else(|| {
-            panic!()
-        }))?;
+		let guild_key = if let Some(key) = interaction.command.guild_id {
+			GuildKey::from(key)
+		} else {
+			interaction
+				.response(Response::error(SlashiesErrorMessages::GuildOnly))
+				.await?;
 
-		interaction.response(Response::from("todo")).await?;
+			return Ok(());
+		};
 
-        
+		let guild_settings = interaction
+			.database()
+			.helper::<GuildHelper>()
+			.acquire(guild_key)?;
+
+		let string = dbg!(format!("{:?}", guild_settings));
+
+		interaction.response(Response::from(string)).await?;
 
 		Ok(())
 	}

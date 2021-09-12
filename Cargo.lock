@@ -1447,6 +1447,7 @@ dependencies = [
  "futures",
  "num_cpus",
  "once_cell",
+ "persy",
  "serde",
  "star-utils",
  "static_assertions",
