@@ -228,11 +228,7 @@ fn user_avatar(user: &UserOrCurrentUser) -> String {
 				"https://cdn.discordapp.com/avatars/{}/{}.{}",
 				user.id(),
 				hash,
-				if hash.starts_with("a_") {
-					"gif"
-				} else {
-					"png"
-				}
+				if hash.starts_with("a_") { "gif" } else { "png" }
 			)
 		},
 	)
