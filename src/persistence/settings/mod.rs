@@ -1,7 +1,7 @@
 mod guild;
 
-use structsy::{Persistent, SRes, internal::PersistentEmbedded};
 use persy::IndexType;
+use structsy::{internal::PersistentEmbedded, Persistent, SRes};
 
 pub use self::guild::{GuildHelper, GuildKey, GuildSettings};
 
@@ -25,10 +25,6 @@ pub trait SettingsHelper<'db> {
 	fn create(&self, id: <Self::Target as Settings>::Id) -> SRes<Self::Target>;
 
 	fn acquire(&self, id: <Self::Target as Settings>::Id) -> SRes<Self::Target> {
-		if let Some(existing) = self.get(id) {
-			Ok(existing)
-		} else {
-			self.create(id)
-		}
+		self.get(id).map_or_else(|| self.create(id), Ok)
 	}
 }

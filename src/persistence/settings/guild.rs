@@ -20,6 +20,7 @@ pub trait GuildQuery {
 }
 
 impl GuildSettings {
+	#[must_use]
 	pub fn new(guild_id: GuildId) -> Self {
 		let id = GuildKey::from(guild_id);
 		let raw_id = id.raw();

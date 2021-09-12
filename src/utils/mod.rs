@@ -1,6 +1,9 @@
-use std::{error::Error, fmt::{Display, Formatter, Result as FmtResult}};
 use once_cell::sync::Lazy;
-use sysinfo::{Process, System, SystemExt, get_current_pid};
+use std::{
+	error::Error,
+	fmt::{Display, Formatter, Result as FmtResult},
+};
+use sysinfo::{get_current_pid, Process, System, SystemExt};
 
 pub mod constants;
 
@@ -11,10 +14,12 @@ pub struct UtilError {
 }
 
 impl UtilError {
+	#[must_use]
 	pub const fn kind(&self) -> UtilErrorType {
 		self.kind
 	}
 
+	#[must_use]
 	pub fn into_source(self) -> Option<Box<dyn Error + Send + Sync>> {
 		self.source
 	}
@@ -58,17 +63,15 @@ pub enum UtilErrorType {
 	ProcessError,
 }
 
-static mut SYSTEM: Lazy<System> = Lazy::new(|| {
-    System::new()
-});
+static mut SYSTEM: Lazy<System> = Lazy::new(System::new);
 
 pub fn get_current_process<'a>() -> Result<&'a Process, UtilError> {
-    let process_id = get_current_pid().map_err(UtilError::pid)?;
-    unsafe {
-        if SYSTEM.refresh_process(process_id) {
-            SYSTEM.process(process_id).ok_or_else(UtilError::process)
-        } else {
-            Err(UtilError::process())
-        }
-    }
+	let process_id = get_current_pid().map_err(UtilError::pid)?;
+	unsafe {
+		if SYSTEM.refresh_process(process_id) {
+			SYSTEM.process(process_id).ok_or_else(UtilError::process)
+		} else {
+			Err(UtilError::process())
+		}
+	}
 }

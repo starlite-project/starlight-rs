@@ -153,7 +153,7 @@ pub enum Commands {
 	Click(Click),
 	Info(Info),
 	Stats(Stats),
-	Settings(Settings)
+	Settings(Settings),
 }
 
 impl Commands {
@@ -175,7 +175,7 @@ impl Commands {
 			Self::Click(c) => c.run(state).await,
 			Self::Info(c) => c.run(state).await,
 			Self::Stats(c) => c.run(state).await,
-			Self::Settings(c) => c.run(state).await
+			Self::Settings(c) => c.run(state).await,
 		}
 	}
 }

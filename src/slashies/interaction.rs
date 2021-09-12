@@ -43,6 +43,7 @@ impl<'a> Interaction<'a> {
 			.update_interaction_original(&self.command.token)
 	}
 
+	#[must_use]
 	pub fn database(&'a self) -> &'a Database {
 		&self.state.database
 	}

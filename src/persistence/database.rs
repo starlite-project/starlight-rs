@@ -1,6 +1,9 @@
-use super::settings::{ GuildSettings, SettingsHelper};
+use super::settings::{GuildSettings, SettingsHelper};
 use anyhow::Result;
-use std::{fmt::{Debug, Formatter, Result as FmtResult}, ops::Deref};
+use std::{
+	fmt::{Debug, Formatter, Result as FmtResult},
+	ops::Deref,
+};
 use structsy::Structsy;
 use sysinfo::ProcessExt;
 use tracing::{event, Level};
@@ -42,6 +45,7 @@ impl Database {
 		Ok(Self(db))
 	}
 
+	#[must_use]
 	pub fn helper<'db, T: SettingsHelper<'db>>(&'db self) -> T {
 		T::new(self)
 	}

@@ -125,6 +125,7 @@ impl Response {
 		self.flags(MessageFlags::EPHEMERAL)
 	}
 
+	#[must_use]
 	pub fn error(message: SlashiesErrorMessages) -> InteractionResponse {
 		Self::from(message.to_string()).exec()
 	}

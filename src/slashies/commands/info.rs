@@ -1,5 +1,7 @@
 use super::SlashCommand;
-use crate::{helpers::CacheHelper, slashies::Response, state::State, utils::constants::SlashiesErrorMessages};
+use crate::{
+	helpers::CacheHelper, slashies::Response, state::State, utils::constants::SlashiesErrorMessages,
+};
 use anyhow::Result;
 use async_trait::async_trait;
 use chrono::{DateTime, TimeZone, Utc};
@@ -209,23 +211,29 @@ impl<'a> From<&'a User> for UserOrCurrentUser<'a> {
 }
 
 fn user_avatar(user: &UserOrCurrentUser) -> String {
-	if let Some(hash) = &user.avatar() {
-		format!(
-			"https://cdn.discordapp.com/avatars/{}/{}.{}",
-			user.id(),
-			hash,
-			if hash.starts_with("a_") { "gif" } else { "png" }
-		)
-	} else {
-		format!(
-			"https://cdn.discordapp.com/embed/avatars/{}.png",
-			user.discriminator()
-				.chars()
-				.last()
-				.unwrap_or_else(|| crate::debug_unreachable!())
-				.to_digit(10)
-				.unwrap_or_else(|| crate::debug_unreachable!())
-				% 5
-		)
-	}
+	user.avatar().as_ref().map_or_else(
+		|| {
+			format!(
+				"https://cdn.discordapp.com/embed/avatars/{}.png",
+				user.discriminator()
+					.chars()
+					.last()
+					.unwrap_or_else(|| crate::debug_unreachable!())
+					.to_digit(10)
+					.unwrap_or_else(|| crate::debug_unreachable!())
+			)
+		},
+		|hash| {
+			format!(
+				"https://cdn.discordapp.com/avatars/{}/{}.{}",
+				user.id(),
+				hash,
+				if hash.starts_with("a_") {
+					"gif"
+				} else {
+					"png"
+				}
+			)
+		},
+	)
 }

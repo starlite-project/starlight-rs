@@ -9,7 +9,7 @@
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{
 	cmp::Ordering,
-	fmt::{Debug, Formatter, Result as FmtResult, Display},
+	fmt::{Debug, Display, Formatter, Result as FmtResult},
 	hash::{Hash, Hasher},
 	io::{Read, Write},
 	marker::PhantomData,
@@ -127,7 +127,10 @@ where
 	}
 }
 
-impl<V, T> Display for Data<V, T> where T: Transformer<DataType = V> + Display {
+impl<V, T> Display for Data<V, T>
+where
+	T: Transformer<DataType = V> + Display,
+{
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		self.value().fmt(f)
 	}
