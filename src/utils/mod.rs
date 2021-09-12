@@ -15,12 +15,13 @@ impl UtilError {
 		self.kind
 	}
 
-	pub fn source(&self) -> Option<Box<dyn Error + Send + Sync>> {
-		None
+	pub fn into_source(self) -> Option<Box<dyn Error + Send + Sync>> {
+		self.source
 	}
 
+	#[must_use]
 	pub fn into_parts(self) -> (UtilErrorType, Option<Box<dyn Error + Send + Sync>>) {
-		(self.kind, None)
+		(self.kind, self.source)
 	}
 
 	fn pid(_: &str) -> Self {
