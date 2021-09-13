@@ -1,10 +1,9 @@
 use super::SlashCommand;
-use crate::{
-	helpers::CacheHelper, slashies::Response, state::State, utils::constants::SlashiesErrorMessages,
-};
+use crate::{helpers::CacheHelper, slashies::Response, state::State, utils::{CacheReliant, constants::SlashiesErrorMessages}};
 use anyhow::Result;
 use async_trait::async_trait;
 use chrono::{DateTime, TimeZone, Utc};
+use twilight_cache_inmemory::ResourceType;
 use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder, EmbedFooterBuilder, ImageSource};
 use twilight_mention::Mention;
 use twilight_model::{
@@ -24,6 +23,12 @@ impl Info {
 	const BASE: EmbedBuilder = EmbedBuilder::new();
 
 	const FORMAT_TYPE: &'static str = "%D, %r";
+}
+
+impl CacheReliant for Info {
+	fn needs() -> ResourceType {
+		ResourceType::USER | ResourceType::MEMBER | ResourceType::USER_CURRENT | ResourceType::ROLE
+	}
 }
 
 #[async_trait]

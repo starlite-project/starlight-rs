@@ -1,8 +1,5 @@
 use super::interaction::Interaction;
-use crate::{
-	components::{BuildError, ComponentBuilder},
-	state::State,
-};
+use crate::{components::{BuildError, ComponentBuilder}, state::State, utils::CacheReliant};
 use anyhow::Result;
 use async_trait::async_trait;
 use base64::encode;
@@ -11,6 +8,7 @@ use info::Info;
 use ping::Ping;
 use settings::Settings;
 use stats::Stats;
+use twilight_cache_inmemory::ResourceType;
 use std::{
 	any::type_name,
 	error::Error,
@@ -177,5 +175,11 @@ impl Commands {
 			Self::Stats(c) => c.run(state).await,
 			Self::Settings(c) => c.run(state).await,
 		}
+	}
+}
+
+impl CacheReliant for Commands {
+	fn needs() -> ResourceType {
+		Info::needs() | Settings::needs() | Stats::needs()
 	}
 }

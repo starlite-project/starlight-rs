@@ -1,10 +1,14 @@
 use anyhow::Result;
-use starlight::state::{Config, StateBuilder};
+use starlight::{
+	persistence::settings::GuildHelper,
+	slashies::commands::Commands,
+	state::{Config, StateBuilder},
+	utils::CacheReliant,
+};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use tokio::runtime::Builder;
 use tracing::{event, Level};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
-use twilight_cache_inmemory::ResourceType;
 use twilight_gateway::cluster::ShardScheme;
 use twilight_model::gateway::Intents;
 
@@ -65,7 +69,7 @@ async fn run() -> Result<()> {
 		.config(config)
 		.intents(Intents::empty())
 		.cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))
-		.cache_builder(|builder| builder.resource_types(ResourceType::all()))
+		.cache_builder(|builder| builder.resource_types(Commands::needs() | GuildHelper::needs()))
 		.build()
 		.await?;
 

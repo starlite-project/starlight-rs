@@ -3,10 +3,11 @@ use crate::{
 	persistence::settings::{GuildHelper, GuildKey, SettingsHelper},
 	slashies::Response,
 	state::State,
-	utils::constants::SlashiesErrorMessages,
+	utils::{constants::SlashiesErrorMessages, CacheReliant},
 };
 use anyhow::Result;
 use async_trait::async_trait;
+use twilight_cache_inmemory::ResourceType;
 use twilight_model::application::{
 	command::{Command, CommandType},
 	interaction::ApplicationCommand,
@@ -14,6 +15,12 @@ use twilight_model::application::{
 
 #[derive(Debug, Clone)]
 pub struct Settings(pub(super) ApplicationCommand);
+
+impl CacheReliant for Settings {
+	fn needs() -> ResourceType {
+		ResourceType::GUILD
+	}
+}
 
 #[async_trait]
 impl SlashCommand<0> for Settings {

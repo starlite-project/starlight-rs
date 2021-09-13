@@ -4,6 +4,7 @@ use std::{
 	fmt::{Display, Formatter, Result as FmtResult},
 };
 use sysinfo::{get_current_pid, Process, System, SystemExt};
+use twilight_cache_inmemory::ResourceType;
 
 pub mod constants;
 
@@ -55,7 +56,13 @@ impl Display for UtilError {
 	}
 }
 
-impl Error for UtilError {}
+impl Error for UtilError {
+	fn source(&self) -> Option<&(dyn Error + 'static)> {
+		self.source
+			.as_ref()
+			.map(|source| &**source as &(dyn Error + 'static))
+	}
+}
 
 #[derive(Debug, Clone, Copy)]
 pub enum UtilErrorType {
@@ -74,4 +81,8 @@ pub fn get_current_process<'a>() -> Result<&'a Process, UtilError> {
 			Err(UtilError::process())
 		}
 	}
+}
+
+pub trait CacheReliant {
+	fn needs() -> ResourceType;
 }

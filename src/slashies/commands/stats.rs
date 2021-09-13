@@ -1,11 +1,9 @@
 use super::SlashCommand;
-use crate::{
-	slashies::{interaction::Interaction, Response},
-	state::State,
-};
+use crate::{slashies::{interaction::Interaction, Response}, state::State, utils::CacheReliant};
 use anyhow::Result;
 use async_trait::async_trait;
 use chrono::Duration;
+use twilight_cache_inmemory::ResourceType;
 use std::{
 	cmp::min,
 	convert::{TryFrom, TryInto},
@@ -234,6 +232,12 @@ impl Stats {
 		} else {
 			Ok(format!("**{dot} CPU Usage:** {cpu_usage:.2}%\n**{dot} Memory Allocated:** {memory_usage}\n**{dot} Binary size:** {binary_size}", dot = DOT, cpu_usage = cpu_usage, memory_usage = memory_usage, binary_size = *BUILD_SIZE))
 		}
+	}
+}
+
+impl CacheReliant for Stats {
+	fn needs() -> ResourceType {
+		ResourceType::USER | ResourceType::CHANNEL | ResourceType::GUILD
 	}
 }
 

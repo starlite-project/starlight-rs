@@ -1,8 +1,9 @@
 use super::{Settings, SettingsHelper};
-use crate::persistence::Database;
+use crate::{persistence::Database, utils::CacheReliant};
 use constella::DataTransformer;
 use structsy::{Ref, SRes, StructsyIter, StructsyTx};
 use structsy_derive::{queries, Persistent};
+use twilight_cache_inmemory::ResourceType;
 use twilight_model::id::GuildId;
 
 pub type GuildKey = DataTransformer<GuildId>;
@@ -42,6 +43,12 @@ impl Settings for GuildSettings {
 #[derive(Debug, Clone, Copy)]
 pub struct GuildHelper<'db> {
 	database: &'db Database,
+}
+
+impl CacheReliant for GuildHelper<'_> {
+	fn needs() -> ResourceType {
+		ResourceType::GUILD
+	}
 }
 
 impl<'db> SettingsHelper<'db> for GuildHelper<'db> {
