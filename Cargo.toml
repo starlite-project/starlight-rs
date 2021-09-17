@@ -1,11 +1,11 @@
 cargo-features = ["strip"]
 
 [package]
-name = "starlight"
-version = "0.1.0"
 authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
 edition = "2018"
 license = "MIT"
+name = "starlight"
+version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -15,17 +15,17 @@ async-trait = "0.1.51"
 base64 = "0.13.0"
 dotenv = "0.15.0"
 futures = "0.3.17"
+num_cpus = "1.13.0"
 once_cell = "1.8"
 persy = "1"
-num_cpus = "1.13.0"
 sysinfo = "0.20.3"
 tracing = "0.1.26"
 tracing-log = "0.1.2"
 
 [dependencies.chrono]
-version = "0.4.19"
 default-features = false
 features = ["std", "clock", "serde"]
+version = "0.4.19"
 
 [dependencies.clap]
 git = "https://github.com/clap-rs/clap.git"
@@ -39,8 +39,8 @@ features = ["derive"]
 version = "1.0.130"
 
 [dependencies.structsy]
-git = "https://gitlab.com/tglman/structsy.git"
 features = ["serde_info"]
+git = "https://gitlab.com/tglman/structsy.git"
 
 [dependencies.structsy-derive]
 git = "https://gitlab.com/tglman/structsy.git"
@@ -49,29 +49,29 @@ git = "https://gitlab.com/tglman/structsy.git"
 git = "https://github.com/PyroTechniac/starlight-rs-utils.git"
 
 [dependencies.tokio]
-version = "1.11.0"
 features = ["macros", "rt-multi-thread", "signal", "fs"]
+version = "1.11.0"
 
 [dependencies.tracing-subscriber]
-version = "0.2.20"
 features = ["fmt", "ansi"]
+version = "0.2.20"
 
 [dependencies.twilight-cache-inmemory]
-git = "https://github.com/twilight-rs/twilight.git"
 default-features = false
+git = "https://github.com/twilight-rs/twilight.git"
 
 [dependencies.twilight-embed-builder]
 git = "https://github.com/twilight-rs/twilight.git"
 
 [dependencies.twilight-gateway]
-git = "https://github.com/twilight-rs/twilight.git"
 default-features = false
 features = ["zlib-simd", "metrics", "rustls", "tracing"]
+git = "https://github.com/twilight-rs/twilight.git"
 
 [dependencies.twilight-http]
-git = "https://github.com/twilight-rs/twilight.git"
 default-features = false
 features = ["tracing", "simd-json", "rustls"]
+git = "https://github.com/twilight-rs/twilight.git"
 
 [dependencies.twilight-mention]
 git = "https://github.com/twilight-rs/twilight.git"
@@ -80,13 +80,13 @@ git = "https://github.com/twilight-rs/twilight.git"
 git = "https://github.com/twilight-rs/twilight.git"
 
 [dependencies.twilight-standby]
-git = "https://github.com/twilight-rs/twilight.git"
 features = ["tracing"]
+git = "https://github.com/twilight-rs/twilight.git"
 
 [dependencies.twilight-util]
-git = "https://github.com/twilight-rs/twilight.git"
 default-features = false
 features = ["snowflake"]
+git = "https://github.com/twilight-rs/twilight.git"
 
 [dev-dependencies]
 static_assertions = "1.1.0"
@@ -95,13 +95,13 @@ static_assertions = "1.1.0"
 built = "0.5.1"
 
 [profile.release]
-lto = "fat"
-panic = "abort"
-debug = true
-strip = "symbols"
 codegen-units = 1
-overflow-checks = false
+debug = true
+lto = "fat"
 opt-level = 3
+overflow-checks = false
+panic = "abort"
+strip = "symbols"
 
 [profile.bench]
 lto = "fat"
