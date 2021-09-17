@@ -49,10 +49,6 @@ impl Database {
 	pub fn helper<'db, T: SettingsHelper<'db>>(&'db self) -> T {
 		T::new(self)
 	}
-
-	// pub fn guilds(&self) -> GuildHelper {
-	// 	GuildHelper::new(self)
-	// }
 }
 
 impl Default for Database {

@@ -1,11 +1,11 @@
+mod client;
 mod guild;
 
+use super::Database;
 use persy::IndexType;
 use structsy::{internal::PersistentEmbedded, Persistent, SRes};
 
 pub use self::guild::{GuildHelper, GuildKey, GuildSettings};
-
-use super::Database;
 
 pub trait Settings: Persistent {
 	type Id: PersistentEmbedded + Copy;
