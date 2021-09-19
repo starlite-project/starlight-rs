@@ -1453,6 +1453,7 @@ dependencies = [
  "static_assertions",
  "structsy",
  "structsy-derive",
+ "supernova",
  "sysinfo",
  "tokio",
  "tracing",
@@ -1503,6 +1504,10 @@ dependencies = [
  "syn",
  "synstructure",
 ]
+
+[[package]]
+name = "supernova"
+version = "0.1.0"
 
 [[package]]
 name = "syn"

@@ -71,7 +71,7 @@ impl SlashCommand<0> for Info {
 			resolved
 				.users
 				.first()
-				.unwrap_or_else(|| crate::debug_unreachable!())
+				.unwrap_or_else(|| supernova::debug_unreachable!())
 		} else if let Some(member) = &interaction.command.member {
 			if let Some(user) = member.user.as_ref() {
 				user
@@ -148,7 +148,7 @@ impl SlashCommand<0> for Info {
 		embed_builder = if roles.len() == 1
 			&& roles
 				.get(0)
-				.unwrap_or_else(|| crate::debug_unreachable!())
+				.unwrap_or_else(|| supernova::debug_unreachable!())
 				.id == guild_id.0.into()
 		{
 			embed_builder
@@ -223,9 +223,9 @@ fn user_avatar(user: &UserOrCurrentUser) -> String {
 				user.discriminator()
 					.chars()
 					.last()
-					.unwrap_or_else(|| crate::debug_unreachable!())
+					.unwrap_or_else(|| supernova::debug_unreachable!())
 					.to_digit(10)
-					.unwrap_or_else(|| crate::debug_unreachable!())
+					.unwrap_or_else(|| supernova::debug_unreachable!())
 			)
 		},
 		|hash| {

@@ -61,7 +61,7 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
 		let name = type_name::<Self>()
 			.split("::")
 			.last()
-			.unwrap_or_else(|| crate::debug_unreachable!());
+			.unwrap_or_else(|| supernova::debug_unreachable!());
 
 		let encoded = encode(name);
 

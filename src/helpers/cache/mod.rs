@@ -50,7 +50,7 @@ impl<'a> CacheHelper<'a> {
 			Ok(user)
 		} else {
 			info!("getting user from http");
-			Ok(crate::model!(self.http().current_user()))
+			Ok(supernova::model!(self.http().current_user()))
 		}
 	}
 
@@ -66,7 +66,7 @@ impl<'a> CacheHelper<'a> {
 			Ok(role)
 		} else {
 			info!("getting role from http");
-			let models: Vec<Role> = crate::model!(self.http().roles(guild_id));
+			let models: Vec<Role> = supernova::model!(self.http().roles(guild_id));
 			models
 				.iter()
 				.find(|role| role.id == role_id)
@@ -91,11 +91,11 @@ impl<'a> CacheHelper<'a> {
 				Ok(roles)
 			} else {
 				info!("getting roles from http");
-				Ok(crate::model!(self.http().roles(guild_id)))
+				Ok(supernova::model!(self.http().roles(guild_id)))
 			}
 		} else {
 			info!("getting roles from http");
-			Ok(crate::model!(self.http().roles(guild_id)))
+			Ok(supernova::model!(self.http().roles(guild_id)))
 		}
 	}
 
@@ -106,7 +106,7 @@ impl<'a> CacheHelper<'a> {
 			Ok(emoji.into())
 		} else {
 			info!("getting emoji from http");
-			Ok(crate::model!(self.http().emoji(guild_id, emoji_id)).into())
+			Ok(supernova::model!(self.http().emoji(guild_id, emoji_id)).into())
 		}
 	}
 
@@ -126,14 +126,14 @@ impl<'a> CacheHelper<'a> {
 				Ok(emojis)
 			} else {
 				info!("getting emojis from http");
-				Ok(crate::model!(self.http().emojis(guild_id))
+				Ok(supernova::model!(self.http().emojis(guild_id))
 					.into_iter()
 					.map(EmojiHelper::from)
 					.collect())
 			}
 		} else {
 			info!("getting emojis from http");
-			Ok(crate::model!(self.http().emojis(guild_id))
+			Ok(supernova::model!(self.http().emojis(guild_id))
 				.into_iter()
 				.map(EmojiHelper::from)
 				.collect())
@@ -147,7 +147,7 @@ impl<'a> CacheHelper<'a> {
 			Ok(user)
 		} else {
 			info!("getting user from http");
-			Ok(crate::model!(self.http().user(user_id)))
+			Ok(supernova::model!(self.http().user(user_id)))
 		}
 	}
 
@@ -158,7 +158,7 @@ impl<'a> CacheHelper<'a> {
 			Ok(channel)
 		} else {
 			info!("getting guild channel from http");
-			let model: Channel = crate::model!(self.http().channel(channel_id));
+			let model: Channel = supernova::model!(self.http().channel(channel_id));
 			match model {
 				Channel::Guild(guild) => Ok(guild),
 				_ => Err(CacheHelperError::model_not_found()),
@@ -173,7 +173,7 @@ impl<'a> CacheHelper<'a> {
 			Ok(channel)
 		} else {
 			info!("getting private channel from http");
-			let model: Channel = crate::model!(self.http().channel(channel_id));
+			let model: Channel = supernova::model!(self.http().channel(channel_id));
 			match model {
 				Channel::Private(private) => Ok(private),
 				_ => Err(CacheHelperError::model_not_found()),
@@ -188,7 +188,7 @@ impl<'a> CacheHelper<'a> {
 			Ok(channel)
 		} else {
 			info!("getting group channel from http");
-			let model: Channel = crate::model!(self.http().channel(channel_id));
+			let model: Channel = supernova::model!(self.http().channel(channel_id));
 			match model {
 				Channel::Group(group) => Ok(group),
 				_ => Err(CacheHelperError::model_not_found()),
@@ -203,7 +203,7 @@ impl<'a> CacheHelper<'a> {
 			Ok(member.into())
 		} else {
 			info!("getting member from http");
-			Ok(crate::model!(self.http().guild_member(guild_id, user_id)).into())
+			Ok(supernova::model!(self.http().guild_member(guild_id, user_id)).into())
 		}
 	}
 
@@ -223,14 +223,14 @@ impl<'a> CacheHelper<'a> {
 				Ok(members)
 			} else {
 				info!("getting members from http");
-				Ok(crate::model!(self.http().guild_members(guild_id))
+				Ok(supernova::model!(self.http().guild_members(guild_id))
 					.into_iter()
 					.map(MemberHelper::from)
 					.collect())
 			}
 		} else {
 			info!("getting members from http");
-			Ok(crate::model!(self.http().guild_members(guild_id))
+			Ok(supernova::model!(self.http().guild_members(guild_id))
 				.into_iter()
 				.map(MemberHelper::from)
 				.collect())

@@ -48,6 +48,9 @@ git = "https://gitlab.com/tglman/structsy.git"
 [dependencies.star-utils]
 git = "https://github.com/PyroTechniac/starlight-rs-utils.git"
 
+[dependencies.supernova]
+path = "./supernova"
+
 [dependencies.tokio]
 features = ["macros", "rt-multi-thread", "signal", "fs"]
 version = "1.11.0"
@@ -107,4 +110,4 @@ strip = "symbols"
 lto = "fat"
 
 [workspace]
-members = ["./constella"]
+members = ["./constella", "./supernova"]

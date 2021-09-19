@@ -1,7 +1,6 @@
 use super::{ClickCommand, SlashCommand};
 use crate::{
 	components::{BuildError, ButtonBuilder, ComponentBuilder},
-	debug_unreachable,
 	slashies::{interaction::Interaction, Response},
 	state::State,
 	InteractionAuthor,
@@ -69,12 +68,12 @@ impl ClickCommand<2> for Click {
 	type Output = String;
 
 	fn parse(_: Interaction<'_>, value: &str) -> Self::Output {
-		let components = Self::define_buttons().unwrap_or_else(|_| debug_unreachable!());
+		let components = Self::define_buttons().unwrap_or_else(|_| supernova::debug_unreachable!());
 
 		components
 			.iter()
 			.find(|button| button.custom_id.as_deref() == Some(value))
-			.unwrap_or_else(|| debug_unreachable!())
+			.unwrap_or_else(|| supernova::debug_unreachable!())
 			.label
 			.clone()
 			.unwrap()
