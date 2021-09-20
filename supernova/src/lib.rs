@@ -20,6 +20,13 @@ macro_rules! model {
 }
 
 #[macro_export]
+macro_rules! status {
+	($request:expr) => {
+		$crate::finish_request!($request, status)
+	}
+}
+
+#[macro_export]
 macro_rules! text {
 	($request:expr) => {
 		$crate::finish_request!($request, text)
@@ -35,6 +42,9 @@ macro_rules! bytes {
 
 #[macro_export]
 macro_rules! finish_request {
+	($request:expr, status) => {
+		$request.exec().await?.status()
+	};
 	($request:expr, $type:ident) => {
 		$request.exec().await?.$type().await?
 	};
@@ -60,7 +70,7 @@ macro_rules! cloned {
 
 #[cfg(test)]
 mod tests {
-	use super::{bytes, cloned, debug_unreachable, model, text};
+	use super::{bytes, cloned, debug_unreachable, model, text, status};
 	use std::error::Error;
 
 	type TestResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
@@ -91,22 +101,26 @@ mod tests {
 	#[derive(Debug, Clone, Copy)]
 	struct ResponseFuture<const N: usize> {
 		inner: [u8; N],
+		code: u16,
 	}
 
 	impl<const N: usize> ResponseFuture<N> {
-		const fn new(bytes: [u8; N]) -> Self {
-			Self { inner: bytes }
+		const fn new(inner: [u8; N], code: u16) -> Self {
+			Self { inner ,code }
 		}
 
 		async fn exec(&self) -> TestResult<Response> {
 			Ok(Response {
 				inner: self.inner.clone().to_vec(),
+				code: self.code
 			})
 		}
 	}
 
+	#[derive(Debug, Clone)]
 	struct Response {
 		inner: Vec<u8>,
+		code: u16,
 	}
 
 	impl Response {
@@ -123,6 +137,10 @@ mod tests {
 				content: String::from_utf8(self.inner.clone())?,
 			})
 		}
+
+		fn status(&self) -> u16 {
+			self.code
+		}
 	}
 
 	#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -131,7 +149,7 @@ mod tests {
 	}
 
 	const RESPONSE_FUTURE: ResponseFuture<13> =
-		ResponseFuture::new([72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33]);
+		ResponseFuture::new([72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33], 200);
 
 	#[tokio::test]
 	async fn bytes() -> TestResult<()> {
@@ -164,6 +182,26 @@ mod tests {
 				content: String::from("Hello, world!")
 			}
 		);
+
+		Ok(())
+	}
+
+	#[tokio::test]
+	async fn status() -> TestResult<()> {
+		let decoded = status!(RESPONSE_FUTURE);
+
+		assert_eq!(decoded, 200);
+
+		Ok(())
+	}
+
+	#[tokio::test]
+	async fn status_failed() -> TestResult<()> {
+		let failed = ResponseFuture::new([], 404);
+
+		let decoded = status!(failed);
+
+		assert_eq!(decoded, 404);
 
 		Ok(())
 	}
