@@ -23,7 +23,7 @@ macro_rules! model {
 macro_rules! status {
 	($request:expr) => {
 		$crate::finish_request!($request, status)
-	}
+	};
 }
 
 #[macro_export]
@@ -66,14 +66,20 @@ macro_rules! cloned {
             move |$(cloned!(@param $p),)+| $body
         }
     );
+	($($n:ident),+ => move |$($p:tt: $t:ty),+| $body:expr) => (
+		{
+			$( let $n = $n.clone(); )+
+			move |$(cloned!(@param $p): $t,)+| $body
+		}
+	);
 }
 
 #[cfg(test)]
 mod tests {
-	use super::{bytes, cloned, debug_unreachable, model, text, status};
+	use super::{bytes, cloned, debug_unreachable, model, status, text};
 	use std::error::Error;
 
-	type TestResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
+	type TestResult<T = ()> = Result<T, Box<dyn Error + Send + Sync>>;
 
 	#[test]
 	fn cloned() {
@@ -84,6 +90,17 @@ mod tests {
 		});
 
 		assert_eq!(three_letters(), String::from("Fer"));
+	}
+
+	#[test]
+	fn cloned_with_args() {
+		let value = 10;
+
+		let add = cloned!(value => move |to_add: u32| {
+			value + to_add
+		});
+
+		assert_eq!(add(10), 20);
 	}
 
 	#[test]
@@ -106,13 +123,13 @@ mod tests {
 
 	impl<const N: usize> ResponseFuture<N> {
 		const fn new(inner: [u8; N], code: u16) -> Self {
-			Self { inner ,code }
+			Self { inner, code }
 		}
 
 		async fn exec(&self) -> TestResult<Response> {
 			Ok(Response {
 				inner: self.inner.clone().to_vec(),
-				code: self.code
+				code: self.code,
 			})
 		}
 	}
@@ -148,11 +165,13 @@ mod tests {
 		content: String,
 	}
 
-	const RESPONSE_FUTURE: ResponseFuture<13> =
-		ResponseFuture::new([72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33], 200);
+	const RESPONSE_FUTURE: ResponseFuture<13> = ResponseFuture::new(
+		[72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33],
+		200,
+	);
 
 	#[tokio::test]
-	async fn bytes() -> TestResult<()> {
+	async fn bytes() -> TestResult {
 		let decoded = bytes!(RESPONSE_FUTURE);
 
 		assert_eq!(
@@ -164,7 +183,7 @@ mod tests {
 	}
 
 	#[tokio::test]
-	async fn text() -> TestResult<()> {
+	async fn text() -> TestResult {
 		let decoded = text!(RESPONSE_FUTURE);
 
 		assert_eq!(decoded, String::from("Hello, world!"));
@@ -173,7 +192,7 @@ mod tests {
 	}
 
 	#[tokio::test]
-	async fn model() -> TestResult<()> {
+	async fn model() -> TestResult {
 		let decoded = model!(RESPONSE_FUTURE);
 
 		assert_eq!(
@@ -187,7 +206,7 @@ mod tests {
 	}
 
 	#[tokio::test]
-	async fn status() -> TestResult<()> {
+	async fn status() -> TestResult {
 		let decoded = status!(RESPONSE_FUTURE);
 
 		assert_eq!(decoded, 200);
@@ -196,7 +215,7 @@ mod tests {
 	}
 
 	#[tokio::test]
-	async fn status_failed() -> TestResult<()> {
+	async fn status_failed() -> TestResult {
 		let failed = ResponseFuture::new([], 404);
 
 		let decoded = status!(failed);
