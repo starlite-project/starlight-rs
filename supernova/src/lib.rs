@@ -60,7 +60,7 @@ macro_rules! cloned {
 
 #[cfg(test)]
 mod tests {
-	use super::{cloned, debug_unreachable, text, bytes, model};
+	use super::{bytes, cloned, debug_unreachable, model, text};
 	use std::error::Error;
 
 	type TestResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
@@ -125,17 +125,45 @@ mod tests {
 		}
 	}
 
+	#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 	struct Message {
 		content: String,
 	}
 
-	const RESPONSE_FUTURE: ResponseFuture<13> = ResponseFuture::new([72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33]);
+	const RESPONSE_FUTURE: ResponseFuture<13> =
+		ResponseFuture::new([72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33]);
 
 	#[tokio::test]
-	async fn bytes() -> Result<(), Box<dyn Error + Send + Sync>> {
+	async fn bytes() -> TestResult<()> {
 		let decoded = bytes!(RESPONSE_FUTURE);
 
-		assert_eq!(decoded, vec![72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33]);
+		assert_eq!(
+			decoded,
+			vec![72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33]
+		);
+
+		Ok(())
+	}
+
+	#[tokio::test]
+	async fn text() -> TestResult<()> {
+		let decoded = text!(RESPONSE_FUTURE);
+
+		assert_eq!(decoded, String::from("Hello, world!"));
+
+		Ok(())
+	}
+
+	#[tokio::test]
+	async fn model() -> TestResult<()> {
+		let decoded = model!(RESPONSE_FUTURE);
+
+		assert_eq!(
+			decoded,
+			Message {
+				content: String::from("Hello, world!")
+			}
+		);
 
 		Ok(())
 	}
