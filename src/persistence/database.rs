@@ -1,4 +1,4 @@
-use super::settings::{GuildSettings, SettingsHelper};
+use super::settings::{GuildSettings, SettingsHelper, ClientSettings};
 use anyhow::Result;
 use std::{
 	fmt::{Debug, Formatter, Result as FmtResult},
@@ -40,7 +40,7 @@ impl Database {
 
 		let db = Structsy::open(db_path)?;
 
-		define!(db, GuildSettings);
+		define!(db, GuildSettings, ClientSettings);
 
 		Ok(Self(db))
 	}

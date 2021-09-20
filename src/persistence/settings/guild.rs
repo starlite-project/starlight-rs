@@ -58,6 +58,10 @@ impl<'db> SettingsHelper<'db> for GuildHelper<'db> {
 		Self { database }
 	}
 
+	fn database(&self) -> &Database {
+		self.database
+	}
+
 	fn get(&self, id: GuildKey) -> Option<Self::Target> {
 		let query = self.database.query::<Self::Target>();
 

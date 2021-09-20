@@ -3,9 +3,12 @@ mod guild;
 
 use super::Database;
 use persy::IndexType;
-use structsy::{internal::PersistentEmbedded, Persistent, SRes};
+use structsy::{internal::PersistentEmbedded, Persistent, SRes, StructsyQuery};
 
-pub use self::guild::{GuildHelper, GuildKey, GuildSettings};
+pub use self::{
+	client::{ClientHelper, ClientKey, ClientSettings},
+	guild::{GuildHelper, GuildKey, GuildSettings},
+};
 
 pub trait Settings: Persistent {
 	type Id: PersistentEmbedded + Copy;
@@ -20,11 +23,17 @@ pub trait SettingsHelper<'db> {
 
 	fn new(database: &'db Database) -> Self;
 
+	fn database(&self) -> &Database;
+
 	fn get(&self, id: <Self::Target as Settings>::Id) -> Option<Self::Target>;
 
 	fn create(&self, id: <Self::Target as Settings>::Id) -> SRes<Self::Target>;
 
 	fn acquire(&self, id: <Self::Target as Settings>::Id) -> SRes<Self::Target> {
 		self.get(id).map_or_else(|| self.create(id), Ok)
+	}
+
+	fn query(&self) -> StructsyQuery<Self::Target> {
+		self.database().query()
 	}
 }
