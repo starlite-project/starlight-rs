@@ -121,7 +121,7 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct SlashError;
 
 impl Display for SlashError {
@@ -132,7 +132,7 @@ impl Display for SlashError {
 
 impl Error for SlashError {}
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct ClickError;
 
 impl Display for ClickError {

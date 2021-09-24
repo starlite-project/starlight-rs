@@ -22,7 +22,7 @@ macro_rules! impl_describer_id {
         $(
             impl Describer for $args {
                 fn description() -> Description {
-                    let field = FieldDescription::new::<u32>(0, &"id", None);
+                    let field = FieldDescription::new::<u64>(0, &"id", None);
                     Description::Struct(StructDescription::new(stringify!($args), &[field]))
                 }
             }

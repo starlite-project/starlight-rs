@@ -1,11 +1,10 @@
 #![feature(doc_cfg)]
 #![deny(clippy::all)]
-#![warn(clippy::pedantic, clippy::nursery, clippy::suspicious)]
+#![warn(clippy::pedantic, clippy::nursery, clippy::suspicious, missing_copy_implementations)]
 // Allowed bc it needs to be derived to allow it to be derived in separate structs
 // But it's also implemented as it is a smart pointer
 #![allow(clippy::derive_hash_xor_eq)]
 
-#[cfg(feature = "serde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{
 	cmp::Ordering,
@@ -188,8 +187,6 @@ where
 	}
 }
 
-#[cfg(feature = "serde")]
-#[doc(cfg(feature = "serde"))]
 impl<V, T> Serialize for Data<V, T>
 where
 	T: Transformer<DataType = V> + Serialize,
@@ -202,8 +199,6 @@ where
 	}
 }
 
-#[cfg(feature = "serde")]
-#[doc(cfg(feature = "serde"))]
 impl<'de, V, T> Deserialize<'de> for Data<V, T>
 where
 	T: Transformer<DataType = V> + Deserialize<'de>,

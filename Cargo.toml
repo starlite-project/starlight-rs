@@ -10,7 +10,6 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.43"
 async-trait = "0.1.51"
 base64 = "0.13.0"
 dotenv = "0.15.0"
@@ -21,6 +20,10 @@ persy = "1"
 sysinfo = "0.20.3"
 tracing = "0.1.26"
 tracing-log = "0.1.2"
+
+[dependencies.anyhow]
+version = "1.0"
+features = ["backtrace"]
 
 [dependencies.chrono]
 default-features = false
@@ -110,4 +113,4 @@ strip = "symbols"
 lto = "fat"
 
 [workspace]
-members = ["./constella", "./supernova", "./singularity"]
+members = ["./constella", "./nebula", "./supernova"]

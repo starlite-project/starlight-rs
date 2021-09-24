@@ -1,12 +1,16 @@
 [package]
-authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
-edition = "2018"
-name = "constella"
+name = "nebula"
 version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies.constella]
+path = "../constella"
 
 [dependencies.serde]
-features = ["derive"]
 version = "1"
+features = ["derive"]
 
 [dependencies.structsy]
 git = "https://gitlab.com/tglman/structsy.git"
