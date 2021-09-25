@@ -1,29 +1,27 @@
-use super::{Settings, SettingsHelper};
+use super::{IdKey, Settings, SettingsHelper};
 use crate::{persistence::Database, utils::CacheReliant};
-use constella::DataTransformer;
+use nebula::Id;
 use structsy::{Ref, SRes, StructsyIter, StructsyTx};
 use structsy_derive::{queries, Persistent};
 use twilight_cache_inmemory::ResourceType;
 use twilight_model::id::GuildId;
 
-pub type GuildKey = DataTransformer<GuildId>;
-
 #[derive(Debug, Clone, Copy, PartialEq, Persistent)]
 pub struct GuildSettings {
 	#[index(mode = "exclusive")]
 	raw_id: u64,
-	pub id: GuildKey,
+	pub id: IdKey,
 }
 
 #[queries(GuildSettings)]
 pub trait GuildQuery {
-	fn by_id(self, id: GuildKey) -> Self;
+	fn by_id(self, id: IdKey) -> Self;
 }
 
 impl GuildSettings {
 	#[must_use]
 	pub fn new(guild_id: GuildId) -> Self {
-		let id = GuildKey::from(guild_id);
+		let id = IdKey::from(Id::from(guild_id));
 		let raw_id = id.raw();
 
 		Self { raw_id, id }
@@ -31,7 +29,7 @@ impl GuildSettings {
 }
 
 impl Settings for GuildSettings {
-	type Id = GuildKey;
+	type Id = IdKey;
 
 	type RawId = u64;
 
@@ -62,7 +60,7 @@ impl<'db> SettingsHelper<'db> for GuildHelper<'db> {
 		self.database
 	}
 
-	fn get(&self, id: GuildKey) -> Option<Self::Target> {
+	fn get(&self, id: IdKey) -> Option<Self::Target> {
 		let query = self.database.query::<Self::Target>();
 
 		let iter: StructsyIter<'static, (Ref<GuildSettings>, GuildSettings)> =
@@ -77,10 +75,10 @@ impl<'db> SettingsHelper<'db> for GuildHelper<'db> {
 		None
 	}
 
-	fn create(&self, id: GuildKey) -> SRes<Self::Target> {
+	fn create(&self, id: IdKey) -> SRes<Self::Target> {
 		let mut tx = self.database.begin()?;
 
-		let guild_settings = GuildSettings::new(id.value());
+		let guild_settings = GuildSettings::new(id.value().into());
 		tx.insert(&guild_settings)?;
 
 		tx.commit()?;

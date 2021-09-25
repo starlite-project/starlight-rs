@@ -1,4 +1,9 @@
-#![warn(clippy::pedantic, clippy::nursery, clippy::suspicious, missing_copy_implementations)]
+#![warn(
+	clippy::pedantic,
+	clippy::nursery,
+	clippy::suspicious,
+	missing_copy_implementations
+)]
 #![deny(clippy::all)]
 
 mod id;

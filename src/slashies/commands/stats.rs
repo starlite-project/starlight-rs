@@ -1,9 +1,12 @@
 use super::SlashCommand;
-use crate::{slashies::{interaction::Interaction, Response}, state::State, utils::CacheReliant};
+use crate::{
+	slashies::{interaction::Interaction, Response},
+	state::State,
+	utils::CacheReliant,
+};
 use anyhow::Result;
 use async_trait::async_trait;
 use chrono::Duration;
-use twilight_cache_inmemory::ResourceType;
 use std::{
 	cmp::min,
 	convert::{TryFrom, TryInto},
@@ -14,6 +17,7 @@ use std::{
 	time::Duration as StdDuration,
 };
 use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
+use twilight_cache_inmemory::ResourceType;
 use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder};
 use twilight_model::application::{
 	command::{Command, CommandType},

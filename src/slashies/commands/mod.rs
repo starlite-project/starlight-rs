@@ -1,5 +1,9 @@
 use super::interaction::Interaction;
-use crate::{components::{BuildError, ComponentBuilder}, state::State, utils::CacheReliant};
+use crate::{
+	components::{BuildError, ComponentBuilder},
+	state::State,
+	utils::CacheReliant,
+};
 use anyhow::Result;
 use async_trait::async_trait;
 use base64::encode;
@@ -8,13 +12,13 @@ use info::Info;
 use ping::Ping;
 use settings::Settings;
 use stats::Stats;
-use twilight_cache_inmemory::ResourceType;
 use std::{
 	any::type_name,
 	error::Error,
 	fmt::{Display, Formatter, Result as FmtResult},
 	lazy::Lazy,
 };
+use twilight_cache_inmemory::ResourceType;
 use twilight_model::{
 	application::{
 		command::Command,

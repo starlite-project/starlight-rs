@@ -1,12 +1,13 @@
 use super::SlashCommand;
 use crate::{
-	persistence::settings::{GuildHelper, GuildKey, SettingsHelper},
+	persistence::settings::{GuildHelper, IdKey, SettingsHelper},
 	slashies::Response,
 	state::State,
 	utils::{constants::SlashiesErrorMessages, CacheReliant},
 };
 use anyhow::Result;
 use async_trait::async_trait;
+use nebula::Id;
 use twilight_cache_inmemory::ResourceType;
 use twilight_model::application::{
 	command::{Command, CommandType},
@@ -43,7 +44,7 @@ impl SlashCommand<0> for Settings {
 		let interaction = state.interaction(&self.0);
 
 		let guild_key = if let Some(key) = interaction.command.guild_id {
-			GuildKey::from(key)
+			IdKey::from(Id::from(key))
 		} else {
 			interaction
 				.response(Response::error(SlashiesErrorMessages::GuildOnly))

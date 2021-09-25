@@ -1,5 +1,10 @@
 #![feature(negative_impls, once_cell)]
-#![warn(clippy::pedantic, clippy::nursery, clippy::suspicious, missing_copy_implementations)]
+#![warn(
+	clippy::pedantic,
+	clippy::nursery,
+	clippy::suspicious,
+	missing_copy_implementations
+)]
 #![deny(clippy::all)]
 #![allow(
 	clippy::missing_errors_doc,

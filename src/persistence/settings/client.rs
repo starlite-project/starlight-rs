@@ -1,28 +1,27 @@
-use super::{Settings, SettingsHelper};
+use super::{IdKey, Settings, SettingsHelper};
 use crate::{persistence::Database, utils::CacheReliant};
-use constella::DataTransformer;
+use nebula::Id;
 use structsy::{Ref, SRes, StructsyIter, StructsyTx};
 use structsy_derive::{queries, Persistent};
 use twilight_cache_inmemory::ResourceType;
 use twilight_model::id::UserId;
 
-pub type ClientKey = DataTransformer<UserId>;
-
 #[derive(Debug, Clone, Copy, PartialEq, Persistent)]
 pub struct ClientSettings {
 	#[index(mode = "exclusive")]
 	raw_id: u64,
-	pub id: ClientKey,
+	pub id: IdKey,
 }
 
 #[queries(ClientSettings)]
 pub trait ClientQuery {
-	fn by_id(self, id: ClientKey) -> Self;
+	fn by_id(self, id: IdKey) -> Self;
 }
 
 impl ClientSettings {
+	#[must_use]
 	pub fn new(client_id: UserId) -> Self {
-		let id = ClientKey::from(client_id);
+		let id = IdKey::from(Id::from(client_id));
 		let raw_id = id.raw();
 
 		Self { raw_id, id }
@@ -30,7 +29,7 @@ impl ClientSettings {
 }
 
 impl Settings for ClientSettings {
-	type Id = ClientKey;
+	type Id = IdKey;
 
 	type RawId = u64;
 
@@ -57,11 +56,11 @@ impl<'db> SettingsHelper<'db> for ClientHelper<'db> {
 		Self { database }
 	}
 
-    fn database(&self) -> &Database {
-        self.database
-    }
+	fn database(&self) -> &Database {
+		self.database
+	}
 
-	fn get(&self, id: ClientKey) -> Option<Self::Target> {
+	fn get(&self, id: IdKey) -> Option<Self::Target> {
 		let query = self.database.query::<Self::Target>();
 
 		let iter: StructsyIter<'static, (Ref<ClientSettings>, ClientSettings)> =
@@ -76,10 +75,10 @@ impl<'db> SettingsHelper<'db> for ClientHelper<'db> {
 		None
 	}
 
-	fn create(&self, id: ClientKey) -> SRes<Self::Target> {
+	fn create(&self, id: IdKey) -> SRes<Self::Target> {
 		let mut tx = self.database.begin()?;
 
-		let client_settings = ClientSettings::new(id.value());
+		let client_settings = ClientSettings::new(id.value().into());
 		tx.insert(&client_settings)?;
 
 		tx.commit()?;

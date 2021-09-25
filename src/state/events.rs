@@ -88,6 +88,7 @@ mod internal {
 		state::State,
 	};
 	use anyhow::Result;
+	use nebula::Id;
 	use tracing::{event, Level};
 	use twilight_model::{
 		application::interaction::Interaction,
@@ -171,7 +172,7 @@ mod internal {
 	pub(super) async fn guild_create(state: State, created_guild: GuildCreate) -> Result<()> {
 		let guild_helper = state.database.helper::<GuildHelper>();
 
-		guild_helper.acquire(created_guild.id.into())?;
+		guild_helper.acquire(Id::from(created_guild.id).into())?;
 
 		Ok(())
 	}

@@ -1,4 +1,4 @@
-use super::settings::{GuildSettings, SettingsHelper, ClientSettings};
+use super::settings::{ClientSettings, GuildSettings, SettingsHelper};
 use anyhow::Result;
 use std::{
 	fmt::{Debug, Formatter, Result as FmtResult},
