@@ -60,18 +60,12 @@ macro_rules! cloned {
             move || $body
         }
     );
-    ($($n:ident),+ => move |$($p:tt),+| $body:expr) => (
+	($($n:ident),+ => move |$($p:tt$(: $t:ty)?),+| $body:expr) => (
         {
             $( let $n = $n.clone(); )+
-            move |$(cloned!(@param $p),)+| $body
+            move |$(cloned!(@param $p)$(: $t)?,)+| $body
         }
     );
-	($($n:ident),+ => move |$($p:tt: $t:ty),+| $body:expr) => (
-		{
-			$( let $n = $n.clone(); )+
-			move |$(cloned!(@param $p): $t,)+| $body
-		}
-	);
 }
 
 #[cfg(test)]
@@ -101,6 +95,17 @@ mod tests {
 		});
 
 		assert_eq!(add(10), 20);
+	}
+
+	#[test]
+	fn cloned_with_multiple_args() {
+		let value = 10;
+
+		let add_and_multiply = cloned!(value => move |to_add: u32, to_multiply: u32| {
+			(value + to_add) * to_multiply
+		});
+
+		assert_eq!(add_and_multiply(10, 2), 40);
 	}
 
 	#[test]
