@@ -1502,6 +1502,7 @@ dependencies = [
  "constella",
  "dotenv",
  "futures",
+ "nebula",
  "num_cpus",
  "once_cell",
  "persy",

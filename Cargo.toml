@@ -36,6 +36,9 @@ git = "https://github.com/clap-rs/clap.git"
 [dependencies.constella]
 path = "./constella"
 
+[dependencies.nebula]
+path = "./nebula"
+
 [dependencies.serde]
 default-features = false
 features = ["derive"]
