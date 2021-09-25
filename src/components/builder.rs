@@ -12,7 +12,7 @@ pub trait ComponentBuilder {
 	fn build_component(self) -> Result<Component, BuildError>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct BuildError;
 
 impl Display for BuildError {

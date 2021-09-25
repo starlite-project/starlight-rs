@@ -1,6 +1,11 @@
 #![feature(doc_cfg)]
 #![deny(clippy::all)]
-#![warn(clippy::pedantic, clippy::nursery, clippy::suspicious, missing_copy_implementations)]
+#![warn(
+	clippy::pedantic,
+	clippy::nursery,
+	clippy::suspicious,
+	missing_copy_implementations
+)]
 // Allowed bc it needs to be derived to allow it to be derived in separate structs
 // But it's also implemented as it is a smart pointer
 #![allow(clippy::derive_hash_xor_eq)]
@@ -20,6 +25,12 @@ use structsy::{
 
 mod describer_impls;
 mod transformer_impls;
+
+pub mod external {
+	pub use structsy::internal::{
+		Description, EnumDescription, FieldDescription, PersistentEmbedded, StructDescription,
+	};
+}
 
 pub trait Transformer {
 	type DataType: PersistentEmbedded;

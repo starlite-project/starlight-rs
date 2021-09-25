@@ -5,32 +5,29 @@ use twilight_model::id::{
 	GuildId, IntegrationId, InteractionId, MessageId, RoleId, StageId, UserId, WebhookId,
 };
 
-macro_rules! impl_describer_primitives {
-    ($($args:ty;)*) => {
-        $(
-            impl Describer for $args {
-                fn description() -> Description {
-                   Description::Struct(StructDescription::new(stringify!($args), &[]))
-                }
-            }
-        )*
-    }
+macro_rules! impl_describer {
+	($($args:ty;)*) => {
+		$(
+			impl Describer for $args {
+				fn description() -> Description {
+					Description::Struct(StructDescription::new(stringify!($args), &[]))
+				}
+			}
+		)*
+	};
+	($($args:tt: $type:ty;)*) => {
+		$(
+			impl Describer for $args {
+				fn description() -> Description {
+					let field = FieldDescription::new::<$type>(0, &"id", None);
+					Description::Struct(StructDescription::new(stringify!($args), &[field]))
+				}
+			}
+		)*
+	};
 }
 
-macro_rules! impl_describer_id {
-    ($($args:tt;)*) => {
-        $(
-            impl Describer for $args {
-                fn description() -> Description {
-                    let field = FieldDescription::new::<u64>(0, &"id", None);
-                    Description::Struct(StructDescription::new(stringify!($args), &[field]))
-                }
-            }
-        )*
-    }
-}
-
-impl_describer_primitives! {
+impl_describer! {
 	u8;
 	u16;
 	u32;
@@ -48,20 +45,20 @@ impl_describer_primitives! {
 	f64;
 }
 
-impl_describer_id! {
-	ApplicationId;
-	AttachmentId;
-	AuditLogEntryId;
-	ChannelId;
-	CommandId;
-	EmojiId;
-	GenericId;
-	GuildId;
-	IntegrationId;
-	InteractionId;
-	MessageId;
-	RoleId;
-	StageId;
-	UserId;
-	WebhookId;
+impl_describer! {
+	ApplicationId: u64;
+	AttachmentId: u64;
+	AuditLogEntryId: u64;
+	ChannelId: u64;
+	CommandId: u64;
+	EmojiId: u64;
+	GenericId: u64;
+	GuildId: u64;
+	IntegrationId: u64;
+	InteractionId: u64;
+	MessageId: u64;
+	RoleId: u64;
+	StageId: u64;
+	UserId: u64;
+	WebhookId: u64;
 }

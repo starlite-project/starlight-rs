@@ -5,43 +5,76 @@ use twilight_model::id::{
 	GuildId, IntegrationId, InteractionId, MessageId, RoleId, StageId, UserId, WebhookId,
 };
 
-macro_rules! impl_transformer_primitives {
-    ($($args:ty;)*) => {
-        $(
-            impl Transformer for $args {
-                type DataType = Self;
+// macro_rules! impl_transformer_primitives {
+//     ($($args:ty;)*) => {
+//         $(
+//             impl Transformer for $args {
+//                 type DataType = Self;
 
-                fn transform(&self) -> Self::DataType {
-                    *self
-                }
+//                 fn transform(&self) -> Self::DataType {
+//                     *self
+//                 }
 
-                fn revert(value: &Self::DataType) -> Self {
-                    *value
-                }
-            }
-        )*
-    }
+//                 fn revert(value: &Self::DataType) -> Self {
+//                     *value
+//                 }
+//             }
+//         )*
+//     }
+// }
+
+macro_rules! impl_transformer {
+	($($args:ty;)*) => {
+		$(
+			impl Transformer for $args {
+				type DataType = Self;
+
+				fn transform(&self) -> Self::DataType {
+					*self
+				}
+
+				fn revert(value: &Self::DataType) -> Self {
+					*value
+				}
+			}
+		)*
+	};
+	($($args:tt: $type:ty;)*) => {
+		$(
+			impl Transformer for $args {
+				type DataType = $type;
+
+				fn transform(&self) -> Self::DataType {
+					self.0
+				}
+
+				fn revert(value: &Self::DataType) -> Self {
+					Self(*value)
+				}
+			}
+		)*
+	};
 }
 
-macro_rules! impl_transformer_id {
-    ($($args:tt;)*) => {
-        $(
-            impl Transformer for $args {
-                type DataType = u64;
+// macro_rules! impl_transformer_id {
+//     ($($args:tt;)*) => {
+//         $(
+//             impl Transformer for $args {
+//                 type DataType = u64;
 
-                fn transform(&self) -> Self::DataType {
-                    self.0
-                }
+//                 fn transform(&self) -> Self::DataType {
+//                     self.0
+//                 }
 
-                fn revert(value: &Self::DataType) -> Self {
-                    Self(*value)
-                }
-            }
-        )*
-    }
-}
+//                 fn revert(value: &Self::DataType) -> Self {
+//                     Self(*value)
+//                 }
+//             }
+//         )*
+//     }
+// }
 
-impl_transformer_primitives! {
+impl_transformer! {
 	u8;
 	u16;
 	u32;
@@ -57,22 +90,22 @@ impl_transformer_primitives! {
 	f64;
 }
 
-impl_transformer_id! {
-	ApplicationId;
-	AttachmentId;
-	AuditLogEntryId;
-	ChannelId;
-	CommandId;
-	EmojiId;
-	GenericId;
-	GuildId;
-	IntegrationId;
-	InteractionId;
-	MessageId;
-	RoleId;
-	StageId;
-	UserId;
-	WebhookId;
+impl_transformer! {
+	ApplicationId: u64;
+	AttachmentId: u64;
+	AuditLogEntryId: u64;
+	ChannelId: u64;
+	CommandId: u64;
+	EmojiId: u64;
+	GenericId: u64;
+	GuildId: u64;
+	IntegrationId: u64;
+	InteractionId: u64;
+	MessageId: u64;
+	RoleId: u64;
+	StageId: u64;
+	UserId: u64;
+	WebhookId: u64;
 }
 
 impl Transformer for String {

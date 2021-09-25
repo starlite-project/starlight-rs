@@ -924,7 +924,6 @@ version = "0.1.0"
 dependencies = [
  "constella",
  "serde",
- "structsy",
  "twilight-model",
 ]
 
