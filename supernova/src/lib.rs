@@ -164,6 +164,10 @@ mod tests {
 			})
 		}
 
+		async fn random(&self) -> TestResult<u8> {
+			Ok(10)
+		}
+
 		fn status(&self) -> u16 {
 			self.code
 		}
@@ -230,6 +234,15 @@ mod tests {
 		let decoded = status!(failed);
 
 		assert_eq!(decoded, 404);
+
+		Ok(())
+	}
+
+	#[tokio::test]
+	async fn finish_request() -> TestResult {
+		let finished = finish_request!(RESPONSE_FUTURE, random);
+
+		assert_eq!(finished, 10);
 
 		Ok(())
 	}
