@@ -52,20 +52,13 @@ macro_rules! finish_request {
 
 #[macro_export]
 macro_rules! cloned {
-    (@param _) => ( _ );
-    (@param $x:ident) => ( $x );
-    ($($n:ident),+ => move || $body:expr) => (
-        {
-            $( let $n = $n.clone(); )+
-            move || $body
-        }
-    );
-	($($n:ident),+ => move |$($p:tt$(: $t:ty)?),+| $body:expr) => (
-        {
-            $( let $n = $n.clone(); )+
-            move |$(cloned!(@param $p)$(: $t)?,)+| $body
-        }
-    );
+	(($($n:ident),+) => $e:expr) => (
+		{
+			$( let $n = ::std::clone::Clone::clone(&$n); )+
+
+			$e
+		}
+	);
 }
 
 #[cfg(test)]
@@ -79,25 +72,18 @@ mod tests {
 	fn cloned() {
 		let name = String::from("Ferris");
 
-		let three_letters = cloned!(name => move || {
+		let three_letters = cloned!((name) => move || {
 			name.split("").take(4).collect::<String>()
 		});
 
 		assert_eq!(three_letters(), String::from("Fer"));
-		let value = String::from("Hello, world!");
-
-		let reverse_value = cloned!(value => move || {
-			value.chars().rev().collect::<String>()
-		});
-
-		assert_eq!(reverse_value(), String::from("!dlrow ,olleH"));
 	}
 
 	#[test]
 	fn cloned_with_args() {
 		let value = 10;
 
-		let add = cloned!(value => move |to_add: u32| {
+		let add = cloned!((value) => move |to_add: u32| {
 			value + to_add
 		});
 
@@ -108,11 +94,22 @@ mod tests {
 	fn cloned_with_multiple_args() {
 		let value = 10;
 
-		let add_and_multiply = cloned!(value => move |to_add: u32, to_multiply: u32| {
+		let add_and_multiply = cloned!((value) => move |to_add: u32, to_multiply: u32| {
 			(value + to_add) * to_multiply
 		});
 
 		assert_eq!(add_and_multiply(10, 2), 40);
+	}
+
+	#[test]
+	fn cloned_with_return_type() {
+		let value = String::from("Hello, world!");
+
+		let reverse_value = cloned!((value) => move || -> String {
+			value.chars().rev().collect()
+		});
+
+		assert_eq!(reverse_value(), String::from("!dlrow ,olleH"));
 	}
 
 	#[test]
