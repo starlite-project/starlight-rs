@@ -84,6 +84,13 @@ mod tests {
 		});
 
 		assert_eq!(three_letters(), String::from("Fer"));
+		let value = String::from("Hello, world!");
+
+		let reverse_value = cloned!(value => move || {
+			value.chars().rev().collect::<String>()
+		});
+
+		assert_eq!(reverse_value(), String::from("!dlrow ,olleH"));
 	}
 
 	#[test]
