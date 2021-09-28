@@ -1,6 +1,7 @@
 use super::{Components, Config, State};
 use crate::persistence::Database;
 use anyhow::{Context, Result};
+use supernova::cloned;
 use tokio::time::Instant;
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
 use twilight_gateway::{
@@ -96,9 +97,15 @@ impl StateBuilder {
 	}
 
 	pub async fn build(self) -> Result<(State, Events)> {
-		let token = self.config.unwrap_or_default().token.to_owned();
-		let http_builder = self.http.unwrap_or_default();
-		let cluster_builder = self.cluster.context("Need cluster to build state").unwrap();
+		let config = self.config.unwrap_or_default();
+		let token = config.token.to_owned();
+		// let http_builder = self
+		// 	.http
+		// 	.unwrap_or_else(move || HttpBuilder::new().token(token.clone()));
+		let http_builder = self
+			.http
+			.unwrap_or_else(cloned!(token => move || HttpBuilder::new().token(token)));
+		let cluster_builder = self.cluster.context("Need cluster to build state")?;
 		let cache_builder = self.cache.unwrap_or_default();
 
 		let http = http_builder.token(token).build();
@@ -112,7 +119,7 @@ impl StateBuilder {
 			standby,
 			http,
 			runtime: Instant::now(),
-			config: self.config.unwrap_or_default(),
+			config,
 			database: Database::open()?,
 		}));
 

@@ -52,9 +52,19 @@ macro_rules! finish_request {
 
 #[macro_export]
 macro_rules! cloned {
+	(@param $n:ident) => (
+		::std::clone::Clone::clone(&$n)
+	);
+	($n:ident => $e:expr) => (
+		{
+			let $n = cloned!(@param $n);
+
+			$e
+		}
+	);
 	(($($n:ident),+) => $e:expr) => (
 		{
-			$( let $n = ::std::clone::Clone::clone(&$n); )+
+			$( let $n = cloned!(@param $n); )+
 
 			$e
 		}
@@ -72,7 +82,7 @@ mod tests {
 	fn cloned() {
 		let name = String::from("Ferris");
 
-		let three_letters = cloned!((name) => move || {
+		let three_letters = cloned!(name => move || {
 			name.split("").take(4).collect::<String>()
 		});
 
@@ -83,7 +93,7 @@ mod tests {
 	fn cloned_with_args() {
 		let value = 10;
 
-		let add = cloned!((value) => move |to_add: u32| {
+		let add = cloned!(value => move |to_add: u32| {
 			value + to_add
 		});
 
@@ -94,7 +104,7 @@ mod tests {
 	fn cloned_with_multiple_args() {
 		let value = 10;
 
-		let add_and_multiply = cloned!((value) => move |to_add: u32, to_multiply: u32| {
+		let add_and_multiply = cloned!(value => move |to_add: u32, to_multiply: u32| {
 			(value + to_add) * to_multiply
 		});
 
@@ -102,10 +112,22 @@ mod tests {
 	}
 
 	#[test]
+	fn cloned_with_multiple_values() {
+		let first_name = "John".to_string();
+		let last_name = "Doe";
+
+		let combine_names = cloned!((first_name, last_name) => move || {
+			first_name + " " + last_name
+		});
+
+		assert_eq!(combine_names(), "John Doe");
+	}
+
+	#[test]
 	fn cloned_with_return_type() {
 		let value = String::from("Hello, world!");
 
-		let reverse_value = cloned!((value) => move || -> String {
+		let reverse_value = cloned!(value => move || -> String {
 			value.chars().rev().collect()
 		});
 
