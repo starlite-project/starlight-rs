@@ -99,9 +99,6 @@ impl StateBuilder {
 	pub async fn build(self) -> Result<(State, Events)> {
 		let config = self.config.unwrap_or_default();
 		let token = config.token.to_owned();
-		// let http_builder = self
-		// 	.http
-		// 	.unwrap_or_else(move || HttpBuilder::new().token(token.clone()));
 		let http_builder = self
 			.http
 			.unwrap_or_else(cloned!(token => move || HttpBuilder::new().token(token)));

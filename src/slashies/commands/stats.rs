@@ -194,7 +194,7 @@ impl Stats {
 		let users = cache_stats.users();
 
 		let rustc_version = {
-			let mut version = crate::build_info::RUSTC_VERSION.to_string();
+			let mut version = crate::build_info::RUSTC_VERSION.to_owned();
 
 			let range = version.find('(').unwrap_or_else(|| version.len())..;
 

@@ -3,6 +3,8 @@
 	clippy::pedantic,
 	clippy::nursery,
 	clippy::suspicious,
+	clippy::str_to_string,
+	clippy::string_to_string,
 	missing_copy_implementations
 )]
 #![deny(clippy::all)]

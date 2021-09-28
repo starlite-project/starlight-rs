@@ -4,6 +4,8 @@
 	clippy::pedantic,
 	clippy::nursery,
 	clippy::suspicious,
+	clippy::str_to_string,
+	clippy::string_to_string,
 	missing_copy_implementations
 )]
 // Allowed bc it needs to be derived to allow it to be derived in separate structs

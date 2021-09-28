@@ -1,3 +1,6 @@
+#![deny(clippy::all)]
+#![warn(clippy::pedantic, clippy::nursery, clippy::suspicious)]
+
 #[macro_export]
 macro_rules! debug_unreachable {
 	() => {
@@ -190,7 +193,7 @@ mod tests {
 			Ok(10)
 		}
 
-		fn status(&self) -> u16 {
+		const fn status(&self) -> u16 {
 			self.code
 		}
 	}
