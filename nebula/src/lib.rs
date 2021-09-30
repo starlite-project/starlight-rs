@@ -10,4 +10,4 @@
 
 mod id;
 
-pub use self::id::Id;
+pub use self::id::{Id, IdKey, ToIdKey};

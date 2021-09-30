@@ -1,6 +1,6 @@
-use super::{IdKey, Settings, SettingsHelper};
+use super::{Settings, SettingsHelper};
 use crate::{persistence::Database, utils::CacheReliant};
-use nebula::Id;
+use nebula::{Id, IdKey};
 use structsy::{Ref, SRes, StructsyIter, StructsyTx};
 use structsy_derive::{queries, Persistent};
 use twilight_cache_inmemory::ResourceType;

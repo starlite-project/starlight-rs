@@ -2,8 +2,6 @@ mod client;
 mod guild;
 
 use super::Database;
-use constella::DataTransformer;
-use nebula::Id;
 use persy::IndexType;
 use structsy::{internal::PersistentEmbedded, Persistent, SRes, StructsyQuery};
 
@@ -11,8 +9,6 @@ pub use self::{
 	client::{ClientHelper, ClientSettings},
 	guild::{GuildHelper, GuildSettings},
 };
-
-pub type IdKey = DataTransformer<Id>;
 
 pub trait Settings: Persistent {
 	type Id: PersistentEmbedded + Copy;

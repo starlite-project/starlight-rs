@@ -1,6 +1,6 @@
-use super::{IdKey, Settings, SettingsHelper};
+use super::{Settings, SettingsHelper};
 use crate::{persistence::Database, utils::CacheReliant};
-use nebula::Id;
+use nebula::{IdKey, ToIdKey};
 use structsy::{Ref, SRes, StructsyIter, StructsyTx};
 use structsy_derive::{queries, Persistent};
 use twilight_cache_inmemory::ResourceType;
@@ -21,7 +21,7 @@ pub trait GuildQuery {
 impl GuildSettings {
 	#[must_use]
 	pub fn new(guild_id: GuildId) -> Self {
-		let id = IdKey::from(Id::from(guild_id));
+		let id = guild_id.to_id_key();
 		let raw_id = id.raw();
 
 		Self { raw_id, id }

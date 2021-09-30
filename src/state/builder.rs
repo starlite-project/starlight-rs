@@ -32,40 +32,38 @@ impl StateBuilder {
 		}
 	}
 
-	pub const fn config(mut self, config: Config) -> Self {
+	pub const fn config(mut self, config: Config) -> Result<Self> {
 		self.config = Some(config);
 
-		self
+		Ok(self)
 	}
 
-	pub const fn intents(mut self, intents: Intents) -> Self {
+	pub const fn intents(mut self, intents: Intents) -> Result<Self> {
 		self.intents = Some(intents);
 
-		self
+		Ok(self)
 	}
 
-	pub fn cluster_builder<F>(mut self, cluster_fn: F) -> Self
+	pub fn cluster_builder<F>(mut self, cluster_fn: F) -> Result<Self>
 	where
 		F: FnOnce(ClusterBuilder) -> ClusterBuilder,
 	{
 		let intents = self
 			.intents
-			.context("need intents to build cluster")
-			.unwrap();
+			.context("need intents to build cluster")?;
 		let token = self
 			.config
-			.context("need config to build cluster")
-			.unwrap()
+			.context("need config to build cluster")?
 			.token;
 
 		let cluster = cluster_fn((token, intents).into());
 
 		self.cluster = Some(cluster);
 
-		self
+		Ok(self)
 	}
 
-	pub fn cache_builder<F>(mut self, cache_fn: F) -> Self
+	pub fn cache_builder<F>(mut self, cache_fn: F) -> Result<Self>
 	where
 		F: FnOnce(CacheBuilder) -> CacheBuilder,
 	{
@@ -73,17 +71,16 @@ impl StateBuilder {
 
 		self.cache = Some(built);
 
-		self
+		Ok(self)
 	}
 
-	pub fn http_builder<F>(mut self, http_fn: F) -> Self
+	pub fn http_builder<F>(mut self, http_fn: F) -> Result<Self>
 	where
 		F: FnOnce(HttpBuilder) -> HttpBuilder,
 	{
 		let token = self
 			.config
-			.context("need config to build http")
-			.unwrap()
+			.context("need config to build http")?
 			.token;
 		let http_builder = self.http.map_or_else(
 			move || HttpBuilder::new().token(token.to_owned()),
@@ -93,7 +90,7 @@ impl StateBuilder {
 
 		self.http = Some(http);
 
-		self
+		Ok(self)
 	}
 
 	pub async fn build(self) -> Result<(State, Events)> {

@@ -66,10 +66,10 @@ async fn run() -> Result<()> {
 	let config = Config::new()?;
 
 	let (client, events) = StateBuilder::new()
-		.config(config)
-		.intents(Intents::empty())
-		.cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))
-		.cache_builder(|builder| builder.resource_types(Commands::needs() | GuildHelper::needs()))
+		.config(config)?
+		.intents(Intents::empty())?
+		.cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))?
+		.cache_builder(|builder| builder.resource_types(Commands::needs() | GuildHelper::needs()))?
 		.build()
 		.await?;
 

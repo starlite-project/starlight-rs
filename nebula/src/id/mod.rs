@@ -1,4 +1,7 @@
-use constella::{DataTransformer, Describer, Transformer, external::{Description, FieldDescription, StructDescription}};
+use constella::{
+	external::{Description, FieldDescription, StructDescription},
+	Describer, Transformer,
+};
 use serde::{Deserialize, Serialize};
 use std::{
 	fmt::{Display, Formatter, Result as FmtResult},
@@ -9,12 +12,14 @@ use twilight_model::id::{
 	GuildId, IntegrationId, InteractionId, MessageId, RoleId, StageId, UserId, WebhookId,
 };
 
+mod key;
+
+pub use self::key::{IdKey, ToIdKey};
+
 #[derive(
 	Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
 )]
 pub struct Id(pub u64);
-
-pub type IdKey = DataTransformer<Id>;
 
 impl Id {
 	#[must_use]
@@ -33,9 +38,9 @@ impl Id {
 	}
 
 	#[must_use]
-	pub fn as_key<T: private::Sealed + Into<Self>>(id: T) -> IdKey {
+	pub fn as_id_key<T: private::Sealed + Into<Self>>(id: T) -> IdKey {
 		IdKey::from(id.into())
-	} 
+	}
 }
 
 impl Deref for Id {
