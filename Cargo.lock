@@ -1530,6 +1530,7 @@ name = "star-test"
 version = "0.1.0"
 dependencies = [
  "miette",
+ "semver",
  "thiserror",
 ]
 

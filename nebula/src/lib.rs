@@ -7,6 +7,7 @@
 	clippy::string_to_string
 )]
 #![deny(clippy::all)]
+#![allow(clippy::module_name_repetitions)]
 
 mod id;
 

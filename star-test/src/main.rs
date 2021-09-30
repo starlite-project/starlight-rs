@@ -1,30 +1,22 @@
-use miette::{Diagnostic, SourceSpan, NamedSource, Result};
-use thiserror::Error;
+use miette::Result;
+use std::{
+	error::Error,
+	fmt::{Display, Formatter, Result as FmtResult},
+};
 
-#[derive(Debug, Error, Diagnostic)]
-#[error("oops!")]
-#[diagnostic(
-	code(oops::my_bad),
-	url(docsrs),
-    help("try doing it better next time?"),
-)]
-struct MyBad {
-	#[source_code]
-	src: NamedSource,
-	#[label("This bit here")]
-	bad_bit: SourceSpan
+#[derive(Debug, Clone, Copy)]
+struct TestError;
+
+impl Display for TestError {
+	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+		f.write_str("This is a test")
+	}
 }
 
+impl Error for TestError {}
+
 fn this_fails() -> Result<()> {
-    let src = "source\n  text\n    here".to_string();
-    // let len = src.len();
-
-    Err(MyBad {
-        src: NamedSource::new("bad_file.rs", src),
-        bad_bit: (9, 4).into(),
-    })?;
-
-    Ok(())
+	miette::bail!(TestError)
 }
 
 fn main() -> Result<()> {

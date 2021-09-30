@@ -85,9 +85,7 @@ impl Response {
 	}
 
 	pub fn message<T: AsRef<str>>(mut self, content: T) -> Self {
-		if content.as_ref().is_empty() {
-			panic!("empty message not allowed");
-		}
+		assert!(!content.as_ref().is_empty(), "empty message not allowed");
 
 		self.0.content = Some(content.as_ref().to_owned());
 
@@ -96,9 +94,7 @@ impl Response {
 
 	#[must_use]
 	pub fn embeds(mut self, embeds: Vec<Embed>) -> Self {
-		if embeds.is_empty() {
-			panic!("empty embeds not allowed");
-		}
+		assert!(!embeds.is_empty(), "empty embeds not allowed");
 
 		self.0.embeds.extend(embeds);
 
