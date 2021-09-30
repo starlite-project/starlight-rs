@@ -5,8 +5,8 @@ use crate::{
 	state::State,
 	InteractionAuthor,
 };
-use anyhow::Result;
 use async_trait::async_trait;
+use miette::{IntoDiagnostic, Result};
 use twilight_model::application::{
 	command::{Command, CommandType},
 	component::{button::ButtonStyle, Button},
@@ -38,26 +38,30 @@ impl SlashCommand<2> for Click {
 
 		let response = Response::new()
 			.message("Click this")
-			.add_components(Self::components()?);
+			.add_components(Self::components().into_diagnostic()?);
 
-		interaction.response(response).await?;
+		interaction.response(response).await.into_diagnostic()?;
 
 		let click_data =
 			Self::wait_for_click(state, interaction, interaction.command.interaction_author())
 				.await?;
 
 		interaction
-			.update()?
+			.update()
+			.into_diagnostic()?
 			.content(Some(
 				format!(
 					"Success! You clicked {}",
 					Self::parse(interaction, &click_data.data.custom_id)
 				)
 				.as_str(),
-			))?
-			.components(Self::EMPTY_COMPONENTS)?
+			))
+			.into_diagnostic()?
+			.components(Self::EMPTY_COMPONENTS)
+			.into_diagnostic()?
 			.exec()
-			.await?;
+			.await
+			.into_diagnostic()?;
 
 		Ok(())
 	}

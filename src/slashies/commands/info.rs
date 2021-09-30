@@ -5,9 +5,9 @@ use crate::{
 	state::State,
 	utils::{constants::SlashiesErrorMessages, CacheReliant},
 };
-use anyhow::Result;
 use async_trait::async_trait;
 use chrono::{DateTime, TimeZone, Utc};
+use miette::{IntoDiagnostic, Result};
 use twilight_cache_inmemory::ResourceType;
 use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder, EmbedFooterBuilder, ImageSource};
 use twilight_mention::Mention;
@@ -59,6 +59,7 @@ impl SlashCommand<0> for Info {
 		}
 	}
 
+	#[allow(clippy::too_many_lines)]
 	async fn run(&self, state: State) -> Result<()> {
 		let interaction = state.interaction(&self.0);
 
@@ -67,7 +68,8 @@ impl SlashCommand<0> for Info {
 		} else {
 			interaction
 				.response(Response::error(SlashiesErrorMessages::GuildOnly))
-				.await?;
+				.await
+				.into_diagnostic()?;
 
 			return Ok(());
 		};
@@ -83,28 +85,26 @@ impl SlashCommand<0> for Info {
 			} else {
 				interaction
 					.response(Response::error(SlashiesErrorMessages::CantGetUser))
-					.await?;
+					.await
+					.into_diagnostic()?;
 				return Ok(());
 			}
 		} else {
 			interaction
 				.response(Response::error(SlashiesErrorMessages::CantGetUser))
-				.await?;
+				.await
+				.into_diagnostic()?;
 			return Ok(());
 		};
 
 		let helper = CacheHelper::new(&interaction.state);
 
-		let member = helper.member(guild_id, user.id).await?;
-
+		let member = helper.member(guild_id, user.id).await.into_diagnostic()?;
 		let created_at_timestamp = user.id.timestamp();
-
-		let current_user = helper.current_user().await?;
-
+		let current_user = helper.current_user().await.into_diagnostic()?;
 		let current_user_enum = UserOrCurrentUser::from(&current_user);
 
 		let user_enum = UserOrCurrentUser::from(user);
-
 		let created_at_formatted = Utc
 			.timestamp_millis(created_at_timestamp)
 			.format(Self::FORMAT_TYPE)
@@ -116,12 +116,15 @@ impl SlashCommand<0> for Info {
 			parsed.format(Self::FORMAT_TYPE).to_string()
 		});
 
-		let mut roles = helper.member_roles(guild_id, user.id).await?;
+		let mut roles = helper
+			.member_roles(guild_id, user.id)
+			.await
+			.into_diagnostic()?;
 
 		roles.reverse();
 
 		let mut embed_builder = Self::BASE
-			.thumbnail(ImageSource::url(user_avatar(&user_enum))?)
+			.thumbnail(ImageSource::url(user_avatar(&user_enum)).into_diagnostic()?)
 			.description(format!(
 				"**{name}#{discriminator}** - {mention} - [Avatar]({avatar})",
 				name = user.name,
@@ -131,7 +134,7 @@ impl SlashCommand<0> for Info {
 			))
 			.footer(
 				EmbedFooterBuilder::new(format!("ID: {}", user.id))
-					.icon_url(ImageSource::url(user_avatar(&current_user_enum))?),
+					.icon_url(ImageSource::url(user_avatar(&current_user_enum)).into_diagnostic()?),
 			)
 			.field(EmbedFieldBuilder::new("Created At", created_at_formatted))
 			.timestamp(format!("{:?}", Utc::now()));
@@ -170,10 +173,11 @@ impl SlashCommand<0> for Info {
 
 		interaction
 			.response(
-				Response::from(embed_builder.build()?)
+				Response::from(embed_builder.build().into_diagnostic()?)
 					.allowed_mentions(|builder| builder.replied_user().user_ids([user.id])),
 			)
-			.await?;
+			.await
+			.into_diagnostic()?;
 
 		Ok(())
 	}

@@ -1,5 +1,5 @@
-use constella::DataTransformer;
 use super::Id;
+use constella::DataTransformer;
 use twilight_model::id::{
 	ApplicationId, AttachmentId, AuditLogEntryId, ChannelId, CommandId, EmojiId, GenericId,
 	GuildId, IntegrationId, InteractionId, MessageId, RoleId, StageId, UserId, WebhookId,
@@ -8,7 +8,7 @@ use twilight_model::id::{
 pub type IdKey = DataTransformer<Id>;
 
 pub trait ToIdKey {
-    fn to_id_key(self) -> IdKey;
+	fn to_id_key(self) -> IdKey;
 }
 
 macro_rules! impl_to_id_key {

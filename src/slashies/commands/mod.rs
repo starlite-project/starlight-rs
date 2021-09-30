@@ -4,11 +4,11 @@ use crate::{
 	state::State,
 	utils::CacheReliant,
 };
-use anyhow::Result;
 use async_trait::async_trait;
 use base64::encode;
 use click::Click;
 use info::Info;
+use miette::{IntoDiagnostic, Result};
 use ping::Ping;
 use settings::Settings;
 use stats::Stats;
@@ -108,19 +108,27 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
 		};
 
 		let event = if let Some(guild_id) = interaction.command.guild_id {
-			state.standby.wait_for(guild_id, waiter).await?
+			state
+				.standby
+				.wait_for(guild_id, waiter)
+				.await
+				.into_diagnostic()?
 		} else {
-			state.standby.wait_for_event(waiter).await?
+			state
+				.standby
+				.wait_for_event(waiter)
+				.await
+				.into_diagnostic()?
 		};
 
 		if let Event::InteractionCreate(interaction_create) = event {
 			if let DiscordInteraction::MessageComponent(comp) = interaction_create.0 {
 				Ok(*comp)
 			} else {
-				Err(ClickError.into())
+				Err(miette::miette!(ClickError))
 			}
 		} else {
-			Err(ClickError.into())
+			Err(miette::miette!(ClickError))
 		}
 	}
 }

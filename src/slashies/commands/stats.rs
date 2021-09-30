@@ -4,9 +4,9 @@ use crate::{
 	state::State,
 	utils::CacheReliant,
 };
-use anyhow::Result;
 use async_trait::async_trait;
 use chrono::Duration;
+use miette::{IntoDiagnostic, Result};
 use std::{
 	cmp::min,
 	convert::{TryFrom, TryInto},
@@ -208,9 +208,16 @@ impl Stats {
 
 	fn uptime(interaction: Interaction) -> Result<String> {
 		let system = System::new();
-		let bot_uptime: Uptime = interaction.state.runtime.elapsed().try_into()?;
+		let bot_uptime: Uptime = interaction
+			.state
+			.runtime
+			.elapsed()
+			.try_into()
+			.into_diagnostic()?;
 
-		let host_uptime: Uptime = StdDuration::from_secs(system.uptime()).try_into()?;
+		let host_uptime: Uptime = StdDuration::from_secs(system.uptime())
+			.try_into()
+			.into_diagnostic()?;
 
 		Ok(format!(
 			"**{dot} Host:** {host_uptime}\n**{dot} Client:** {bot_uptime}",
@@ -223,13 +230,14 @@ impl Stats {
 	#[allow(clippy::cast_precision_loss, clippy::borrow_interior_mutable_const)]
 	async fn server_usage() -> Result<String> {
 		let cpu_count = num_cpus::get_physical() as f64;
-		let process = crate::utils::get_current_process()?;
+		let process = crate::utils::get_current_process().into_diagnostic()?;
 
 		process.cpu_usage();
 		tokio::time::sleep(StdDuration::from_millis(200)).await;
 		let cpu_usage = (f64::from(process.cpu_usage()) / cpu_count) * 100.0;
 
-		let memory_usage = Bytes::try_from(star_utils::memory()?)?;
+		let memory_usage =
+			Bytes::try_from(star_utils::memory().into_diagnostic()?).into_diagnostic()?;
 
 		if cfg!(windows) {
 			Ok(format!("**{dot} CPU Usage:** {cpu_usage:.2}%\n**{dot} Memory usage:** {memory_usage}\n**{dot} Binary size:** {binary_size}", dot = DOT, cpu_usage = cpu_usage, memory_usage = memory_usage, binary_size = *BUILD_SIZE))
@@ -277,7 +285,10 @@ impl SlashCommand<0> for Stats {
 				Self::server_usage().await?,
 			));
 
-		interaction.response(Response::from(embed.build()?)).await?;
+		interaction
+			.response(Response::from(embed.build().into_diagnostic()?))
+			.await
+			.into_diagnostic()?;
 
 		Ok(())
 	}

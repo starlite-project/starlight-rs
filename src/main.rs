@@ -1,4 +1,5 @@
-use anyhow::Result;
+// use anyhow::Result;
+use miette::{IntoDiagnostic, Result};
 use starlight::{
 	persistence::settings::GuildHelper,
 	slashies::commands::Commands,
@@ -34,15 +35,17 @@ fn main() -> Result<()> {
 		.on_thread_stop(|| {
 			ATOMIC_ID.fetch_sub(1, Ordering::SeqCst);
 		})
-		.build()?
+		.build()
+		.into_diagnostic()?
 		.block_on(run())?;
 
 	Ok(())
 }
 
 async fn run() -> Result<()> {
-	let mut log_filter_layer =
-		EnvFilter::try_from_default_env().or_else(|_| EnvFilter::try_new("info"))?;
+	let mut log_filter_layer = EnvFilter::try_from_default_env()
+		.or_else(|_| EnvFilter::try_new("info"))
+		.into_diagnostic()?;
 	let log_fmt_layer = fmt::layer()
 		.pretty()
 		.with_thread_ids(true)
@@ -50,18 +53,19 @@ async fn run() -> Result<()> {
 
 	log_filter_layer = if cfg!(debug_assertions) {
 		log_filter_layer
-			.add_directive("starlight[act]=debug".parse()?)
-			.add_directive("starlight=trace".parse()?)
+			.add_directive("starlight[act]=debug".parse().into_diagnostic()?)
+			.add_directive("starlight=trace".parse().into_diagnostic()?)
 	} else {
-		log_filter_layer.add_directive("starlight_rs=info".parse()?)
+		log_filter_layer.add_directive("starlight_rs=info".parse().into_diagnostic()?)
 	};
 
 	tracing_subscriber::registry()
 		.with(log_filter_layer)
 		.with(log_fmt_layer)
-		.try_init()?;
+		.try_init()
+		.into_diagnostic()?;
 
-	dotenv::dotenv()?;
+	dotenv::dotenv().into_diagnostic()?;
 
 	let config = Config::new()?;
 
@@ -88,8 +92,8 @@ async fn run() -> Result<()> {
 
 	#[cfg(unix)]
 	{
-		let mut sigint = signal(SignalKind::interrupt())?;
-		let mut sigterm = signal(SignalKind::terminate())?;
+		let mut sigint = signal(SignalKind::interrupt()).into_diagnostic()?;
+		let mut sigterm = signal(SignalKind::terminate()).into_diagnostic()?;
 
 		tokio::select! {
 			_ = sigint.recv() => event!(Level::INFO, "received SIGINT"),

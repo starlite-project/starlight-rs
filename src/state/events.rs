@@ -1,5 +1,5 @@
 use super::State;
-use anyhow::Result;
+use miette::Result;
 use twilight_gateway::Event;
 
 #[allow(clippy::enum_glob_use, clippy::match_wildcard_for_single_variants)]
@@ -87,7 +87,7 @@ mod internal {
 		slashies,
 		state::State,
 	};
-	use anyhow::Result;
+	use miette::{IntoDiagnostic, Result};
 	use nebula::Id;
 	use tracing::{event, Level};
 	use twilight_model::{
@@ -172,7 +172,9 @@ mod internal {
 	pub(super) async fn guild_create(state: State, created_guild: GuildCreate) -> Result<()> {
 		let guild_helper = state.database.helper::<GuildHelper>();
 
-		guild_helper.acquire(Id::from(created_guild.id).into())?;
+		guild_helper
+			.acquire(Id::from(created_guild.id).into())
+			.into_diagnostic()?;
 
 		Ok(())
 	}

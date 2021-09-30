@@ -1,5 +1,5 @@
-use anyhow::Result;
 use clap::{crate_authors, crate_description, crate_license, crate_name, crate_version, App, Arg};
+use miette::{IntoDiagnostic, Result};
 use serde::{Deserialize, Serialize};
 use std::{env, ffi::OsStr, fs, path::PathBuf};
 use tracing::{event, instrument, Level};
@@ -55,9 +55,11 @@ impl Config {
 	pub fn get_user_id(self) -> Result<u64> {
 		let first_part_of_token = self.token.split('.').next().unwrap_or_default();
 
-		let decoded = base64::decode(first_part_of_token)?;
+		let decoded = base64::decode(first_part_of_token).into_diagnostic()?;
 
-		let value = unsafe { String::from_utf8_unchecked(decoded) }.parse()?;
+		let value = unsafe { String::from_utf8_unchecked(decoded) }
+			.parse()
+			.into_diagnostic()?;
 
 		Ok(value)
 	}
@@ -69,10 +71,10 @@ impl Config {
 			let path = [&credential_dir, OsStr::new("token")]
 				.iter()
 				.collect::<PathBuf>();
-			fs::read_to_string(path)?
+			fs::read_to_string(path).into_diagnostic()?
 		} else {
 			event!(Level::WARN, "falling back to `TOKEN` environment variabke");
-			env::var("DISCORD_TOKEN")?
+			env::var("DISCORD_TOKEN").into_diagnostic()?
 		};
 
 		Ok(Box::leak(Box::new(token)))

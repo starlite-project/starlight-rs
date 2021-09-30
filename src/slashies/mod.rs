@@ -184,7 +184,7 @@ pub async fn act(state: State, command: ApplicationCommand) {
 		if let Err(e) = cmd.run(state).await {
 			event!(
 				Level::ERROR,
-				error = &*e as &dyn std::error::Error,
+				error = &*e.root_cause(),
 				"error running command"
 			);
 		}

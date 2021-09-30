@@ -1,5 +1,5 @@
 use super::settings::{ClientSettings, GuildSettings, SettingsHelper};
-use anyhow::Result;
+use miette::{IntoDiagnostic, Result};
 use std::{
 	fmt::{Debug, Formatter, Result as FmtResult},
 	ops::Deref,
@@ -11,9 +11,9 @@ use tracing::{event, Level};
 macro_rules! define {
 	($db: expr, $($structs: ty),*) => {
 		$(
-			if !$db.is_defined::<$structs>()? {
+			if !$db.is_defined::<$structs>().into_diagnostic()? {
 				event!(Level::DEBUG, "defining struct {}", stringify!($structs));
-				$db.define::<$structs>()?;
+				$db.define::<$structs>().into_diagnostic()?;
 			}
 		)*
 	}
@@ -25,7 +25,7 @@ pub struct Database(Structsy);
 impl Database {
 	pub fn open() -> Result<Self> {
 		let db_path = {
-			let process = crate::utils::get_current_process()?;
+			let process = crate::utils::get_current_process().into_diagnostic()?;
 
 			let mut path = process.exe().to_path_buf();
 
@@ -38,7 +38,7 @@ impl Database {
 			path
 		};
 
-		let db = Structsy::open(db_path)?;
+		let db = Structsy::open(db_path).into_diagnostic()?;
 
 		define!(db, GuildSettings, ClientSettings);
 

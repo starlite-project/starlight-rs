@@ -3,8 +3,8 @@ use crate::{
 	persistence::Database,
 	slashies::{commands::get_slashies, interaction::Interaction},
 };
-use anyhow::Result;
 use futures::StreamExt;
+use miette::{IntoDiagnostic, Result};
 use std::ops::Deref;
 use tokio::time::Instant;
 use tracing::{event, Level};
@@ -31,10 +31,19 @@ impl State {
 		if self.0.config.remove_slash_commands {
 			event!(Level::INFO, "removing all slash commands");
 			if let Some(guild_id) = self.0.config.guild_id {
-				self.http.set_guild_commands(guild_id, &[])?.exec().await
+				self.http
+					.set_guild_commands(guild_id, &[])
+					.into_diagnostic()?
+					.exec()
+					.await
 			} else {
-				self.http.set_global_commands(&[])?.exec().await
-			}?;
+				self.http
+					.set_global_commands(&[])
+					.into_diagnostic()?
+					.exec()
+					.await
+			}
+			.into_diagnostic()?;
 
 			std::process::exit(0);
 		};
@@ -42,12 +51,18 @@ impl State {
 		event!(Level::INFO, "setting slash commands");
 		if let Some(guild_id) = self.0.config.guild_id {
 			self.http
-				.set_guild_commands(guild_id, &get_slashies())?
+				.set_guild_commands(guild_id, &get_slashies())
+				.into_diagnostic()?
 				.exec()
 				.await
 		} else {
-			self.http.set_global_commands(&get_slashies())?.exec().await
-		}?;
+			self.http
+				.set_global_commands(&get_slashies())
+				.into_diagnostic()?
+				.exec()
+				.await
+		}
+		.into_diagnostic()?;
 
 		self.cluster.up().await;
 		event!(Level::INFO, "all shards connected");

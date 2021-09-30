@@ -1,7 +1,7 @@
 use super::SlashCommand;
 use crate::{slashies::Response, state::State};
-use anyhow::Result;
 use async_trait::async_trait;
+use miette::{IntoDiagnostic, Result};
 use std::{convert::TryInto, time::Duration};
 use twilight_model::application::{
 	command::{Command, CommandType},
@@ -37,7 +37,7 @@ impl SlashCommand<0> for Ping {
 			.values()
 			.filter_map(|info| info.latency().average())
 			.sum::<Duration>()
-			/ state.cluster.shards().len().try_into()?;
+			/ state.cluster.shards().len().try_into().into_diagnostic()?;
 
 		let response = match ping.as_millis() {
 			0 => Response::from("Pong! Couldn't quite get average latency"),
@@ -46,7 +46,10 @@ impl SlashCommand<0> for Ping {
 			}
 		};
 
-		interaction.response(response.ephemeral()).await?;
+		interaction
+			.response(response.ephemeral())
+			.await
+			.into_diagnostic()?;
 
 		Ok(())
 	}

@@ -1,6 +1,11 @@
 use super::{Components, Config, State};
 use crate::persistence::Database;
-use anyhow::{Context, Result};
+use std::{
+	error::Error as StdError,
+	fmt::{Display, Formatter, Result as FmtResult},
+};
+// use anyhow::{Context, Result};
+use miette::{IntoDiagnostic, Result, WrapErr};
 use supernova::cloned;
 use tokio::time::Instant;
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
@@ -10,6 +15,25 @@ use twilight_gateway::{
 };
 use twilight_http::client::ClientBuilder as HttpBuilder;
 use twilight_standby::Standby;
+
+#[derive(Debug, Clone, Copy)]
+pub enum StateBuilderError {
+	Intents,
+	Config,
+	Cluster,
+}
+
+impl Display for StateBuilderError {
+	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+		match self {
+			Self::Intents => f.write_str("intents not set"),
+			Self::Config => f.write_str("config not set"),
+			Self::Cluster => f.write_str("cluster not set"),
+		}
+	}
+}
+
+impl StdError for StateBuilderError {}
 
 #[derive(Debug, Default)]
 pub struct StateBuilder {
@@ -50,9 +74,13 @@ impl StateBuilder {
 	{
 		let intents = self
 			.intents
+			.ok_or(StateBuilderError::Intents)
+			.into_diagnostic()
 			.context("need intents to build cluster")?;
 		let token = self
 			.config
+			.ok_or(StateBuilderError::Config)
+			.into_diagnostic()
 			.context("need config to build cluster")?
 			.token;
 
@@ -80,6 +108,8 @@ impl StateBuilder {
 	{
 		let token = self
 			.config
+			.ok_or(StateBuilderError::Config)
+			.into_diagnostic()
 			.context("need config to build http")?
 			.token;
 		let http_builder = self.http.map_or_else(
@@ -99,12 +129,20 @@ impl StateBuilder {
 		let http_builder = self
 			.http
 			.unwrap_or_else(cloned!(token => move || HttpBuilder::new().token(token)));
-		let cluster_builder = self.cluster.context("Need cluster to build state")?;
+		let cluster_builder = self
+			.cluster
+			.ok_or(StateBuilderError::Cluster)
+			.into_diagnostic()
+			.context("Need cluster to build state")?;
 		let cache_builder = self.cache.unwrap_or_default();
 
 		let http = http_builder.token(token).build();
 		let cache = cache_builder.build();
-		let cluster = cluster_builder.http_client(http.clone()).build().await?;
+		let cluster = cluster_builder
+			.http_client(http.clone())
+			.build()
+			.await
+			.into_diagnostic()?;
 		let standby = Standby::new();
 
 		let components: &'static Components = Box::leak(Box::new(Components {

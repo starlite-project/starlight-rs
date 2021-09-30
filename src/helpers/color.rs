@@ -2,7 +2,10 @@ use serde::{
 	de::{Error as DeError, Visitor},
 	Deserialize, Deserializer, Serialize, Serializer,
 };
-use std::{convert::TryInto, fmt::{Formatter, Result as FmtResult}};
+use std::{
+	convert::TryInto,
+	fmt::{Formatter, Result as FmtResult},
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Color(u8, u8, u8);
@@ -101,7 +104,10 @@ impl<'de> Visitor<'de> for ColorVisitor {
 		Ok(Color::from_decimal(v))
 	}
 
-	fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E> where E: DeError {
+	fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
+	where
+		E: DeError,
+	{
 		Ok(Color::from_decimal(v.try_into().map_err(DeError::custom)?))
 	}
 }

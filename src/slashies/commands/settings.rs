@@ -5,8 +5,8 @@ use crate::{
 	state::State,
 	utils::{constants::SlashiesErrorMessages, CacheReliant},
 };
-use anyhow::Result;
 use async_trait::async_trait;
+use miette::{IntoDiagnostic, Result};
 use nebula::ToIdKey;
 use twilight_cache_inmemory::ResourceType;
 use twilight_model::application::{
@@ -48,7 +48,8 @@ impl SlashCommand<0> for Settings {
 		} else {
 			interaction
 				.response(Response::error(SlashiesErrorMessages::GuildOnly))
-				.await?;
+				.await
+				.into_diagnostic()?;
 
 			return Ok(());
 		};
@@ -56,11 +57,15 @@ impl SlashCommand<0> for Settings {
 		let guild_settings = interaction
 			.database()
 			.helper::<GuildHelper>()
-			.acquire(guild_key)?;
+			.acquire(guild_key)
+			.into_diagnostic()?;
 
 		let string = dbg!(format!("{:?}", guild_settings));
 
-		interaction.response(Response::from(string)).await?;
+		interaction
+			.response(Response::from(string))
+			.await
+			.into_diagnostic()?;
 
 		Ok(())
 	}
