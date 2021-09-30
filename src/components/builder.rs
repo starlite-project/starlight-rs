@@ -1,7 +1,4 @@
-use std::{
-	error::Error,
-	fmt::{Display, Formatter, Result as FmtResult},
-};
+use thiserror::Error;
 use twilight_model::application::component::Component;
 
 pub trait ComponentBuilder {
@@ -12,16 +9,9 @@ pub trait ComponentBuilder {
 	fn build_component(self) -> Result<Component, BuildError>;
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Error, Clone, Copy)]
+#[error("an error occurred while building the component")]
 pub struct BuildError;
-
-impl Display for BuildError {
-	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-		f.write_str("an error occurred while building the component")
-	}
-}
-
-impl Error for BuildError {}
 
 #[cfg(test)]
 mod tests {

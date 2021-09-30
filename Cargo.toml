@@ -18,12 +18,9 @@ num_cpus = "1.13.0"
 once_cell = "1.8"
 persy = "1"
 sysinfo = "0.20.3"
+thiserror = "1.0.29"
 tracing = "0.1.26"
 tracing-log = "0.1.2"
-
-# [dependencies.anyhow]
-# version = "1.0"
-# features = ["backtrace"]
 
 [dependencies.chrono]
 default-features = false
