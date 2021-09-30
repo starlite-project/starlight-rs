@@ -1,12 +1,8 @@
 use super::{Components, Config, State};
 use crate::persistence::Database;
-use std::{
-	error::Error as StdError,
-	fmt::{Display, Formatter, Result as FmtResult},
-};
-// use anyhow::{Context, Result};
 use miette::{IntoDiagnostic, Result, WrapErr};
 use supernova::cloned;
+use thiserror::Error;
 use tokio::time::Instant;
 use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
 use twilight_gateway::{
@@ -16,24 +12,27 @@ use twilight_gateway::{
 use twilight_http::client::ClientBuilder as HttpBuilder;
 use twilight_standby::Standby;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Error, Clone, Copy)]
 pub enum StateBuilderError {
+	#[error("intents not set")]
 	Intents,
+	#[error("config not set")]
 	Config,
+	#[error("cluster not built")]
 	Cluster,
 }
 
-impl Display for StateBuilderError {
-	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-		match self {
-			Self::Intents => f.write_str("intents not set"),
-			Self::Config => f.write_str("config not set"),
-			Self::Cluster => f.write_str("cluster not set"),
-		}
-	}
-}
+// impl Display for StateBuilderError {
+// 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+// 		match self {
+// 			Self::Intents => f.write_str("intents not set"),
+// 			Self::Config => f.write_str("config not set"),
+// 			Self::Cluster => f.write_str("cluster not set"),
+// 		}
+// 	}
+// }
 
-impl StdError for StateBuilderError {}
+// impl StdError for StateBuilderError {}
 
 #[derive(Debug, Default)]
 pub struct StateBuilder {

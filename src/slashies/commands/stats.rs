@@ -10,13 +10,13 @@ use miette::{IntoDiagnostic, Result};
 use std::{
 	cmp::min,
 	convert::{TryFrom, TryInto},
-	error::Error,
 	fmt::{Display, Error as FmtError, Formatter, Result as FmtResult},
 	fs::metadata,
 	lazy::Lazy,
 	time::Duration as StdDuration,
 };
 use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
+use thiserror::Error;
 use twilight_cache_inmemory::ResourceType;
 use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder};
 use twilight_model::application::{
@@ -46,29 +46,13 @@ const BUILD_SIZE: Lazy<Bytes> = Lazy::new(|| {
 		.expect("failed to get byte size")
 });
 
-#[derive(Debug)]
+#[derive(Debug, Error, Clone, Copy)]
+#[error("source duration value is out of range for the target type")]
 struct OutOfRangeError;
 
-impl Display for OutOfRangeError {
-	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-		f.write_str("source duration value is out of range for the target type")
-	}
-}
-
-impl Error for OutOfRangeError {}
-
-#[derive(Debug)]
+#[derive(Debug, Error, Clone, Copy)]
+#[error("cannot convert {0} to f64")]
 struct ConvertError(u64);
-
-impl Display for ConvertError {
-	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-		f.write_str("cannot convert ")?;
-		Display::fmt(&self.0, f)?;
-		f.write_str(" to f64")
-	}
-}
-
-impl Error for ConvertError {}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(transparent)]

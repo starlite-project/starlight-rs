@@ -12,12 +12,8 @@ use miette::{IntoDiagnostic, Result};
 use ping::Ping;
 use settings::Settings;
 use stats::Stats;
-use std::{
-	any::type_name,
-	error::Error,
-	fmt::{Display, Formatter, Result as FmtResult},
-	lazy::Lazy,
-};
+use std::{any::type_name, lazy::Lazy};
+use thiserror::Error;
 use twilight_cache_inmemory::ResourceType;
 use twilight_model::{
 	application::{
@@ -133,27 +129,13 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
 	}
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Error, Clone, Copy)]
+#[error("an error occurred during the slash command's execution")]
 pub struct SlashError;
 
-impl Display for SlashError {
-	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-		f.write_str("an error occurred during the slash command's execution")
-	}
-}
-
-impl Error for SlashError {}
-
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Error, Clone, Copy)]
+#[error("an error occurred getting data from the interaction")]
 pub struct ClickError;
-
-impl Display for ClickError {
-	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-		f.write_str("an error occurred getting data from the interaction")
-	}
-}
-
-impl Error for ClickError {}
 
 impl<T: SlashCommand<0>> !ClickCommand<0> for T {}
 
