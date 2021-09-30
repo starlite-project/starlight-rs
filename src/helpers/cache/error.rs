@@ -12,7 +12,7 @@ pub enum CacheHelperError {
 }
 
 impl CacheHelperError {
-	pub(super) fn model_not_found() -> Self {
+	pub(super) const fn model_not_found() -> Self {
 		Self::ModelNotFound
 	}
 }
