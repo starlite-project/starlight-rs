@@ -116,4 +116,4 @@ strip = "symbols"
 lto = "fat"
 
 [workspace]
-members = ["./constella", "./nebula", "./supernova"]
+members = ["./constella", "./nebula", "./supernova", "./star-test"]
