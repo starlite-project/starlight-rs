@@ -578,9 +578,9 @@ checksum = "f0a01e0497841a3b2db4f8afa483cce65f7e96a3498bd6c541734792aeac8fe7"
 
 [[package]]
 name = "h2"
-version = "0.3.5"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b21b78895ff1ade3f8df6a9a77917f20dc8b46d0069dd5a3837cf1f507a70ee"
+checksum = "6c06815895acec637cd6ed6e9662c935b866d20a106f8361892893a7d9234964"
 dependencies = [
  "bytes",
  "fnv",
@@ -1518,20 +1518,16 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 [[package]]
 name = "star-test"
 version = "0.1.0"
-dependencies = [
- "miette",
- "semver",
- "thiserror",
-]
 
 [[package]]
 name = "star-utils"
 version = "0.1.0"
-source = "git+https://github.com/PyroTechniac/starlight-rs-utils.git#4a1be7b15e0d8e73999545ce3b87b6b5c7fc0585"
+source = "git+https://github.com/PyroTechniac/starlight-rs-utils.git#769c5b0571b37eff1d466085c7931f3341f2fa39"
 dependencies = [
  "kernel32-sys",
  "libc",
  "procfs",
+ "thiserror",
  "win-bindings",
  "windows",
 ]
@@ -1962,7 +1958,7 @@ dependencies = [
 [[package]]
 name = "twilight-cache-inmemory"
 version = "0.6.3"
-source = "git+https://github.com/twilight-rs/twilight.git#4491537ae18f0e2f21c226a069c8b7af90bd593b"
+source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
 dependencies = [
  "bitflags",
  "dashmap",
@@ -1973,7 +1969,7 @@ dependencies = [
 [[package]]
 name = "twilight-embed-builder"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#4491537ae18f0e2f21c226a069c8b7af90bd593b"
+source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
 dependencies = [
  "twilight-model",
 ]
@@ -1981,7 +1977,7 @@ dependencies = [
 [[package]]
 name = "twilight-gateway"
 version = "0.6.4"
-source = "git+https://github.com/twilight-rs/twilight.git#4491537ae18f0e2f21c226a069c8b7af90bd593b"
+source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
 dependencies = [
  "bitflags",
  "flate2",
@@ -2002,7 +1998,7 @@ dependencies = [
 [[package]]
 name = "twilight-gateway-queue"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#4491537ae18f0e2f21c226a069c8b7af90bd593b"
+source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
 dependencies = [
  "tokio",
  "tracing",
@@ -2012,7 +2008,7 @@ dependencies = [
 [[package]]
 name = "twilight-http"
 version = "0.6.5"
-source = "git+https://github.com/twilight-rs/twilight.git#4491537ae18f0e2f21c226a069c8b7af90bd593b"
+source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
 dependencies = [
  "hyper",
  "hyper-rustls",
@@ -2029,7 +2025,7 @@ dependencies = [
 [[package]]
 name = "twilight-mention"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#4491537ae18f0e2f21c226a069c8b7af90bd593b"
+source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
 dependencies = [
  "twilight-model",
 ]
@@ -2037,7 +2033,7 @@ dependencies = [
 [[package]]
 name = "twilight-model"
 version = "0.6.4"
-source = "git+https://github.com/twilight-rs/twilight.git#4491537ae18f0e2f21c226a069c8b7af90bd593b"
+source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
 dependencies = [
  "bitflags",
  "serde",
@@ -2049,7 +2045,7 @@ dependencies = [
 [[package]]
 name = "twilight-standby"
 version = "0.6.2"
-source = "git+https://github.com/twilight-rs/twilight.git#4491537ae18f0e2f21c226a069c8b7af90bd593b"
+source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
 dependencies = [
  "dashmap",
  "futures-util",
@@ -2061,7 +2057,7 @@ dependencies = [
 [[package]]
 name = "twilight-util"
 version = "0.6.1"
-source = "git+https://github.com/twilight-rs/twilight.git#4491537ae18f0e2f21c226a069c8b7af90bd593b"
+source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
 dependencies = [
  "twilight-model",
 ]
@@ -2270,7 +2266,7 @@ dependencies = [
 [[package]]
 name = "win-bindings"
 version = "0.1.0"
-source = "git+https://github.com/PyroTechniac/starlight-rs-utils.git#4a1be7b15e0d8e73999545ce3b87b6b5c7fc0585"
+source = "git+https://github.com/PyroTechniac/starlight-rs-utils.git#769c5b0571b37eff1d466085c7931f3341f2fa39"
 dependencies = [
  "windows",
 ]
