@@ -68,7 +68,7 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
 		let encoded = encode(name);
 
 		for (i, val) in array.iter_mut().enumerate() {
-			*val = (encoded.clone() + "_" + &i.to_string()).leak()
+			*val = (encoded.to_owned() + "_" + &i.to_string()).leak()
 		}
 
 		array

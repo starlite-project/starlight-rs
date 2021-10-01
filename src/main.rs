@@ -102,8 +102,6 @@ async fn run() -> Result<()> {
 	client.shutdown();
 
 	let client_ptr = unsafe {
-		// client.0 as *const Components;
-		// Box::from_raw()
 		Box::from_raw(client.0 as *const Components as *mut Components)
 	};
 
