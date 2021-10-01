@@ -21,11 +21,9 @@ fn main() -> Result<()> {
 	Builder::new_multi_thread()
 		.enable_all()
 		.thread_name_fn(|| {
-			let id = {
-				ATOMIC_ID.fetch_add(1, Ordering::SeqCst);
-				ATOMIC_ID.load(Ordering::SeqCst)
-			};
-			format!("starlight-pool-{}", id)
+			let id = ATOMIC_ID.fetch_add(1, Ordering::SeqCst) + 1;
+			let output = String::from("starlight-pool-");
+			output + &id.to_string()
 		})
 		.on_thread_stop(|| {
 			ATOMIC_ID.fetch_sub(1, Ordering::SeqCst);
