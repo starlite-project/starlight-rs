@@ -9,6 +9,7 @@ use base64::encode;
 use click::Click;
 use info::Info;
 use miette::{IntoDiagnostic, Result};
+use nebula::Leak;
 use ping::Ping;
 use settings::Settings;
 use stats::Stats;
@@ -67,7 +68,7 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
 		let encoded = encode(name);
 
 		for (i, val) in array.iter_mut().enumerate() {
-			*val = Box::leak(Box::new(encoded.clone() + "_" + &i.to_string()))
+			*val = (encoded.clone() + "_" + &i.to_string()).leak()
 		}
 
 		array

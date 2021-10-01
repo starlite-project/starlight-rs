@@ -1,11 +1,6 @@
 // use anyhow::Result;
 use miette::{IntoDiagnostic, Result};
-use starlight::{
-	persistence::settings::GuildHelper,
-	slashies::commands::Commands,
-	state::{Config, StateBuilder},
-	utils::CacheReliant,
-};
+use starlight::{persistence::settings::GuildHelper, slashies::commands::Commands, state::{Components, Config, StateBuilder}, utils::CacheReliant};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use tokio::runtime::Builder;
 use tracing::{event, Level};
@@ -105,6 +100,15 @@ async fn run() -> Result<()> {
 	event!(Level::INFO, "shutting down");
 
 	client.shutdown();
+
+	let client_ptr = unsafe {
+		// client.0 as *const Components;
+		// Box::from_raw()
+		Box::from_raw(client.0 as *const Components as *mut Components)
+	};
+
+	// Drop the client components pointer so it's memory can be freed
+	drop(client_ptr);
 
 	Ok(())
 }

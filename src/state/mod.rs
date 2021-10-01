@@ -21,7 +21,7 @@ mod events;
 pub use self::{builder::StateBuilder, config::Config};
 
 #[derive(Debug, Clone, Copy)]
-pub struct State(&'static Components);
+pub struct State(pub &'static Components);
 
 impl State {
 	pub async fn connect(self) -> Result<()> {

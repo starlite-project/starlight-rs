@@ -1,6 +1,7 @@
 use super::{Components, Config, State};
 use crate::persistence::Database;
 use miette::{IntoDiagnostic, Result, WrapErr};
+use nebula::Leak;
 use supernova::cloned;
 use thiserror::Error;
 use tokio::time::Instant;
@@ -116,7 +117,7 @@ impl StateBuilder {
 		let http_builder = self
 			.http
 			.unwrap_or_else(cloned!(token => move || HttpBuilder::new().token(token)));
-		let cluster_builder = self
+		let cluster_builder: ClusterBuilder = self
 			.cluster
 			.ok_or(StateBuilderError::Cluster)
 			.into_diagnostic()
@@ -125,23 +126,23 @@ impl StateBuilder {
 
 		let http = http_builder.token(token).build();
 		let cache = cache_builder.build();
-		let cluster = cluster_builder
+		let (cluster, events) = cluster_builder
 			.http_client(http.clone())
 			.build()
 			.await
 			.into_diagnostic()?;
 		let standby = Standby::new();
 
-		let components: &'static Components = Box::leak(Box::new(Components {
+		let components = Components {
 			cache,
-			cluster: cluster.0,
+			cluster,
 			standby,
 			http,
 			runtime: Instant::now(),
 			config,
 			database: Database::open()?,
-		}));
+		}.leak();
 
-		Ok((State(components), cluster.1))
+		Ok((State(components), events))
 	}
 }
