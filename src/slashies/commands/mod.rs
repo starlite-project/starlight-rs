@@ -58,15 +58,16 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
 	const COMPONENT_IDS: Lazy<[&'static str; N]> = Lazy::new(|| {
 		let mut array = [""; N];
 
-		let name = type_name::<Self>()
+		let name = unsafe { type_name::<Self>()
 			.split("::")
 			.last()
-			.unwrap_or_else(|| supernova::debug_unreachable!());
+			.unwrap_unchecked()
+		};
 
 		let encoded = encode(name);
 
 		for (i, val) in array.iter_mut().enumerate() {
-			*val = Box::leak(Box::new(format!("{}_{}", encoded, i)));
+			*val = Box::leak(Box::new(encoded.clone() + "_" + &i.to_string()))
 		}
 
 		array

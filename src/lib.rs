@@ -1,4 +1,4 @@
-#![feature(negative_impls, once_cell)]
+#![feature(negative_impls, once_cell, option_result_unwrap_unchecked)]
 #![warn(
 	clippy::pedantic,
 	clippy::nursery,
