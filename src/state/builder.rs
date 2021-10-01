@@ -22,18 +22,6 @@ pub enum StateBuilderError {
 	Cluster,
 }
 
-// impl Display for StateBuilderError {
-// 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-// 		match self {
-// 			Self::Intents => f.write_str("intents not set"),
-// 			Self::Config => f.write_str("config not set"),
-// 			Self::Cluster => f.write_str("cluster not set"),
-// 		}
-// 	}
-// }
-
-// impl StdError for StateBuilderError {}
-
 #[derive(Debug, Default)]
 pub struct StateBuilder {
 	cluster: Option<ClusterBuilder>,

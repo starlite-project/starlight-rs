@@ -10,8 +10,18 @@ pub trait ComponentBuilder {
 }
 
 #[derive(Debug, Error, Clone, Copy)]
-#[error("an error occurred while building the component")]
-pub struct BuildError;
+pub enum BuildError {
+	#[error("the value `{0}` was not set")]
+	ValueNotSet(&'static str),
+	#[error("an invalid component type was passed")]
+	InvalidComponentType,
+	#[error("unable to build into a component")]
+	NotBuildable,
+	#[cfg(test)]
+	#[cfg_attr(test, doc(hidden))]
+	#[cfg_attr(test, error("this is a testing error"))]
+	Testing
+}
 
 #[cfg(test)]
 mod tests {
@@ -34,11 +44,11 @@ mod tests {
 			type Target = ();
 
 			fn build(self) -> Result<Self::Target, BuildError> {
-				Err(BuildError)
+				Err(BuildError::Testing)
 			}
 
 			fn build_component(self) -> Result<Component, BuildError> {
-				Err(BuildError)
+				Err(BuildError::Testing)
 			}
 		}
 
@@ -59,7 +69,7 @@ mod tests {
 			}
 
 			fn build_component(self) -> Result<Component, BuildError> {
-				Err(BuildError)
+				Err(BuildError::Testing)
 			}
 		}
 

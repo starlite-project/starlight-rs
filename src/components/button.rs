@@ -76,7 +76,7 @@ impl ComponentBuilder for ButtonBuilder {
 		let disabled = self.disabled.unwrap_or(false);
 		let emoji = self.emoji;
 		let label = self.label;
-		let style = self.style.ok_or(BuildError)?;
+		let style = self.style.ok_or(BuildError::ValueNotSet("style"))?;
 		let url = self.url;
 
 		Ok(Button {

@@ -75,7 +75,7 @@ impl ComponentBuilder for SelectMenuBuilder {
 	type Target = SelectMenu;
 
 	fn build(self) -> Result<Self::Target, BuildError> {
-		let custom_id = self.custom_id.ok_or(BuildError)?;
+		let custom_id = self.custom_id.ok_or(BuildError::ValueNotSet("custom_id"))?;
 		let disabled = self.disabled.unwrap_or(false);
 		let max_values = self.max_values;
 		let min_values = self.min_values;
@@ -149,8 +149,8 @@ impl ComponentBuilder for SelectMenuOptionBuilder {
 		let default = self.default.unwrap_or(false);
 		let description = self.description;
 		let emoji = self.emoji;
-		let label = self.label.ok_or(BuildError)?;
-		let value = self.value.ok_or(BuildError)?;
+		let label = self.label.ok_or(BuildError::ValueNotSet("label"))?;
+		let value = self.value.ok_or(BuildError::ValueNotSet("value"))?;
 
 		Ok(SelectMenuOption {
 			default,
@@ -162,6 +162,6 @@ impl ComponentBuilder for SelectMenuOptionBuilder {
 	}
 
 	fn build_component(self) -> Result<Component, BuildError> {
-		Err(BuildError)
+		Err(BuildError::NotBuildable)
 	}
 }

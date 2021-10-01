@@ -60,7 +60,7 @@ impl ComponentBuilder for ActionRowBuilder {
 			.iter()
 			.any(|component| component.kind() == ComponentType::ActionRow)
 		{
-			return Err(BuildError);
+			return Err(BuildError::InvalidComponentType);
 		}
 
 		Ok(ActionRow {
