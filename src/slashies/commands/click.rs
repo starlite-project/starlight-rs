@@ -3,7 +3,7 @@ use crate::{
 	components::{BuildError, ButtonBuilder, ComponentBuilder},
 	slashies::{interaction::Interaction, Response},
 	state::State,
-	InteractionAuthor,
+	utils::interaction_author
 };
 use async_trait::async_trait;
 use miette::{IntoDiagnostic, Result};
@@ -43,7 +43,7 @@ impl SlashCommand<2> for Click {
 		interaction.response(response).await.into_diagnostic()?;
 
 		let click_data =
-			Self::wait_for_click(state, interaction, interaction.command.interaction_author())
+			Self::wait_for_click(state, interaction, interaction_author(interaction.command))
 				.await?;
 
 		interaction

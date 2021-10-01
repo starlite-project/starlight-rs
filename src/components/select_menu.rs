@@ -162,6 +162,6 @@ impl ComponentBuilder for SelectMenuOptionBuilder {
 	}
 
 	fn build_component(self) -> Result<Component, BuildError> {
-		unreachable!()
+		Err(BuildError)
 	}
 }

@@ -5,6 +5,7 @@
 	clippy::suspicious,
 	clippy::str_to_string,
 	clippy::string_to_string,
+	clippy::panic_in_result_fn,
 	missing_copy_implementations
 )]
 #![deny(clippy::all)]
@@ -16,14 +17,11 @@
 )]
 
 pub mod components;
-pub mod ext_traits;
 pub mod helpers;
 pub mod persistence;
 pub mod slashies;
 pub mod state;
 pub mod utils;
-
-pub use ext_traits::*;
 
 pub mod build_info {
 	include!(concat!(env!("OUT_DIR"), "/built.rs"));

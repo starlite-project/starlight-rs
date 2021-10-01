@@ -1,86 +1,45 @@
 use once_cell::sync::Lazy;
-use std::{
-	error::Error,
-	fmt::{Display, Formatter, Result as FmtResult},
-};
 use sysinfo::{get_current_pid, Process, System, SystemExt};
+use thiserror::Error;
 use twilight_cache_inmemory::ResourceType;
+use twilight_model::{application::interaction::ApplicationCommand, id::UserId};
 
 pub mod constants;
 
-#[derive(Debug)]
-pub struct UtilError {
-	source: Option<Box<dyn Error + Send + Sync>>,
-	kind: UtilErrorType,
-}
-
-impl UtilError {
-	#[must_use]
-	pub const fn kind(&self) -> UtilErrorType {
-		self.kind
-	}
-
-	#[must_use]
-	pub fn into_source(self) -> Option<Box<dyn Error + Send + Sync>> {
-		self.source
-	}
-
-	#[must_use]
-	pub fn into_parts(self) -> (UtilErrorType, Option<Box<dyn Error + Send + Sync>>) {
-		(self.kind, self.source)
-	}
-
-	fn pid(_: &str) -> Self {
-		Self {
-			source: None,
-			kind: UtilErrorType::PidError,
-		}
-	}
-
-	fn process() -> Self {
-		Self {
-			source: None,
-			kind: UtilErrorType::ProcessError,
-		}
-	}
-}
-
-impl Display for UtilError {
-	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-		match self.kind {
-			UtilErrorType::PidError => f.write_str("an error occurred getting the pid"),
-			UtilErrorType::ProcessError => {
-				f.write_str("an error occurred getting the current process")
-			}
-		}
-	}
-}
-
-impl Error for UtilError {
-	fn source(&self) -> Option<&(dyn Error + 'static)> {
-		self.source
-			.as_ref()
-			.map(|source| &**source as &(dyn Error + 'static))
-	}
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum UtilErrorType {
-	PidError,
-	ProcessError,
+#[derive(Debug, Error, Clone, Copy)]
+pub enum UtilError {
+	#[error("an error occurred getting the pid")]
+	Pid,
+	#[error("an error occurred getting the current process")]
+	Process,
 }
 
 static mut SYSTEM: Lazy<System> = Lazy::new(System::new);
 
 pub fn get_current_process<'a>() -> Result<&'a Process, UtilError> {
-	let process_id = get_current_pid().map_err(UtilError::pid)?;
+	let process_id = get_current_pid().map_err(|_| UtilError::Pid)?;
 	unsafe {
 		if SYSTEM.refresh_process(process_id) {
-			SYSTEM.process(process_id).ok_or_else(UtilError::process)
+			SYSTEM.process(process_id).ok_or(UtilError::Process)
 		} else {
-			Err(UtilError::process())
+			Err(UtilError::Process)
 		}
 	}
+}
+
+#[must_use]
+pub const fn interaction_author(command: &ApplicationCommand) -> UserId {
+	if let Some(ref member) = command.member {
+		if let Some(user) = &member.user {
+			return user.id
+		}
+	}
+
+	if let Some(ref user) = command.user {
+		return user.id
+	}
+
+	UserId(0)
 }
 
 pub trait CacheReliant {
