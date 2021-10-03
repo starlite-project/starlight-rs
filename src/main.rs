@@ -1,6 +1,11 @@
 // use anyhow::Result;
 use miette::{IntoDiagnostic, Result};
-use starlight::{persistence::settings::GuildHelper, slashies::commands::Commands, state::{Components, Config, StateBuilder}, utils::CacheReliant};
+use starlight::{
+	persistence::settings::GuildHelper,
+	slashies::commands::Commands,
+	state::{Components, Config, StateBuilder},
+	utils::CacheReliant,
+};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use tokio::runtime::Builder;
 use tracing::{event, Level};
@@ -74,8 +79,8 @@ async fn run() -> Result<()> {
 
 	#[cfg(windows)]
 	{
-		let mut sig_c = ctrl_c()?;
-		let mut sig_break = ctrl_break()?;
+		let mut sig_c = ctrl_c().into_diagnostic()?;
+		let mut sig_break = ctrl_break().into_diagnostic()?;
 		tokio::select! {
 			_ = sig_c.recv() => event!(Level::INFO, "received CTRLC"),
 			_ = sig_break.recv() => event!(Level::INFO, "received CTRLBREAK"),
@@ -99,9 +104,7 @@ async fn run() -> Result<()> {
 
 	client.shutdown();
 
-	let client_ptr = unsafe {
-		Box::from_raw(client.0 as *const Components as *mut Components)
-	};
+	let client_ptr = unsafe { Box::from_raw(client.0 as *const Components as *mut Components) };
 
 	// Drop the client components pointer so it's memory can be freed
 	drop(client_ptr);

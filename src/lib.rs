@@ -1,4 +1,10 @@
-#![feature(negative_impls, once_cell, option_result_unwrap_unchecked)]
+#![feature(
+	negative_impls,
+	once_cell,
+	option_result_unwrap_unchecked,
+	maybe_uninit_uninit_array,
+	maybe_uninit_array_assume_init
+)]
 #![warn(
 	clippy::pedantic,
 	clippy::nursery,
@@ -13,7 +19,8 @@
 	clippy::missing_errors_doc,
 	clippy::missing_panics_doc,
 	clippy::module_name_repetitions,
-	clippy::struct_excessive_bools
+	clippy::struct_excessive_bools,
+	clippy::suspicious_else_formatting
 )]
 
 pub mod components;

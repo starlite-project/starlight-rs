@@ -1,6 +1,6 @@
 use super::interaction::Interaction;
 use crate::{
-	components::{BuildError, ComponentBuilder},
+	components::{BuildError, ButtonBuilder, ComponentBuilder},
 	state::State,
 	utils::CacheReliant,
 };
@@ -13,13 +13,13 @@ use nebula::Leak;
 use ping::Ping;
 use settings::Settings;
 use stats::Stats;
-use std::{any::type_name, lazy::Lazy};
+use std::{any::type_name, lazy::Lazy, mem::MaybeUninit};
 use thiserror::Error;
 use twilight_cache_inmemory::ResourceType;
 use twilight_model::{
 	application::{
 		command::Command,
-		component::{Button, Component},
+		component::{button::ButtonStyle, Button, Component},
 		interaction::{
 			ApplicationCommand, Interaction as DiscordInteraction, MessageComponentInteraction,
 		},
@@ -56,29 +56,43 @@ pub trait SlashCommand<const N: usize> {
 
 #[async_trait]
 pub trait ClickCommand<const N: usize>: SlashCommand<N> {
+	type Output;
+
 	const COMPONENT_IDS: Lazy<[&'static str; N]> = Lazy::new(|| {
 		let mut array = [""; N];
 
-		let name = unsafe { type_name::<Self>()
-			.split("::")
-			.last()
-			.unwrap_unchecked()
-		};
+		let name = unsafe { type_name::<Self>().split("::").last().unwrap_unchecked() };
 
 		let encoded = encode(name);
 
 		for (i, val) in array.iter_mut().enumerate() {
-			*val = (encoded.to_owned() + "_" + &i.to_string()).leak()
+			*val = (encoded.clone() + "_" + &i.to_string()).leak();
 		}
 
 		array
 	});
 
-	type Output;
+	const BUTTONS: [(&'static str, ButtonStyle); N];
 
 	const EMPTY_COMPONENTS: Option<&'static [Component]> = Some(&[]);
 
-	fn define_buttons() -> Result<[Button; N], BuildError>;
+	fn define_buttons() -> Result<[Button; N], BuildError> {
+		let mut output: [MaybeUninit<Button>; N] = MaybeUninit::uninit_array::<N>();
+
+		let component_ids = *Self::COMPONENT_IDS;
+
+		for (i, (label, style)) in Self::BUTTONS.iter().copied().enumerate() {
+			output[i].write(
+				ButtonBuilder::new()
+					.custom_id(component_ids[i])
+					.label(label)
+					.style(style)
+					.build()?,
+			);
+		}
+
+		unsafe { Ok(MaybeUninit::array_assume_init(output)) }
+	}
 
 	fn parse(interaction: Interaction, input: &str) -> Self::Output;
 
@@ -130,6 +144,8 @@ pub trait ClickCommand<const N: usize>: SlashCommand<N> {
 		}
 	}
 }
+
+pub trait EmptyOutput<const N: usize>: ClickCommand<N> {}
 
 #[derive(Debug, Error, Clone, Copy)]
 #[error("an error occurred during the slash command's execution")]

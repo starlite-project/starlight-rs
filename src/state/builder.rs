@@ -116,7 +116,7 @@ impl StateBuilder {
 		let token = config.token.to_owned();
 		let http_builder = self
 			.http
-			.unwrap_or_else(cloned!(token => move || HttpBuilder::new().token(token)));
+			.unwrap_or_else(cloned!((token) => move || HttpBuilder::new().token(token)));
 		let cluster_builder: ClusterBuilder = self
 			.cluster
 			.ok_or(StateBuilderError::Cluster)
@@ -141,7 +141,8 @@ impl StateBuilder {
 			runtime: Instant::now(),
 			config,
 			database: Database::open()?,
-		}.leak();
+		}
+		.leak();
 
 		Ok((State(components), events))
 	}

@@ -31,12 +31,12 @@ pub fn get_current_process<'a>() -> Result<&'a Process, UtilError> {
 pub const fn interaction_author(command: &ApplicationCommand) -> UserId {
 	if let Some(ref member) = command.member {
 		if let Some(user) = &member.user {
-			return user.id
+			return user.id;
 		}
 	}
 
 	if let Some(ref user) = command.user {
-		return user.id
+		return user.id;
 	}
 
 	UserId(0)

@@ -1,9 +1,11 @@
 use clap::{crate_authors, crate_description, crate_license, crate_name, crate_version, App, Arg};
 use miette::{IntoDiagnostic, Result};
+use nebula::Leak;
 use serde::{Deserialize, Serialize};
 use std::{env, ffi::OsStr, fs, path::PathBuf};
 use tracing::{event, instrument, Level};
 use twilight_model::id::GuildId;
+use nebula::Id;
 
 const REMOVE_SLASH_COMMANDS_KEY: &str = "remove-slash-commands";
 const GUILD_ID_KEY: &str = "guild-id";
@@ -52,10 +54,10 @@ impl Config {
 		})
 	}
 
-	pub fn get_user_id(self) -> Result<u64> {
+	pub fn get_user_id(self) -> Result<Id> {
 		let first_part_of_token = self.token.split('.').next().unwrap_or_default();
 
-		let decoded = base64::decode(first_part_of_token).into_diagnostic()?;
+		let decoded = base64::decode(first_part_of_token).unwrap();
 
 		let value = unsafe { String::from_utf8_unchecked(decoded) }
 			.parse()
@@ -65,18 +67,18 @@ impl Config {
 	}
 
 	#[instrument]
+	#[allow(clippy::let_unit_value)]
 	fn get_token() -> Result<&'static str> {
-		let token = if let Some(credential_dir) = env::var_os("CREDENTIALS_DIRECTORY") {
+		let token = env::var_os("CREDENTIALS_DIRECTORY").map_or_else(|| {
+			event!(Level::WARN, "falling back to `DISCORD_TOKEN` environment variable");
+			env::var("DISCORD_TOKEN").into_diagnostic()
+		}, |credential_dir| {
 			event!(Level::INFO, "using systemd credential storage");
 			let path = [&credential_dir, OsStr::new("token")]
-				.iter()
-				.collect::<PathBuf>();
-			fs::read_to_string(path).into_diagnostic()?
-		} else {
-			event!(Level::WARN, "falling back to `TOKEN` environment variabke");
-			env::var("DISCORD_TOKEN").into_diagnostic()?
-		};
+			.iter().collect::<PathBuf>();
+			fs::read_to_string(path).into_diagnostic()
+		})?;
 
-		Ok(Box::leak(Box::new(token)))
+		Ok(token.leak())
 	}
 }

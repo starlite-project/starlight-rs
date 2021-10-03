@@ -3,7 +3,7 @@ use crate::{
 	components::{BuildError, ButtonBuilder, ComponentBuilder},
 	slashies::{interaction::Interaction, Response},
 	state::State,
-	utils::interaction_author
+	utils::interaction_author,
 };
 use async_trait::async_trait;
 use miette::{IntoDiagnostic, Result};
@@ -70,6 +70,13 @@ impl SlashCommand<2> for Click {
 #[async_trait]
 impl ClickCommand<2> for Click {
 	type Output = String;
+
+	// const BUTTON_LABELS: [&'static str; 2] = ["A button", "Another button!"];
+
+	const BUTTONS: [(&'static str, ButtonStyle); 2] = [
+		("A button", ButtonStyle::Success),
+		("Another button!", ButtonStyle::Danger),
+	];
 
 	fn parse(_: Interaction<'_>, value: &str) -> Self::Output {
 		let components = Self::define_buttons().unwrap_or_else(|_| supernova::debug_unreachable!());

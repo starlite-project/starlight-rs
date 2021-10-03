@@ -184,7 +184,7 @@ dependencies = [
 [[package]]
 name = "clap"
 version = "3.0.0-beta.4"
-source = "git+https://github.com/clap-rs/clap.git#5940bb23609efadab24aa854feba9f44b50a9617"
+source = "git+https://github.com/clap-rs/clap.git#236cf584cfeccdae995d19a25245d261e00c32e3"
 dependencies = [
  "atty",
  "bitflags",
@@ -200,7 +200,7 @@ dependencies = [
 [[package]]
 name = "clap_derive"
 version = "3.0.0-beta.4"
-source = "git+https://github.com/clap-rs/clap.git#5940bb23609efadab24aa854feba9f44b50a9617"
+source = "git+https://github.com/clap-rs/clap.git#236cf584cfeccdae995d19a25245d261e00c32e3"
 dependencies = [
  "heck",
  "proc-macro-error",
@@ -884,9 +884,9 @@ dependencies = [
 
 [[package]]
 name = "miette"
-version = "3.0.1"
+version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "024831248cacc3305f5bb33d9daf9df54d6d95bf462c58f388845a17388c47fe"
+checksum = "4786c5b04c6f73e96d88444e7f37e241d99479ea5dd88a4887363ab2e03b4e53"
 dependencies = [
  "atty",
  "backtrace",
@@ -903,9 +903,9 @@ dependencies = [
 
 [[package]]
 name = "miette-derive"
-version = "3.0.1"
+version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "074acd9c89172a516def5d82b8d90fb724fecba9dcae6fcdd88a75689601349f"
+checksum = "0ee63a981bc9cde5f26665ffd756b624963bf0b5956e0df51e52ef8f6b5466d6"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1586,7 +1586,7 @@ checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
 [[package]]
 name = "structsy"
 version = "0.4.0"
-source = "git+https://gitlab.com/tglman/structsy.git#6000a445adece94fd813a19d0588455135c99dd1"
+source = "git+https://gitlab.com/tglman/structsy.git#02b5a9e29b2b61a5fbf6e77f5d87c55fe5e9c44c"
 dependencies = [
  "byteorder",
  "data-encoding",
@@ -1598,7 +1598,7 @@ dependencies = [
 [[package]]
 name = "structsy-derive"
 version = "0.4.0"
-source = "git+https://gitlab.com/tglman/structsy.git#6000a445adece94fd813a19d0588455135c99dd1"
+source = "git+https://gitlab.com/tglman/structsy.git#02b5a9e29b2b61a5fbf6e77f5d87c55fe5e9c44c"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -1616,9 +1616,9 @@ dependencies = [
 
 [[package]]
 name = "supports-color"
-version = "1.1.1"
+version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32f5b0f9e689dd52e27228469dd68b7416b60d75b7571ae9060a5f4c50048fee"
+checksum = "3f3cef55878ee693bb9f6765515f52910ec20b776d222fce5d11fbb9f5368028"
 dependencies = [
  "atty",
  "is_ci",
@@ -1644,9 +1644,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "1.0.77"
+version = "1.0.78"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5239bc68e0fef57495900cfea4e8dc75596d9a319d7e16b1e0a440d24e6fe0a0"
+checksum = "a4eac2e6c19f5c3abc0c229bea31ff0b9b091c7b14990e8924b92902a303a0c0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1865,9 +1865,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-attributes"
-version = "0.1.16"
+version = "0.1.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98863d0dd09fa59a1b79c6750ad80dbda6b75f4e71c437a6a1a8cb91a8bcbd77"
+checksum = "c4f915eb6abf914599c200260efced9203504c4c37380af10cdf3b7d36970650"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1876,9 +1876,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-core"
-version = "0.1.20"
+version = "0.1.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46125608c26121c81b0c6d693eab5a420e416da7e43c426d2e8f7df8da8a3acf"
+checksum = "1f4ed65637b8390770814083d20756f87bfa2c21bf2f110babdc5438351746e4"
 dependencies = [
  "lazy_static",
 ]
@@ -1958,7 +1958,7 @@ dependencies = [
 [[package]]
 name = "twilight-cache-inmemory"
 version = "0.6.3"
-source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
+source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
 dependencies = [
  "bitflags",
  "dashmap",
@@ -1969,7 +1969,7 @@ dependencies = [
 [[package]]
 name = "twilight-embed-builder"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
+source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
 dependencies = [
  "twilight-model",
 ]
@@ -1977,7 +1977,7 @@ dependencies = [
 [[package]]
 name = "twilight-gateway"
 version = "0.6.4"
-source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
+source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
 dependencies = [
  "bitflags",
  "flate2",
@@ -1998,7 +1998,7 @@ dependencies = [
 [[package]]
 name = "twilight-gateway-queue"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
+source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
 dependencies = [
  "tokio",
  "tracing",
@@ -2008,7 +2008,7 @@ dependencies = [
 [[package]]
 name = "twilight-http"
 version = "0.6.5"
-source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
+source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
 dependencies = [
  "hyper",
  "hyper-rustls",
@@ -2025,7 +2025,7 @@ dependencies = [
 [[package]]
 name = "twilight-mention"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
+source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
 dependencies = [
  "twilight-model",
 ]
@@ -2033,7 +2033,7 @@ dependencies = [
 [[package]]
 name = "twilight-model"
 version = "0.6.4"
-source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
+source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
 dependencies = [
  "bitflags",
  "serde",
@@ -2045,7 +2045,7 @@ dependencies = [
 [[package]]
 name = "twilight-standby"
 version = "0.6.2"
-source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
+source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
 dependencies = [
  "dashmap",
  "futures-util",
@@ -2057,7 +2057,7 @@ dependencies = [
 [[package]]
 name = "twilight-util"
 version = "0.6.1"
-source = "git+https://github.com/twilight-rs/twilight.git#5a22227fac89101ec6007aad974503fc5e71c344"
+source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
 dependencies = [
  "twilight-model",
 ]

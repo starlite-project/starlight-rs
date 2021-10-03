@@ -20,7 +20,7 @@ pub enum BuildError {
 	#[cfg(test)]
 	#[cfg_attr(test, doc(hidden))]
 	#[cfg_attr(test, error("this is a testing error"))]
-	Testing
+	Testing,
 }
 
 #[cfg(test)]

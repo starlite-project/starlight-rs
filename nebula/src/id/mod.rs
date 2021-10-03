@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use std::{
 	fmt::{Display, Formatter, Result as FmtResult},
 	ops::Deref,
+	str::FromStr,
+	num::ParseIntError
 };
 use twilight_model::id::{
 	ApplicationId, AttachmentId, AuditLogEntryId, ChannelId, CommandId, EmojiId, GenericId,
@@ -61,6 +63,26 @@ impl Describer for Id {
 	fn description() -> Description {
 		let field = FieldDescription::new::<u64>(0, "id", None);
 		Description::Struct(StructDescription::new("Id", &[field]))
+	}
+}
+
+impl From<u64> for Id {
+	fn from(value: u64) -> Self {
+		Self::new(value)
+	}
+}
+
+impl From<Id> for u64 {
+	fn from(value: Id) -> Self {
+		value.0
+	}
+}
+
+impl FromStr for Id {
+	type Err = ParseIntError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		s.parse::<u64>().map(From::from)
 	}
 }
 
