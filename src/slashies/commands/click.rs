@@ -89,21 +89,4 @@ impl ClickCommand<2> for Click {
 			.clone()
 			.unwrap()
 	}
-
-	fn define_buttons() -> Result<[Button; 2], BuildError> {
-		let component_ids = Self::COMPONENT_IDS;
-
-		Ok([
-			ButtonBuilder::new()
-				.custom_id(component_ids[0])
-				.label("A button")
-				.style(ButtonStyle::Success)
-				.build()?,
-			ButtonBuilder::new()
-				.custom_id(component_ids[1])
-				.label("Another button!")
-				.style(ButtonStyle::Danger)
-				.build()?,
-		])
-	}
 }
