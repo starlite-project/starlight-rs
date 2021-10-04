@@ -3,7 +3,8 @@
 	once_cell,
 	option_result_unwrap_unchecked,
 	maybe_uninit_uninit_array,
-	maybe_uninit_array_assume_init
+	maybe_uninit_array_assume_init,
+	result_flattening
 )]
 #![warn(
 	clippy::pedantic,

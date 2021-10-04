@@ -1,7 +1,6 @@
-use super::SlashCommand;
 use crate::{
 	helpers::CacheHelper,
-	slashies::Response,
+	slashies::{Response, SlashCommand},
 	state::State,
 	utils::{constants::SlashiesErrorMessages, CacheReliant},
 };
@@ -37,7 +36,7 @@ impl CacheReliant for Info {
 }
 
 #[async_trait]
-impl SlashCommand<0> for Info {
+impl SlashCommand for Info {
 	const NAME: &'static str = "info";
 
 	fn define() -> Command {

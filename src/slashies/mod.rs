@@ -18,6 +18,9 @@ use twilight_model::{
 
 pub mod commands;
 pub mod interaction;
+mod r#impl;
+
+pub use self::r#impl::{SlashCommand, ClickCommand, ClickError, ParseCommand, ParseError};
 
 #[derive(Debug, Clone)]
 pub struct Response(CallbackData);

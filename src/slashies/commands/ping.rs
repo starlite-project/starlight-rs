@@ -1,5 +1,4 @@
-use super::SlashCommand;
-use crate::{slashies::Response, state::State};
+use crate::{slashies::{Response, SlashCommand}, state::State};
 use async_trait::async_trait;
 use miette::{IntoDiagnostic, Result};
 use std::{convert::TryInto, time::Duration};
@@ -12,7 +11,7 @@ use twilight_model::application::{
 pub struct Ping(pub(super) ApplicationCommand);
 
 #[async_trait]
-impl SlashCommand<0> for Ping {
+impl SlashCommand for Ping {
 	const NAME: &'static str = "ping";
 
 	fn define() -> Command {

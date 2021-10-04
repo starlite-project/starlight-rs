@@ -1,7 +1,6 @@
-use super::SlashCommand;
 use crate::{
 	persistence::settings::{GuildHelper, SettingsHelper},
-	slashies::Response,
+	slashies::{Response, SlashCommand},
 	state::State,
 	utils::{constants::SlashiesErrorMessages, CacheReliant},
 };
@@ -24,7 +23,7 @@ impl CacheReliant for Settings {
 }
 
 #[async_trait]
-impl SlashCommand<0> for Settings {
+impl SlashCommand for Settings {
 	const NAME: &'static str = "settings";
 
 	fn define() -> Command {

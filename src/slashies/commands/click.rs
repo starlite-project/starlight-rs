@@ -1,7 +1,7 @@
-use super::{ClickCommand, SlashCommand};
 use crate::{
-	components::{BuildError, ButtonBuilder, ComponentBuilder},
-	slashies::{interaction::Interaction, Response},
+	slashies::{
+		interaction::Interaction, ClickCommand, ParseCommand, ParseError, Response, SlashCommand,
+	},
 	state::State,
 	utils::interaction_author,
 };
@@ -9,7 +9,7 @@ use async_trait::async_trait;
 use miette::{IntoDiagnostic, Result};
 use twilight_model::application::{
 	command::{Command, CommandType},
-	component::{button::ButtonStyle, Button},
+	component::button::ButtonStyle,
 	interaction::ApplicationCommand,
 };
 
@@ -17,7 +17,7 @@ use twilight_model::application::{
 pub struct Click(pub(super) ApplicationCommand);
 
 #[async_trait]
-impl SlashCommand<2> for Click {
+impl SlashCommand for Click {
 	const NAME: &'static str = "click";
 
 	fn define() -> Command {
@@ -43,8 +43,7 @@ impl SlashCommand<2> for Click {
 		interaction.response(response).await.into_diagnostic()?;
 
 		let click_data =
-			Self::wait_for_click(state, interaction, interaction_author(interaction.command))
-				.await?;
+			Self::wait_for_click(interaction, interaction_author(interaction.command)).await?;
 
 		interaction
 			.update()
@@ -52,7 +51,7 @@ impl SlashCommand<2> for Click {
 			.content(Some(
 				format!(
 					"Success! You clicked {}",
-					Self::parse(interaction, &click_data.data.custom_id)
+					Self::parse(interaction, &click_data.data.custom_id).into_diagnostic()?
 				)
 				.as_str(),
 			))
@@ -69,24 +68,23 @@ impl SlashCommand<2> for Click {
 
 #[async_trait]
 impl ClickCommand<2> for Click {
-	type Output = String;
-
-	// const BUTTON_LABELS: [&'static str; 2] = ["A button", "Another button!"];
-
 	const BUTTONS: [(&'static str, ButtonStyle); 2] = [
 		("A button", ButtonStyle::Success),
 		("Another button!", ButtonStyle::Danger),
 	];
+}
 
-	fn parse(_: Interaction<'_>, value: &str) -> Self::Output {
-		let components = Self::define_buttons().unwrap_or_else(|_| supernova::debug_unreachable!());
+impl ParseCommand<2> for Click {
+	type Output = String;
+
+	fn parse(_: Interaction, input: &str) -> Result<Self::Output, ParseError> {
+		let components = Self::define_buttons().map_err(|_| ParseError)?;
 
 		components
 			.iter()
-			.find(|button| button.custom_id.as_deref() == Some(value))
-			.unwrap_or_else(|| supernova::debug_unreachable!())
-			.label
-			.clone()
-			.unwrap()
+			.cloned()
+			.find(|button| button.custom_id.as_deref() == Some(input))
+			.and_then(|button| button.label)
+			.ok_or(ParseError)
 	}
 }
