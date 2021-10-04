@@ -210,6 +210,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "click-derive"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+ "twilight-model",
+]
+
+[[package]]
 name = "cmake"
 version = "0.1.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1518,6 +1528,9 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 [[package]]
 name = "star-test"
 version = "0.1.0"
+dependencies = [
+ "click-derive",
+]
 
 [[package]]
 name = "star-utils"
