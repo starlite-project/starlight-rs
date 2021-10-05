@@ -18,15 +18,17 @@ use twilight_model::{
 	id::UserId,
 };
 
+pub use click_derive::*;
+
 #[derive(Debug, Error, Clone, Copy)]
 #[error("an error occurred getting data from the interaction")]
 pub struct ClickError;
 
 #[async_trait]
 pub trait ClickCommand<const N: usize>: SlashCommand {
-	const STYLES: &[ButtonStyle];
+	const STYLES: [ButtonStyle; N];
 
-	const LABELS: &[&'static str];
+	const LABELS: [&'static str; N];
 
 	const COMPONENT_IDS: Lazy<[&'static str; N]> = Lazy::new(|| {
 		let mut output = [""; N];
@@ -51,17 +53,7 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 	fn define_buttons() -> Result<[Button; N], BuildError> {
 		let mut output: [MaybeUninit<Button>; N] = MaybeUninit::uninit_array::<N>();
 
-		// for (i, (label, style)) in Self::BUTTONS.iter().copied().enumerate() {
-		// 	output[i].write(
-		// 		ButtonBuilder::new()
-		// 			.custom_id(component_ids[i])
-		// 			.label(label)
-		// 			.style(style)
-		// 			.build()?,
-		// 	);
-		// }
-
-		for i in 0..N {
+		for (i, item) in output.iter_mut().enumerate().take(N) {
 			let label = Self::LABELS[i];
 			let style = Self::STYLES[i];
 			let id = Self::COMPONENT_IDS[i];
@@ -72,7 +64,7 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 				.style(style)
 				.build()?;
 
-			output[i].write(button);
+			item.write(button);
 		}
 
 		unsafe { Ok(MaybeUninit::array_assume_init(output)) }

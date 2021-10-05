@@ -9,11 +9,12 @@ use async_trait::async_trait;
 use miette::{IntoDiagnostic, Result};
 use twilight_model::application::{
 	command::{Command, CommandType},
-	component::button::ButtonStyle,
 	interaction::ApplicationCommand,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, ClickCommand)]
+#[labels("A button!", "Another button!")]
+#[styles(Success, Danger)]
 pub struct Click(pub(super) ApplicationCommand);
 
 #[async_trait]
@@ -66,17 +67,12 @@ impl SlashCommand for Click {
 	}
 }
 
-#[async_trait]
-impl ClickCommand<2> for Click {
-	// const BUTTONS: [(&'static str, ButtonStyle); 2] = [
-	// 	("A button", ButtonStyle::Success),
-	// 	("Another button!", ButtonStyle::Danger),
-	// ];
+// #[async_trait]
+// impl ClickCommand<2> for Click {
+// 	const STYLES: &'static [ButtonStyle] = &[ButtonStyle::Success, ButtonStyle::Danger];
 
-	const STYLES: [ButtonStyle; 2] = [ButtonStyle::Success, ButtonStyle::Danger];
-
-	const LABELS: [&'static str; 2] = ["A button!", "Another button!"];
-}
+// 	const LABELS: &'static [&'static str] = &["A button!", "Another button!"];
+// }
 
 impl ParseCommand<2> for Click {
 	type Output = String;

@@ -6,9 +6,9 @@ trait ClickCommand<const N: usize> {
 	const STYLES: [ButtonStyle; N];
 }
 
-// #[derive(ClickCommand)]
-// #[buttons(2)]
-// #[styles("Hello, world!", "Goodbye!")]
-// struct TestCommand;
+#[derive(ClickCommand)]
+#[styles(Success, Danger)]
+#[labels("Hello, world!", "Goodbye!")]
+struct TestCommand;
 
 fn main() {}

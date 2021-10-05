@@ -216,7 +216,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
- "twilight-model",
 ]
 
 [[package]]
@@ -1555,6 +1554,7 @@ dependencies = [
  "built",
  "chrono",
  "clap",
+ "click-derive",
  "constella",
  "dotenv",
  "futures",

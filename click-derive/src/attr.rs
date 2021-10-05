@@ -1,7 +1,103 @@
 use crate::util::LitExt;
-use proc_macro2::Span;
+use proc_macro2::{Literal, Punct, Spacing, Span, TokenStream, TokenTree};
+use quote::{ToTokens, quote};
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
-use syn::{spanned::Spanned, Attribute, Error, Ident, Lit, LitStr, Meta, NestedMeta, Path, Result};
+use syn::{
+	spanned::Spanned, Attribute, DeriveInput, Error, Ident, Lit, LitStr, Meta, NestedMeta, Path,
+	Result,
+};
+
+#[derive(Debug, Clone)]
+pub struct ParsedAttributes {
+	pub labels: Labels,
+	pub styles: Styles,
+}
+
+#[derive(Debug, Clone)]
+pub struct Labels(pub Vec<String>);
+
+impl ToTokens for Labels {
+	fn to_tokens(&self, tokens: &mut TokenStream) {
+		let mut parsed = Vec::with_capacity(self.0.len() * 2);
+
+		for value in self.0.clone().into_iter() {
+			parsed.push(TokenTree::from(Literal::string(&value)));
+			parsed.push(Punct::new(',', Spacing::Alone).into());
+		}
+
+		tokens.extend(parsed);
+	}
+}
+
+#[derive(Debug, Clone)]
+pub struct Styles(pub Vec<String>);
+
+impl ToTokens for Styles {
+	fn to_tokens(&self, tokens: &mut TokenStream) {
+		let mut parsed: Vec<TokenStream> = Vec::with_capacity(self.0.len() * 2);
+
+		for value in self.0.clone().into_iter() {
+			let mut path = quote!(twilight_model::application::component::button::ButtonStyle);
+			let span = Span::call_site();
+			let ident = Ident::new(&value, span);
+			let colon = Punct::new(':', Spacing::Joint);
+			path.extend(vec![TokenTree::from(colon.clone()), TokenTree::from(colon.clone()), TokenTree::from(ident)]);
+			parsed.push(path);
+			parsed.push(TokenTree::from(Punct::new(',', Spacing::Alone)).into());
+		}
+
+		tokens.extend(parsed)
+	}
+}
+
+#[derive(Debug, Default, Clone, Copy)]
+struct AttributeParser<'a> {
+	labels: Option<&'a Attribute>,
+	styles: Option<&'a Attribute>,
+}
+
+impl<'a> TryFrom<AttributeParser<'a>> for ParsedAttributes {
+	type Error = Error;
+
+	fn try_from(value: AttributeParser<'a>) -> Result<Self> {
+		let (labels_attr, styles_attr) = unsafe {
+			(
+				value.labels.unwrap_unchecked(),
+				value.styles.unwrap_unchecked(),
+			)
+		};
+
+		let labels = parse(parse_values(labels_attr)?)?;
+		let styles = parse(parse_values(styles_attr)?)?;
+
+		Ok(Self {
+			labels: Labels(labels),
+			styles: Styles(styles),
+		})
+	}
+}
+
+pub fn get(input: &DeriveInput) -> Result<ParsedAttributes> {
+	let mut attribute_parser = AttributeParser::default();
+
+	for attr in &input.attrs {
+		if attr.path.is_ident("styles") {
+			attribute_parser.styles = Some(attr);
+		} else if attr.path.is_ident("labels") {
+			attribute_parser.labels = Some(attr);
+		}
+	}
+
+	if attribute_parser.styles.is_none() {
+		return Err(Error::new_spanned(input, "expected styles attribute"));
+	}
+
+	if attribute_parser.labels.is_none() {
+		return Err(Error::new_spanned(input, "expected labels attribute"));
+	}
+
+	ParsedAttributes::try_from(attribute_parser)
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ValueKind {

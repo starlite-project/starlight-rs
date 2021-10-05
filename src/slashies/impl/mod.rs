@@ -3,7 +3,7 @@ mod parse;
 mod slash;
 
 pub use self::{
-	click::{ClickCommand, ClickError},
+	click::*,
 	parse::{ParseCommand, ParseError},
 	slash::SlashCommand,
 };

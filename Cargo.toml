@@ -30,6 +30,9 @@ version = "0.4.19"
 [dependencies.clap]
 git = "https://github.com/clap-rs/clap.git"
 
+[dependencies.click-derive]
+path = "./click-derive"
+
 [dependencies.constella]
 path = "./constella"
 
