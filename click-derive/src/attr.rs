@@ -1,6 +1,7 @@
-use std::fmt::{Display, Formatter, Result as FmtResult, Write};
+use crate::util::LitExt;
 use proc_macro2::Span;
-use syn::{Attribute, Error, Ident, Lit, LitStr, Meta, NestedMeta, Path, Result, spanned::Spanned};
+use std::fmt::{Display, Formatter, Result as FmtResult, Write};
+use syn::{spanned::Spanned, Attribute, Error, Ident, Lit, LitStr, Meta, NestedMeta, Path, Result};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ValueKind {
@@ -13,28 +14,37 @@ pub enum ValueKind {
 impl Display for ValueKind {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		match self {
-            Self::Name => f.pad("`#[<name>]`"),
-            Self::Equals => f.pad("`#[<name> = <value>]`"),
-            Self::List => f.pad("`#[<name>([<value>, <value>, <value>, ...])]`"),
-            Self::SingleList => f.pad("`#[<name>(<value>)]`"),
+			Self::Name => f.pad("`#[<name>]`"),
+			Self::Equals => f.pad("`#[<name> = <value>]`"),
+			Self::List => f.pad("`#[<name>([<value>, <value>, <value>, ...])]`"),
+			Self::SingleList => f.pad("`#[<name>(<value>)]`"),
 		}
 	}
 }
 
 fn to_ident(p: Path) -> Result<Ident> {
 	if p.segments.is_empty() {
-		return Err(Error::new(p.span(), "cannot convert an empty path to an identifier"));
+		return Err(Error::new(
+			p.span(),
+			"cannot convert an empty path to an identifier",
+		));
 	}
 
-    if p.segments.len() > 1 {
-        return Err(Error::new(p.span(), "the path must not have more than one segment"));
-    }
+	if p.segments.len() > 1 {
+		return Err(Error::new(
+			p.span(),
+			"the path must not have more than one segment",
+		));
+	}
 
-    if !p.segments[0].arguments.is_empty() {
-        return Err(Error::new(p.span(), "the singular path segment must not have any arguments"));
-    }
+	if !p.segments[0].arguments.is_empty() {
+		return Err(Error::new(
+			p.span(),
+			"the singular path segment must not have any arguments",
+		));
+	}
 
-    Ok(p.segments[0].ident.clone())
+	Ok(p.segments[0].ident.clone())
 }
 
 #[derive(Debug)]
@@ -51,7 +61,7 @@ impl Values {
 			name,
 			literals,
 			kind,
-			span
+			span,
 		}
 	}
 }
@@ -64,7 +74,7 @@ pub fn parse_values(attr: &Attribute) -> Result<Values> {
 			let name = to_ident(path)?;
 
 			Ok(Values::new(name, ValueKind::Name, vec![], attr.span()))
-		},
+		}
 		Meta::List(meta) => {
 			let name = to_ident(meta.path)?;
 			let nested = meta.nested;
@@ -75,8 +85,8 @@ pub fn parse_values(attr: &Attribute) -> Result<Values> {
 
 			let mut lits = Vec::with_capacity(nested.len());
 
-            for meta in nested {
-                match meta {
+			for meta in nested {
+				match meta {
                     NestedMeta::Lit(l) => lits.push(l),
                     NestedMeta::Meta(m) => match m {
                         Meta::Path(path) => {
@@ -88,12 +98,16 @@ pub fn parse_values(attr: &Attribute) -> Result<Values> {
                         }
                     },
                 }
-            }
+			}
 
-			let kind = if lits.len() == 1 {ValueKind::SingleList} else {ValueKind::List};
+			let kind = if lits.len() == 1 {
+				ValueKind::SingleList
+			} else {
+				ValueKind::List
+			};
 
 			Ok(Values::new(name, kind, lits, attr.span()))
-		},
+		}
 		Meta::NameValue(meta) => {
 			let name = to_ident(meta.path)?;
 			let lit = meta.lit;
@@ -142,7 +156,13 @@ fn is_form_acceptable(expect: &[ValueKind], kind: ValueKind) -> bool {
 #[inline]
 fn validate(values: &Values, forms: &[ValueKind]) -> Result<()> {
 	if !is_form_acceptable(forms, values.kind) {
-		return Err(Error::new(values.span, format_args!("the attribute must be in one of these forms:\n{}", DisplaySlice(forms))))
+		return Err(Error::new(
+			values.span,
+			format_args!(
+				"the attribute must be in one of these forms:\n{}",
+				DisplaySlice(forms)
+			),
+		));
 	}
 
 	Ok(())
@@ -155,12 +175,43 @@ pub fn parse<T: AttributeOption>(values: Values) -> Result<T> {
 
 pub trait AttributeOption: Sized {
 	fn parse(values: Values) -> Result<Self>;
-}   
+}
 
 impl AttributeOption for Vec<String> {
 	fn parse(values: Values) -> Result<Self> {
 		validate(&values, &[ValueKind::List])?;
 
-		Ok(values.literals.into_iter().map(|lit| lit.to_str()).collect())
+		Ok(values
+			.literals
+			.into_iter()
+			.map(|lit| lit.to_str())
+			.collect())
+	}
+}
+
+impl AttributeOption for String {
+	fn parse(values: Values) -> Result<Self> {
+		validate(&values, &[ValueKind::Equals, ValueKind::SingleList])?;
+
+		Ok(values.literals[0].to_str())
+	}
+}
+
+impl AttributeOption for bool {
+	fn parse(values: Values) -> Result<Self> {
+		validate(&values, &[ValueKind::Name, ValueKind::SingleList])?;
+
+		Ok(values.literals.get(0).map_or(true, |l| l.to_bool()))
+	}
+}
+
+impl AttributeOption for usize {
+	fn parse(values: Values) -> Result<Self> {
+		validate(
+			&values,
+			&[ValueKind::Name, ValueKind::Equals, ValueKind::SingleList],
+		)?;
+
+		Ok(values.literals[0].to_int())
 	}
 }

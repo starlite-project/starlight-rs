@@ -23,5 +23,34 @@ fn parse(input: DeriveInput) -> Result<TokenStream2> {
 		_ => panic!("ClickCommand can only be derived on structs"),
 	};
 
+	// for attr in input.attrs {
+	// 	if attr.path.is_ident("styles") {
+	// 		let value = attr::parse_values(&attr)?;
+	// 		let parsed = attr::parse::<Vec<String>>(value)?;
+	// 		dbg!(parsed);
+	// 	}
+	// 	if attr.path.is_ident("buttons") {
+	// 		let value = attr::parse_values(&attr)?;
+	// 		let parsed = attr::parse::<usize>(value)?;
+	// 		dbg!(parsed);
+	// 	}
+	// }
+
+	// let buttons_value = input.attrs.iter().find(|attr| attr.path.is_ident("buttons")).unwrap_or_else(|| panic!("expected buttons attribute"));
+
+	let buttons_value = {
+		let attribute = input.attrs.iter().find(|attr| attr.path.is_ident("buttons")).unwrap_or_else(|| panic!("expected buttons attribute"));
+
+		let values = attr::parse_values(attribute)?;
+		attr::parse::<usize>(values)?
+	};
+
+	let styles = {
+		let attribute = input.attrs.iter().find(|attr| attr.path.is_ident("styles")).unwrap_or_else(|| panic!("expected styles attribute"));
+
+		let values = attr::parse_values(attribute)?;
+		attr::parse::<Vec<String>>(values)?
+	};
+
 	todo!();
 }

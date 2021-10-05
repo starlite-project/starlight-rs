@@ -1,16 +1,14 @@
 use click_derive::*;
+use twilight_model::application::component::button::ButtonStyle;
 
 trait ClickCommand<const N: usize> {
-	const BUTTONS: [u64; N];
+	const LABELS: [&'static str; N];
+	const STYLES: [ButtonStyle; N];
 }
 
-#[derive(ClickCommand)]
-#[buttons(2)]
-// #[styles[
-//     ["Hello, world!", Success],
-//     ("Goodbye!", Danger)
-// ]]
-#[styles("Hello, world!", "Goodbye!")]
-struct TestCommand;
+// #[derive(ClickCommand)]
+// #[buttons(2)]
+// #[styles("Hello, world!", "Goodbye!")]
+// struct TestCommand;
 
 fn main() {}

@@ -68,10 +68,14 @@ impl SlashCommand for Click {
 
 #[async_trait]
 impl ClickCommand<2> for Click {
-	const BUTTONS: [(&'static str, ButtonStyle); 2] = [
-		("A button", ButtonStyle::Success),
-		("Another button!", ButtonStyle::Danger),
-	];
+	// const BUTTONS: [(&'static str, ButtonStyle); 2] = [
+	// 	("A button", ButtonStyle::Success),
+	// 	("Another button!", ButtonStyle::Danger),
+	// ];
+
+	const STYLES: [ButtonStyle; 2] = [ButtonStyle::Success, ButtonStyle::Danger];
+
+	const LABELS: [&'static str; 2] = ["A button!", "Another button!"];
 }
 
 impl ParseCommand<2> for Click {

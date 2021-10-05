@@ -1530,6 +1530,7 @@ name = "star-test"
 version = "0.1.0"
 dependencies = [
  "click-derive",
+ "twilight-model",
 ]
 
 [[package]]
