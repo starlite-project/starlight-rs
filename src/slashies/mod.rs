@@ -17,10 +17,10 @@ use twilight_model::{
 };
 
 pub mod commands;
-pub mod interaction;
 mod r#impl;
+pub mod interaction;
 
-pub use self::r#impl::{SlashCommand, ClickCommand, ClickError, ParseCommand, ParseError};
+pub use self::r#impl::{ClickCommand, ClickError, ParseCommand, ParseError, SlashCommand};
 
 #[derive(Debug, Clone)]
 pub struct Response(CallbackData);

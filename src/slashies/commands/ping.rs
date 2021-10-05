@@ -1,4 +1,7 @@
-use crate::{slashies::{Response, SlashCommand}, state::State};
+use crate::{
+	slashies::{Response, SlashCommand},
+	state::State,
+};
 use async_trait::async_trait;
 use miette::{IntoDiagnostic, Result};
 use std::{convert::TryInto, time::Duration};

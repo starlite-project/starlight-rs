@@ -1,6 +1,6 @@
 use crate::util::LitExt;
 use proc_macro2::{Literal, Punct, Spacing, Span, TokenStream, TokenTree};
-use quote::{ToTokens, quote};
+use quote::{quote, ToTokens};
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use syn::{
 	spanned::Spanned, Attribute, DeriveInput, Error, Ident, Lit, LitStr, Meta, NestedMeta, Path,
@@ -41,7 +41,11 @@ impl ToTokens for Styles {
 			let span = Span::call_site();
 			let ident = Ident::new(&value, span);
 			let colon = Punct::new(':', Spacing::Joint);
-			path.extend(vec![TokenTree::from(colon.clone()), TokenTree::from(colon.clone()), TokenTree::from(ident)]);
+			path.extend(vec![
+				TokenTree::from(colon.clone()),
+				TokenTree::from(colon.clone()),
+				TokenTree::from(ident),
+			]);
 			parsed.push(path);
 			parsed.push(TokenTree::from(Punct::new(',', Spacing::Alone)).into());
 		}
@@ -162,7 +166,7 @@ impl Values {
 	}
 }
 
-pub fn parse_values(attr: &Attribute) -> Result<Values> {
+fn parse_values(attr: &Attribute) -> Result<Values> {
 	let meta = attr.parse_meta()?;
 
 	match meta {
@@ -265,7 +269,7 @@ fn validate(values: &Values, forms: &[ValueKind]) -> Result<()> {
 }
 
 #[inline]
-pub fn parse<T: AttributeOption>(values: Values) -> Result<T> {
+fn parse<T: AttributeOption>(values: Values) -> Result<T> {
 	T::parse(values)
 }
 

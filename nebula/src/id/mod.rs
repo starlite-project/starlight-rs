@@ -5,9 +5,9 @@ use constella::{
 use serde::{Deserialize, Serialize};
 use std::{
 	fmt::{Display, Formatter, Result as FmtResult},
+	num::ParseIntError,
 	ops::Deref,
 	str::FromStr,
-	num::ParseIntError
 };
 use twilight_model::id::{
 	ApplicationId, AttachmentId, AuditLogEntryId, ChannelId, CommandId, EmojiId, GenericId,

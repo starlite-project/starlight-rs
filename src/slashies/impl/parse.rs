@@ -1,5 +1,5 @@
-use crate::slashies::interaction::Interaction;
 use super::ClickCommand;
+use crate::slashies::interaction::Interaction;
 use thiserror::Error;
 
 #[derive(Debug, Error, Clone, Copy)]
@@ -7,7 +7,7 @@ use thiserror::Error;
 pub struct ParseError;
 
 pub trait ParseCommand<const N: usize>: ClickCommand<N> {
-    type Output;
+	type Output;
 
-    fn parse(interaction: Interaction, input: &str) -> Result<Self::Output, ParseError>;
+	fn parse(interaction: Interaction, input: &str) -> Result<Self::Output, ParseError>;
 }
