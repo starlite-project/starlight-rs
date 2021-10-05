@@ -300,14 +300,3 @@ impl AttributeOption for bool {
 		Ok(values.literals.get(0).map_or(true, |l| l.to_bool()))
 	}
 }
-
-impl AttributeOption for usize {
-	fn parse(values: Values) -> Result<Self> {
-		validate(
-			&values,
-			&[ValueKind::Name, ValueKind::Equals, ValueKind::SingleList],
-		)?;
-
-		Ok(values.literals[0].to_int())
-	}
-}

@@ -1,14 +1,8 @@
-use std::{fmt::Display, str::FromStr};
-
 use syn::{Ident, Lit};
 
 pub trait LitExt {
 	fn to_str(&self) -> String;
 	fn to_bool(&self) -> bool;
-	fn to_int<T>(&self) -> T
-	where
-		T: FromStr,
-		T::Err: Display;
 	fn to_ident(&self) -> Ident;
 }
 
@@ -30,21 +24,6 @@ impl LitExt for Lit {
 			self.to_str()
 				.parse()
 				.unwrap_or_else(|_| panic!("expected bool from {:?}", self))
-		}
-	}
-
-	fn to_int<T>(&self) -> T
-	where
-		T: FromStr,
-		T::Err: Display,
-	{
-		if let Self::Int(i) = self {
-			i.base10_parse()
-				.unwrap_or_else(|err| panic!("expected int from {:?}: {}", self, err))
-		} else {
-			self.to_str()
-				.parse()
-				.unwrap_or_else(|_| panic!("expected int from {:?}", self))
 		}
 	}
 
