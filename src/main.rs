@@ -1,4 +1,3 @@
-// use anyhow::Result;
 use miette::{IntoDiagnostic, Result};
 use starlight::{
 	persistence::settings::GuildHelper,

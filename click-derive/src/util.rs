@@ -5,7 +5,6 @@ use syn::{Ident, Lit};
 pub trait LitExt {
 	fn to_str(&self) -> String;
 	fn to_bool(&self) -> bool;
-	// fn to_usize(&self) -> usize;
 	fn to_int<T>(&self) -> T
 	where
 		T: FromStr,

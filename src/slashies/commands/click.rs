@@ -67,13 +67,6 @@ impl SlashCommand for Click {
 	}
 }
 
-// #[async_trait]
-// impl ClickCommand<2> for Click {
-// 	const STYLES: &'static [ButtonStyle] = &[ButtonStyle::Success, ButtonStyle::Danger];
-
-// 	const LABELS: &'static [&'static str] = &["A button!", "Another button!"];
-// }
-
 impl ParseCommand<2> for Click {
 	type Output = String;
 
