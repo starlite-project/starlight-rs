@@ -1,17 +1,13 @@
 mod attr;
+mod util;
 
 extern crate proc_macro;
 
-use std::borrow::Borrow;
-
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{ToTokens, quote};
-use syn::{Data, DeriveInput, Result, parse_macro_input, parse_quote};
+use syn::{Data, DeriveInput, Result, parse_macro_input};
 
-use crate::attr::Buttons;
-
-#[proc_macro_derive(ClickCommand, attributes(buttons, styles))]
+#[proc_macro_derive(ClickCommand, attributes(buttons, styles, labels))]
 pub fn derive_click(input: TokenStream) -> TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
 	parse(input)
@@ -27,7 +23,5 @@ fn parse(input: DeriveInput) -> Result<TokenStream2> {
 		_ => panic!("ClickCommand can only be derived on structs"),
 	};
 
-	let click_attrs = attr::get(&input.attrs)?;
-
-	todo!()
+	todo!();
 }

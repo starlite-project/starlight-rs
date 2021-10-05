@@ -1,85 +1,166 @@
-use syn::{Attribute, Error, LitInt, LitStr, Result, TypeSlice, parse::{Nothing, Parse, ParseStream, Parser}, parse_macro_input};
-use twilight_model::application::component::button::ButtonStyle;
+use std::fmt::{Display, Formatter, Result as FmtResult, Write};
+use proc_macro2::Span;
+use syn::{Attribute, Error, Ident, Lit, LitStr, Meta, NestedMeta, Path, Result, spanned::Spanned};
 
-pub struct ClickAttributes {
-	pub buttons: Buttons,
-	pub styles: Styles,
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ValueKind {
+	Name,
+	Equals,
+	List,
+	SingleList,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct Buttons(pub usize);
+impl Display for ValueKind {
+	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+		match self {
+            Self::Name => f.pad("`#[<name>]`"),
+            Self::Equals => f.pad("`#[<name> = <value>]`"),
+            Self::List => f.pad("`#[<name>([<value>, <value>, <value>, ...])]`"),
+            Self::SingleList => f.pad("`#[<name>(<value>)]`"),
+		}
+	}
+}
 
-impl Parse for Buttons {
-	fn parse(input: ParseStream) -> Result<Self> {
-		let int: LitInt = input.parse()?;
-		let value = int.base10_parse::<usize>()?;
-		Ok(Self(value))
+fn to_ident(p: Path) -> Result<Ident> {
+	if p.segments.is_empty() {
+		return Err(Error::new(p.span(), "cannot convert an empty path to an identifier"));
+	}
+
+    if p.segments.len() > 1 {
+        return Err(Error::new(p.span(), "the path must not have more than one segment"));
+    }
+
+    if !p.segments[0].arguments.is_empty() {
+        return Err(Error::new(p.span(), "the singular path segment must not have any arguments"));
+    }
+
+    Ok(p.segments[0].ident.clone())
+}
+
+#[derive(Debug)]
+pub struct Values {
+	pub name: Ident,
+	pub literals: Vec<Lit>,
+	pub kind: ValueKind,
+	pub span: Span,
+}
+
+impl Values {
+	pub const fn new(name: Ident, kind: ValueKind, literals: Vec<Lit>, span: Span) -> Self {
+		Self {
+			name,
+			literals,
+			kind,
+			span
+		}
+	}
+}
+
+pub fn parse_values(attr: &Attribute) -> Result<Values> {
+	let meta = attr.parse_meta()?;
+
+	match meta {
+		Meta::Path(path) => {
+			let name = to_ident(path)?;
+
+			Ok(Values::new(name, ValueKind::Name, vec![], attr.span()))
+		},
+		Meta::List(meta) => {
+			let name = to_ident(meta.path)?;
+			let nested = meta.nested;
+
+			if nested.is_empty() {
+				return Err(Error::new(attr.span(), "list cannot be empty"));
+			}
+
+			let mut lits = Vec::with_capacity(nested.len());
+
+            for meta in nested {
+                match meta {
+                    NestedMeta::Lit(l) => lits.push(l),
+                    NestedMeta::Meta(m) => match m {
+                        Meta::Path(path) => {
+                            let i = to_ident(path)?;
+                            lits.push(Lit::Str(LitStr::new(&i.to_string(), i.span())))
+                        }
+                        Meta::List(_) | Meta::NameValue(_) => {
+                            return Err(Error::new(attr.span(), "cannot nest a list; only accept literals and identifiers at this level"))
+                        }
+                    },
+                }
+            }
+
+			let kind = if lits.len() == 1 {ValueKind::SingleList} else {ValueKind::List};
+
+			Ok(Values::new(name, kind, lits, attr.span()))
+		},
+		Meta::NameValue(meta) => {
+			let name = to_ident(meta.path)?;
+			let lit = meta.lit;
+
+			Ok(Values::new(name, ValueKind::Equals, vec![lit], attr.span()))
+		}
 	}
 }
 
 #[derive(Debug, Clone)]
-pub struct Styles(Vec<&'static str>);
+struct DisplaySlice<'a, T>(&'a [T]);
 
-impl Parse for Styles {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let first: LitStr = input.parse()?;
-        
-        Ok(Self(vec![Box::leak(Box::new(first.value()))]))
-    }
-}
+impl<'a, T: Display> Display for DisplaySlice<'a, T> {
+	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+		let mut iter = self.0.iter().enumerate();
 
-#[derive(Default)]
-struct ClickAttributesBuilder<'a> {
-	buttons: Option<&'a Attribute>,
-    labels: Option<&'a Attribute>,
-	styles: Option<&'a Attribute>,
-}
+		match iter.next() {
+			None => f.write_str("nothing")?,
+			Some((idx, elem)) => {
+				Display::fmt(&idx, f)?;
+				f.write_str(": ")?;
+				Display::fmt(&elem, f)?;
 
-impl<'a> ClickAttributesBuilder<'a> {
-	fn build(self) -> Result<ClickAttributes> {
-		if self.buttons.is_none() {
-			panic!("expected buttons attribute");
+				for (idx, elem) in iter {
+					f.write_char('\n')?;
+					Display::fmt(&idx, f)?;
+					f.write_str(": ")?;
+					Display::fmt(&elem, f)?;
+				}
+			}
 		}
 
-		if self.styles.is_none() {
-			panic!("expected styles attribute");
-		}
-
-		Ok(ClickAttributes {
-			buttons: self.buttons.unwrap().parse_args()?,
-			styles: self.styles.unwrap().parse_args()?,
-		})
+		Ok(())
 	}
 }
 
-pub fn get(input: &[Attribute]) -> Result<ClickAttributes> {
-	let mut builder = ClickAttributesBuilder::default();
-
-	for attr in input {
-		if attr.path.is_ident("buttons") {
-			require_non_empty_attribute(attr, "buttons")?;
-			if builder.buttons.is_some() {
-				return Err(Error::new_spanned(attr, "duplicate #[buttons] attribute"));
-			}
-			builder.buttons = Some(attr);
-		} else if attr.path.is_ident("styles") {
-			require_non_empty_attribute(attr, "styles")?;
-			if builder.styles.is_some() {
-				return Err(Error::new_spanned(attr, "duplicate #[styles] attribute"));
-			}
-			builder.styles = Some(attr);
-		}
+#[inline]
+fn is_form_acceptable(expect: &[ValueKind], kind: ValueKind) -> bool {
+	if expect.contains(&ValueKind::List) && kind == ValueKind::SingleList {
+		true
+	} else {
+		expect.contains(&kind)
 	}
-
-	builder.build()
 }
 
-fn require_non_empty_attribute(attr: &Attribute, name: &str) -> Result<()> {
-	match syn::parse2::<Nothing>(attr.tokens.clone()) {
-		Ok(_) => Err(Error::new_spanned(
-			attr,
-			format!("expected tokens with attribute {}", name),
-		)),
-		Err(_) => Ok(()),
+#[inline]
+fn validate(values: &Values, forms: &[ValueKind]) -> Result<()> {
+	if !is_form_acceptable(forms, values.kind) {
+		return Err(Error::new(values.span, format_args!("the attribute must be in one of these forms:\n{}", DisplaySlice(forms))))
+	}
+
+	Ok(())
+}
+
+#[inline]
+pub fn parse<T: AttributeOption>(values: Values) -> Result<T> {
+	T::parse(values)
+}
+
+pub trait AttributeOption: Sized {
+	fn parse(values: Values) -> Result<Self>;
+}   
+
+impl AttributeOption for Vec<String> {
+	fn parse(values: Values) -> Result<Self> {
+		validate(&values, &[ValueKind::List])?;
+
+		Ok(values.literals.into_iter().map(|lit| lit.to_str()).collect())
 	}
 }

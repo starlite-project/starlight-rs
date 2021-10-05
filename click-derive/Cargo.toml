@@ -11,7 +11,7 @@ proc-macro = true
 [dependencies]
 proc-macro2 = "1.0"
 quote = "1.0"
-syn = { version = "1.0.78", features = ["extra-traits", "full"] }
+syn = { version = "1.0.78", features = ["derive", "extra-traits", "full"] }
 
 [dependencies.twilight-model]
 git = "https://github.com/twilight-rs/twilight.git"
