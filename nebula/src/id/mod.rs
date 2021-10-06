@@ -9,10 +9,10 @@ use std::{
 	ops::Deref,
 	str::FromStr,
 };
-use twilight_model::id::{
+use twilight_model::{application::interaction::Interaction, channel::{Channel, GuildChannel}, id::{
 	ApplicationId, AttachmentId, AuditLogEntryId, ChannelId, CommandId, EmojiId, GenericId,
 	GuildId, IntegrationId, InteractionId, MessageId, RoleId, StageId, UserId, WebhookId,
-};
+}};
 
 mod key;
 
@@ -63,6 +63,18 @@ impl Describer for Id {
 	fn description() -> Description {
 		let field = FieldDescription::new::<u64>(0, "id", None);
 		Description::Struct(StructDescription::new("Id", &[field]))
+	}
+}
+
+impl From<Channel> for Id {
+	fn from(channel: Channel) -> Self {
+		Self::from(channel.id())
+	}
+}
+
+impl From<GuildChannel> for Id {
+	fn from(channel: GuildChannel) -> Self {
+		Self::from(channel.id())
 	}
 }
 
