@@ -183,22 +183,39 @@ fn parse_values(attr: &Attribute) -> Result<Values> {
 				return Err(Error::new(attr.span(), "list cannot be empty"));
 			}
 
-			let mut lits = Vec::with_capacity(nested.len());
+			// let mut lits = Vec::with_capacity(nested.len());
 
-			for meta in nested {
+			// for meta in nested {
+			// 	match meta {
+			//         NestedMeta::Lit(l) => lits.push(l),
+			//         NestedMeta::Meta(m) => match m {
+			//             Meta::Path(path) => {
+			//                 let i = to_ident(path)?;
+			//                 lits.push(Lit::Str(LitStr::new(&i.to_string(), i.span())))
+			//             }
+			//             Meta::List(_) | Meta::NameValue(_) => {
+			//                 return Err(Error::new(attr.span(), "cannot nest a list; only accept literals and identifiers at this level"))
+			//             }
+			//         },
+			//     }
+			// }
+
+			let lits = nested.into_iter()
+			.map(|meta| {
 				match meta {
-                    NestedMeta::Lit(l) => lits.push(l),
-                    NestedMeta::Meta(m) => match m {
-                        Meta::Path(path) => {
-                            let i = to_ident(path)?;
-                            lits.push(Lit::Str(LitStr::new(&i.to_string(), i.span())))
-                        }
-                        Meta::List(_) | Meta::NameValue(_) => {
-                            return Err(Error::new(attr.span(), "cannot nest a list; only accept literals and identifiers at this level"))
-                        }
-                    },
-                }
-			}
+					NestedMeta::Lit(l) => Ok(l),
+					NestedMeta::Meta(m) => match m {
+						Meta::Path(path) => {
+							let i = to_ident(path)?;
+							Ok(Lit::Str(LitStr::new(&i.to_string(), i.span())))
+						},
+						Meta::List(_) | Meta::NameValue(_) => {
+							Err(Error::new(attr.span(), "cannot nest a list; only accept literals and identifiers at this level"))
+						}
+					}
+				}
+			})
+			.collect::<Result<Vec<_>>>()?;
 
 			let kind = if lits.len() == 1 {
 				ValueKind::SingleList
