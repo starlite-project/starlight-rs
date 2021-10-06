@@ -1,7 +1,6 @@
 #![feature(option_result_unwrap_unchecked)]
 
 mod attr;
-mod util;
 
 extern crate proc_macro;
 
@@ -9,6 +8,8 @@ use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::{parse_macro_input, DeriveInput, Result};
+
+use crate::attr::{Labels, Styles};
 
 #[proc_macro_derive(ClickCommand, attributes(styles, labels))]
 pub fn derive_click(input: TokenStream) -> TokenStream {
@@ -21,9 +22,18 @@ pub fn derive_click(input: TokenStream) -> TokenStream {
 fn parse(input: DeriveInput) -> Result<TokenStream2> {
 	let name = &input.ident;
 
-	let attributes = attr::get(&input)?;
-	let labels = attributes.labels;
-	let styles = attributes.styles;
+	let styles: Styles = input
+		.attrs
+		.iter()
+		.find(|value| value.path.is_ident("styles"))
+		.unwrap_or_else(|| panic!("expected styles attribute"))
+		.parse_args()?;
+	let labels: Labels = input
+		.attrs
+		.iter()
+		.find(|value| value.path.is_ident("labels"))
+		.unwrap_or_else(|| panic!("expected labels attribute"))
+		.parse_args()?;
 
 	if labels.0.len() != styles.0.len() {
 		panic!("expected equal labels and styles");
@@ -32,6 +42,7 @@ fn parse(input: DeriveInput) -> Result<TokenStream2> {
 	let buttons = labels.0.len();
 
 	let tokens = quote! {
+		#[automatically_derived]
 		impl ClickCommand<#buttons> for #name {
 			const LABELS: [&'static str; #buttons] = [#labels];
 
