@@ -9,10 +9,10 @@ use std::{
 	ops::Deref,
 	str::FromStr,
 };
-use twilight_model::{application::interaction::Interaction, channel::{Channel, GuildChannel}, id::{
+use twilight_model::id::{
 	ApplicationId, AttachmentId, AuditLogEntryId, ChannelId, CommandId, EmojiId, GenericId,
 	GuildId, IntegrationId, InteractionId, MessageId, RoleId, StageId, UserId, WebhookId,
-}};
+};
 
 mod key;
 

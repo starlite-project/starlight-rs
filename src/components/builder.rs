@@ -58,6 +58,7 @@ mod tests {
 	}
 
 	#[test]
+	#[allow(clippy::panic_in_result_fn)]
 	fn builder_pass() -> Result<(), BuildError> {
 		struct Builder;
 
