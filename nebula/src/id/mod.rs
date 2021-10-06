@@ -66,18 +66,6 @@ impl Describer for Id {
 	}
 }
 
-impl From<Channel> for Id {
-	fn from(channel: Channel) -> Self {
-		Self::from(channel.id())
-	}
-}
-
-impl From<GuildChannel> for Id {
-	fn from(channel: GuildChannel) -> Self {
-		Self::from(channel.id())
-	}
-}
-
 impl From<u64> for Id {
 	fn from(value: u64) -> Self {
 		Self::new(value)
