@@ -3,8 +3,8 @@ use proc_macro2::{Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use quote::{quote, ToTokens};
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use syn::{
-	spanned::Spanned, Attribute, DeriveInput, Error, Ident, Lit, LitStr, Meta, NestedMeta, Path,
-	Result,
+	spanned::Spanned,
+	Attribute, DeriveInput, Error, Ident, Lit, LitStr, Meta, NestedMeta, Path, Result,
 };
 
 #[derive(Debug, Clone)]
@@ -71,8 +71,8 @@ impl<'a> TryFrom<AttributeParser<'a>> for ParsedAttributes {
 			)
 		};
 
-		let labels = parse(parse_values(labels_attr)?)?;
-		let styles = parse(parse_values(styles_attr)?)?;
+		let labels = parse(Values::try_from(labels_attr.clone())?)?;
+		let styles = parse(Values::try_from(styles_attr.clone())?)?;
 
 		Ok(Self {
 			labels: Labels(labels),
@@ -166,70 +166,57 @@ impl Values {
 	}
 }
 
-fn parse_values(attr: &Attribute) -> Result<Values> {
-	let meta = attr.parse_meta()?;
+impl TryFrom<Attribute> for Values {
+	type Error = Error;
 
-	match meta {
-		Meta::Path(path) => {
-			let name = to_ident(path)?;
+	fn try_from(attr: Attribute) -> Result<Self> {
+		let meta = attr.parse_meta()?;
 
-			Ok(Values::new(name, ValueKind::Name, vec![], attr.span()))
-		}
-		Meta::List(meta) => {
-			let name = to_ident(meta.path)?;
-			let nested = meta.nested;
+		match meta {
+			Meta::Path(path) => {
+				let name = to_ident(path)?;
 
-			if nested.is_empty() {
-				return Err(Error::new(attr.span(), "list cannot be empty"));
+				Ok(Values::new(name, ValueKind::Name, vec![], attr.span()))
 			}
+			Meta::List(meta) => {
+				let name = to_ident(meta.path)?;
+				let nested = meta.nested;
 
-			// let mut lits = Vec::with_capacity(nested.len());
+				if nested.is_empty() {
+					return Err(Error::new(attr.span(), "list cannot be empty"));
+				}
 
-			// for meta in nested {
-			// 	match meta {
-			//         NestedMeta::Lit(l) => lits.push(l),
-			//         NestedMeta::Meta(m) => match m {
-			//             Meta::Path(path) => {
-			//                 let i = to_ident(path)?;
-			//                 lits.push(Lit::Str(LitStr::new(&i.to_string(), i.span())))
-			//             }
-			//             Meta::List(_) | Meta::NameValue(_) => {
-			//                 return Err(Error::new(attr.span(), "cannot nest a list; only accept literals and identifiers at this level"))
-			//             }
-			//         },
-			//     }
-			// }
-
-			let lits = nested.into_iter()
-			.map(|meta| {
-				match meta {
-					NestedMeta::Lit(l) => Ok(l),
-					NestedMeta::Meta(m) => match m {
-						Meta::Path(path) => {
-							let i = to_ident(path)?;
-							Ok(Lit::Str(LitStr::new(&i.to_string(), i.span())))
-						},
-						Meta::List(_) | Meta::NameValue(_) => {
-							Err(Error::new(attr.span(), "cannot nest a list; only accept literals and identifiers at this level"))
+				let lits = nested.into_iter()
+				.map(|meta| {
+					match meta {
+						NestedMeta::Lit(l) => Ok(l),
+						NestedMeta::Meta(m) => match m {
+							Meta::Path(path) => {
+								let i = to_ident(path)?;
+								Ok(Lit::Str(LitStr::new(&i.to_string(), i.span())))
+							},
+							Meta::List(_) | Meta::NameValue(_) => {
+								Err(Error::new(attr.span(), "cannot nest a list; only accept literals and identifiers at this level"))
+							}
 						}
 					}
-				}
-			})
-			.collect::<Result<Vec<_>>>()?;
+				})
+				.collect::<Result<Vec<_>>>()?;
 
-			let kind = if lits.len() == 1 {
-				ValueKind::SingleList
-			} else {
-				ValueKind::List
-			};
+				let kind = if lits.len() == 1 {
+					ValueKind::SingleList
+				} else {
+					ValueKind::List
+				};
 
-			Ok(Values::new(name, kind, lits, attr.span()))
-		}
-		Meta::NameValue(meta) => {
-			let name = to_ident(meta.path)?;
-			let lit = meta.lit;
+				Ok(Values::new(name, kind, lits, attr.span()))
+			}
+			Meta::NameValue(meta) => {
+				let name = to_ident(meta.path)?;
+				let lit = meta.lit;
 
-			Ok(Values::new(name, ValueKind::Equals, vec![lit], attr.span()))
+				Ok(Values::new(name, ValueKind::Equals, vec![lit], attr.span()))
+			}
 		}
 	}
 }
