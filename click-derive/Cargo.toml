@@ -11,4 +11,11 @@ proc-macro = true
 [dependencies]
 proc-macro2 = "1.0"
 quote = "1.0"
-syn = { version = "1.0.78", features = ["derive", "extra-traits", "full"] }
+url = "2.2.2"
+
+[dependencies.supernova]
+path = "../supernova"
+
+[dependencies.syn]
+version = "1.0.78"
+features = ["derive", "extra-traits", "full"]

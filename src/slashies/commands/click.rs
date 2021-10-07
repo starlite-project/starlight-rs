@@ -15,6 +15,7 @@ use twilight_model::application::{
 #[derive(Debug, Clone, ClickCommand)]
 #[labels("A button!", "Another button!")]
 #[styles(Success, Danger)]
+#[buttons(Link("To me!", "https://github.com/pyrotechniac/starlight-rs"), Success("A button!"), Danger("Another button!"))]
 pub struct Click(pub(super) ApplicationCommand);
 
 #[async_trait]
@@ -67,7 +68,7 @@ impl SlashCommand for Click {
 	}
 }
 
-impl ParseCommand<2> for Click {
+impl ParseCommand<3> for Click {
 	type Output = String;
 
 	fn parse(_: Interaction, input: &str) -> Result<Self::Output, ParseError> {
