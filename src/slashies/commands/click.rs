@@ -13,7 +13,11 @@ use twilight_model::application::{
 };
 
 #[derive(Debug, Clone, ClickCommand)]
-#[buttons(Link("To me!", "https://github.com/pyrotechniac/starlight-rs"), Success("A button!"), Danger("Another button!"))]
+#[buttons(
+	Link("To me!", "https://github.com/pyrotechniac/starlight-rs"),
+	Success("A button!"),
+	Danger("Another button!")
+)]
 pub struct Click(pub(super) ApplicationCommand);
 
 #[async_trait]

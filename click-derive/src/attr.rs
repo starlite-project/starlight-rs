@@ -37,22 +37,31 @@ impl Parse for Buttons {
 		}
 
 		if labels.len() != size {
-			return Err(Error::new(input.span(), "labels we're an invalid length (this shouldn't happen)"));
+			return Err(Error::new(
+				input.span(),
+				"labels we're an invalid length (this shouldn't happen)",
+			));
 		}
 
 		if styles.len() != size {
-			return Err(Error::new(input.span(), "styles we're an invalid length (this shouldn't happen)"));
+			return Err(Error::new(
+				input.span(),
+				"styles we're an invalid length (this shouldn't happen)",
+			));
 		}
 
 		if links.len() > size || links.len() > labels.len() || links.len() > styles.len() {
-			return Err(Error::new(input.span(), "links we're an invalid length (this shouldn't happen)"));
+			return Err(Error::new(
+				input.span(),
+				"links we're an invalid length (this shouldn't happen)",
+			));
 		}
 
 		Ok(Self {
 			labels: Labels(labels),
 			styles: Styles(styles),
 			links: Links(links),
-			size
+			size,
 		})
 	}
 }
@@ -114,7 +123,10 @@ impl Parse for Link {
 		let inner = input.parse::<LitStr>()?;
 
 		if let Err(error) = Url::parse(inner.value().as_str()) {
-			Err(Error::new_spanned(inner, format!("expected valid url, reason: {}", &error)))
+			Err(Error::new_spanned(
+				inner,
+				format!("expected valid url, reason: {}", &error),
+			))
 		} else {
 			Ok(Self(inner))
 		}
@@ -184,7 +196,11 @@ impl ToTokens for Links {
 
 			let index_tree = TokenTree::Literal(Literal::usize_suffixed(i));
 			let url_literal = TokenTree::Literal(Literal::string(&link.0.value()));
-			stream.extend(vec![index_tree, TokenTree::Punct(comma.clone()), url_literal]);
+			stream.extend(vec![
+				index_tree,
+				TokenTree::Punct(comma.clone()),
+				url_literal,
+			]);
 			parsed.push(TokenTree::Group(Group::new(Delimiter::Parenthesis, stream)));
 		}
 
