@@ -55,20 +55,12 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 	fn define_buttons() -> Result<[Button; N], BuildError> {
 		let mut output: [MaybeUninit<Button>; N] = MaybeUninit::uninit_array::<N>();
 
-		let links = Self::LINKS.into_iter().cloned().collect::<HashMap<_, _>>();
+		let links = Self::LINKS.iter().copied().collect::<HashMap<_, _>>();
 
 		for (i, item) in output.iter_mut().enumerate().take(N) {
 			let label = Self::LABELS[i];
 			let style = Self::STYLES[i];
 			let id = Self::COMPONENT_IDS[i];
-
-			// let button = ButtonBuilder::new()
-			// 	.custom_id(id)
-			// 	.label(label)
-			// 	.style(style)
-			// 	.build()?;
-
-			// item.write(button);
 			let mut button_builder = ButtonBuilder::new().label(label);
 
 			button_builder = if let Some(link) = links.get(&i) {
