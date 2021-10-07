@@ -11,7 +11,7 @@ use quote::quote;
 use supernova::cloned;
 use syn::{parse_macro_input, DeriveInput, Error, Result};
 
-#[proc_macro_derive(ClickCommand, attributes(buttons, styles, labels))]
+#[proc_macro_derive(ClickCommand, attributes(buttons))]
 pub fn derive_click(input: TokenStream) -> TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
 	parse(input)

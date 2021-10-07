@@ -13,8 +13,6 @@ use twilight_model::application::{
 };
 
 #[derive(Debug, Clone, ClickCommand)]
-#[labels("A button!", "Another button!")]
-#[styles(Success, Danger)]
 #[buttons(Link("To me!", "https://github.com/pyrotechniac/starlight-rs"), Success("A button!"), Danger("Another button!"))]
 pub struct Click(pub(super) ApplicationCommand);
 

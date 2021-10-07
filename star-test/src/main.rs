@@ -8,9 +8,7 @@ trait ClickCommand<const N: usize> {
 }
 
 #[derive(ClickCommand)]
-#[styles(Success, Danger)]
 #[buttons(Danger("Hello, world!"), Link("Testing", "https://github.com"))]
-#[labels("Hello, world!", "Goodbye!")]
 struct TestCommand;
 
 fn main() {}
