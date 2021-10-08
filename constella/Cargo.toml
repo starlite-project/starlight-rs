@@ -12,4 +12,4 @@ version = "1"
 git = "https://gitlab.com/tglman/structsy.git"
 
 [dependencies.twilight-model]
-git = "https://github.com/twilight-rs/twilight.git"
+git = "https://github.com/PyroTechniac/twilight.git"

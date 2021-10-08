@@ -20,12 +20,18 @@ macro_rules! model {
 	($request:expr) => {
 		$crate::finish_request!($request, model)
 	};
+	(@diagnostic $request:expr) => {
+		$crate::finish_request!(@diagnostic $request, model)
+	};
 }
 
 #[macro_export]
 macro_rules! status {
 	($request:expr) => {
 		$crate::finish_request!($request, status)
+	};
+	(@diagnostic $request:expr) => {
+		$crate::finish_request!(@diagnostic $request, status)
 	};
 }
 
@@ -34,6 +40,9 @@ macro_rules! text {
 	($request:expr) => {
 		$crate::finish_request!($request, text)
 	};
+	(@diagnostic $request:expr) => {
+		$crate::finish_request!(@diagnostic $request, text)
+	};
 }
 
 #[macro_export]
@@ -41,16 +50,33 @@ macro_rules! bytes {
 	($request:expr) => {
 		$crate::finish_request!($request, bytes)
 	};
+	(@diagnostic $request:expr) => {
+		$crate::finish_request!(@diagnostic $request, bytes)
+	}
 }
 
 #[macro_export]
 macro_rules! finish_request {
-	($request:expr, status) => {
+	($request:expr, status) => {{
 		$request.exec().await?.status()
-	};
-	($request:expr, $type:ident) => {
+	}};
+	(@diagnostic $request:expr, status) => {{
+		use ::miette::IntoDiagnostic;
+		$request.exec().await.into_diagnostic()?.status()
+	}};
+	($request:expr, $type:ident) => {{
 		$request.exec().await?.$type().await?
-	};
+	}};
+	(@diagnostic $request:expr, $type:ident) => {{
+		use ::miette::IntoDiagnostic;
+		$request
+			.exec()
+			.await
+			.into_diagnostic()?
+			.$type()
+			.await
+			.into_diagnostic()?
+	}};
 }
 
 #[macro_export]
@@ -76,10 +102,23 @@ macro_rules! cloned {
 
 #[cfg(test)]
 mod tests {
-	use super::{bytes, cloned, debug_unreachable, model, status, text};
-	use std::error::Error;
+	use std::string::FromUtf8Error;
 
-	type TestResult<T = ()> = Result<T, Box<dyn Error + Send + Sync>>;
+	use super::{bytes, cloned, debug_unreachable, model, status, text};
+	use thiserror::Error;
+
+	#[derive(Debug, Error, Clone, Copy)]
+	#[error("test error")]
+	struct TestError;
+
+	impl From<FromUtf8Error> for TestError {
+		fn from(_: FromUtf8Error) -> Self {
+			Self
+		}
+	}
+
+	type TestResult<T = ()> = std::result::Result<T, TestError>;
+	type DiagnosticResult<T = ()> = miette::Result<T>;
 
 	#[test]
 	fn cloned() {
@@ -221,8 +260,29 @@ mod tests {
 	}
 
 	#[tokio::test]
+	async fn bytes_diagnostic() -> DiagnosticResult {
+		let decoded = bytes!(@diagnostic RESPONSE_FUTURE);
+
+		assert_eq!(
+			decoded,
+			vec![72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33]
+		);
+
+		Ok(())
+	}
+
+	#[tokio::test]
 	async fn text() -> TestResult {
 		let decoded = text!(RESPONSE_FUTURE);
+
+		assert_eq!(decoded, String::from("Hello, world!"));
+
+		Ok(())
+	}
+
+	#[tokio::test]
+	async fn text_diagnostic() -> DiagnosticResult {
+		let decoded = text!(@diagnostic RESPONSE_FUTURE);
 
 		assert_eq!(decoded, String::from("Hello, world!"));
 
@@ -244,8 +304,31 @@ mod tests {
 	}
 
 	#[tokio::test]
+	async fn model_diagnostic() -> DiagnosticResult {
+		let decoded = model!(@diagnostic RESPONSE_FUTURE);
+
+		assert_eq!(
+			decoded,
+			Message {
+				content: String::from("Hello, world!")
+			}
+		);
+
+		Ok(())
+	}
+
+	#[tokio::test]
 	async fn status() -> TestResult {
 		let decoded = status!(RESPONSE_FUTURE);
+
+		assert_eq!(decoded, 200);
+
+		Ok(())
+	}
+
+	#[tokio::test]
+	async fn status_diagnostic() -> DiagnosticResult {
+		let decoded = status!(@diagnostic RESPONSE_FUTURE);
 
 		assert_eq!(decoded, 200);
 

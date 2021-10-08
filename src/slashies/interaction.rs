@@ -1,12 +1,11 @@
-use twilight_http::{
-	request::application::{interaction::UpdateOriginalResponse, InteractionError},
-	Error,
-};
-use twilight_model::application::{callback::InteractionResponse, interaction::ApplicationCommand};
-
-use crate::{persistence::Database, state::State};
-
 use super::Response;
+use crate::{persistence::Database, state::State};
+use miette::{IntoDiagnostic, Result as MietteResult};
+use twilight_http::{request::application::interaction::UpdateOriginalResponse, Error};
+use twilight_model::{
+	application::{callback::InteractionResponse, interaction::ApplicationCommand},
+	channel::Message,
+};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Interaction<'a> {
@@ -37,10 +36,21 @@ impl<'a> Interaction<'a> {
 		Ok(())
 	}
 
-	pub fn update(&self) -> Result<UpdateOriginalResponse<'_>, InteractionError> {
+	pub async fn get_message(&self) -> MietteResult<Message> {
+		let get_original_response = self
+			.state
+			.http
+			.get_interaction_original(&self.command.token)
+			.into_diagnostic()?;
+
+		Ok(supernova::model!(@diagnostic get_original_response))
+	}
+
+	pub fn update(&self) -> MietteResult<UpdateOriginalResponse<'_>> {
 		self.state
 			.http
 			.update_interaction_original(&self.command.token)
+			.into_diagnostic()
 	}
 
 	#[must_use]

@@ -50,8 +50,7 @@ impl SlashCommand for Click {
 			Self::wait_for_click(interaction, interaction_author(interaction.command)).await?;
 
 		interaction
-			.update()
-			.into_diagnostic()?
+			.update()?
 			.content(Some(
 				format!(
 					"Success! You clicked {}",

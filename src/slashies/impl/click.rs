@@ -79,6 +79,21 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 		interaction: Interaction<'a>,
 		user_id: UserId,
 	) -> Result<MessageComponentInteraction> {
+		let message_id = interaction.get_message().await?.id;
+		interaction
+			.state
+			.standby
+			.wait_for_button(message_id, move |event: &MessageComponentInteraction| {
+				event.author_id().unwrap_or_default() == user_id
+			})
+			.await
+			.into_diagnostic()
+	}
+
+	async fn wait_for_click_old<'a>(
+		interaction: Interaction<'a>,
+		user_id: UserId,
+	) -> Result<MessageComponentInteraction> {
 		let waiter = move |event: &Event| {
 			if let Event::InteractionCreate(interaction_create) = event {
 				if let DiscordInteraction::MessageComponent(ref button) = interaction_create.0 {

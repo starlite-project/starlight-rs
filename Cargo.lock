@@ -241,7 +241,7 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "structsy",
- "twilight-model",
+ "twilight-model 0.6.5",
 ]
 
 [[package]]
@@ -961,7 +961,7 @@ version = "0.1.0"
 dependencies = [
  "constella",
  "serde",
- "twilight-model",
+ "twilight-model 0.6.5",
 ]
 
 [[package]]
@@ -1531,7 +1531,7 @@ name = "star-test"
 version = "0.1.0"
 dependencies = [
  "click-derive",
- "twilight-model",
+ "twilight-model 0.6.4",
 ]
 
 [[package]]
@@ -1582,7 +1582,7 @@ dependencies = [
  "twilight-gateway",
  "twilight-http",
  "twilight-mention",
- "twilight-model",
+ "twilight-model 0.6.5",
  "twilight-standby",
  "twilight-util",
 ]
@@ -1627,6 +1627,8 @@ dependencies = [
 name = "supernova"
 version = "0.1.0"
 dependencies = [
+ "miette",
+ "thiserror",
  "tokio",
 ]
 
@@ -1973,27 +1975,27 @@ dependencies = [
 
 [[package]]
 name = "twilight-cache-inmemory"
-version = "0.6.3"
-source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
+version = "0.6.4"
+source = "git+https://github.com/PyroTechniac/twilight.git#dc9d27cd68ea5822c186da9c66c498ea8110abe2"
 dependencies = [
  "bitflags",
  "dashmap",
  "serde",
- "twilight-model",
+ "twilight-model 0.6.5",
 ]
 
 [[package]]
 name = "twilight-embed-builder"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
+source = "git+https://github.com/PyroTechniac/twilight.git#dc9d27cd68ea5822c186da9c66c498ea8110abe2"
 dependencies = [
- "twilight-model",
+ "twilight-model 0.6.5",
 ]
 
 [[package]]
 name = "twilight-gateway"
-version = "0.6.4"
-source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
+version = "0.6.5"
+source = "git+https://github.com/PyroTechniac/twilight.git#dc9d27cd68ea5822c186da9c66c498ea8110abe2"
 dependencies = [
  "bitflags",
  "flate2",
@@ -2007,14 +2009,14 @@ dependencies = [
  "tracing",
  "twilight-gateway-queue",
  "twilight-http",
- "twilight-model",
+ "twilight-model 0.6.5",
  "url",
 ]
 
 [[package]]
 name = "twilight-gateway-queue"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
+source = "git+https://github.com/PyroTechniac/twilight.git#dc9d27cd68ea5822c186da9c66c498ea8110abe2"
 dependencies = [
  "tokio",
  "tracing",
@@ -2023,8 +2025,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-http"
-version = "0.6.5"
-source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
+version = "0.6.6"
+source = "git+https://github.com/PyroTechniac/twilight.git#dc9d27cd68ea5822c186da9c66c498ea8110abe2"
 dependencies = [
  "hyper",
  "hyper-rustls",
@@ -2035,15 +2037,15 @@ dependencies = [
  "simd-json",
  "tokio",
  "tracing",
- "twilight-model",
+ "twilight-model 0.6.5",
 ]
 
 [[package]]
 name = "twilight-mention"
 version = "0.6.0"
-source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
+source = "git+https://github.com/PyroTechniac/twilight.git#dc9d27cd68ea5822c186da9c66c498ea8110abe2"
 dependencies = [
- "twilight-model",
+ "twilight-model 0.6.5",
 ]
 
 [[package]]
@@ -2059,23 +2061,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "twilight-model"
+version = "0.6.5"
+source = "git+https://github.com/PyroTechniac/twilight.git#dc9d27cd68ea5822c186da9c66c498ea8110abe2"
+dependencies = [
+ "bitflags",
+ "serde",
+ "serde-value",
+ "serde_repr",
+ "tracing",
+]
+
+[[package]]
 name = "twilight-standby"
 version = "0.6.2"
-source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
+source = "git+https://github.com/PyroTechniac/twilight.git#dc9d27cd68ea5822c186da9c66c498ea8110abe2"
 dependencies = [
  "dashmap",
  "futures-util",
  "tokio",
  "tracing",
- "twilight-model",
+ "twilight-model 0.6.5",
 ]
 
 [[package]]
 name = "twilight-util"
-version = "0.6.1"
-source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
+version = "0.6.2"
+source = "git+https://github.com/PyroTechniac/twilight.git#dc9d27cd68ea5822c186da9c66c498ea8110abe2"
 dependencies = [
- "twilight-model",
+ "twilight-model 0.6.5",
 ]
 
 [[package]]
