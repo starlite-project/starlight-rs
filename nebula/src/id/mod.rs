@@ -8,6 +8,7 @@ use std::{
 	num::ParseIntError,
 	ops::Deref,
 	str::FromStr,
+	convert::AsRef,
 };
 use twilight_model::id::{
 	ApplicationId, AttachmentId, AuditLogEntryId, ChannelId, CommandId, EmojiId, GenericId,
@@ -42,6 +43,12 @@ impl Id {
 	#[must_use]
 	pub fn as_id_key<T: private::Sealed + Into<Self>>(id: T) -> IdKey {
 		IdKey::from(id.into())
+	}
+}
+
+impl AsRef<u64> for Id {
+	fn as_ref(&self) -> &u64 {
+		&self.0
 	}
 }
 
