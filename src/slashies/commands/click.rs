@@ -69,17 +69,14 @@ impl SlashCommand for Click {
 	}
 }
 
-impl ParseCommand<3> for Click {
+impl ParseCommand for Click {
 	type Output = String;
 
 	fn parse(_: Interaction, input: &str) -> Result<Self::Output, ParseError> {
-		let components = Self::define_buttons().map_err(|_| ParseError)?;
+		let button = Self::parse_button(input)?;
 
-		components
-			.iter()
-			.cloned()
-			.find(|button| button.custom_id.as_deref() == Some(input))
-			.and_then(|button| button.label)
-			.ok_or(ParseError)
+		button.label.ok_or(ParseError::Custom(
+			"an error occurred while getting the button pressed (this shouldn't happen)",
+		))
 	}
 }
