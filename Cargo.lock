@@ -221,6 +221,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "clokwerk"
+version = "0.3.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a99373edf782eec8fde0d52bd2f60e4ae5eaca31f1d2cf5aec68243849a37a9"
+dependencies = [
+ "chrono",
+]
+
+[[package]]
 name = "cmake"
 version = "0.1.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -241,7 +250,7 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "structsy",
- "twilight-model 0.6.5",
+ "twilight-model",
 ]
 
 [[package]]
@@ -768,15 +777,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "instant"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "716d3d89f35ac6a34fd0eed635395f4c3b76fa889338a4632e5231a8684216bd"
-dependencies = [
- "cfg-if",
-]
-
-[[package]]
 name = "is_ci"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -837,15 +837,6 @@ name = "linked-hash-map"
 version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7fb9b38af92608140b86b693604b9ffcc5824240a484d1ecd4795bacb2fe88f3"
-
-[[package]]
-name = "lock_api"
-version = "0.4.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "712a4d093c9976e24e7dbca41db895dabcbac38eb5f4045393d17a95bdfb1109"
-dependencies = [
- "scopeguard",
-]
 
 [[package]]
 name = "log"
@@ -979,7 +970,7 @@ version = "0.1.0"
 dependencies = [
  "constella",
  "serde",
- "twilight-model 0.6.5",
+ "twilight-model",
 ]
 
 [[package]]
@@ -1070,31 +1061,6 @@ name = "owo-colors"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a61765925aec40abdb23812a3a1a01fafc6ffb9da22768b2ce665a9e84e527c"
-
-[[package]]
-name = "parking_lot"
-version = "0.11.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d17b78036a60663b797adeaee46f5c9dfebb86948d1255007a1d6be0271ff99"
-dependencies = [
- "instant",
- "lock_api",
- "parking_lot_core",
-]
-
-[[package]]
-name = "parking_lot_core"
-version = "0.8.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d76e8e1493bcac0d2766c42737f34458f1c8c50c0d23bcb24ea953affb273216"
-dependencies = [
- "cfg-if",
- "instant",
- "libc",
- "redox_syscall",
- "smallvec",
- "winapi 0.3.9",
-]
 
 [[package]]
 name = "percent-encoding"
@@ -1295,15 +1261,6 @@ dependencies = [
  "crossbeam-utils",
  "lazy_static",
  "num_cpus",
-]
-
-[[package]]
-name = "redox_syscall"
-version = "0.2.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8383f39639269cde97d255a32bdb68c047337295414940c68bdd30c2e13203ff"
-dependencies = [
- "bitflags",
 ]
 
 [[package]]
@@ -1582,8 +1539,7 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 name = "star-test"
 version = "0.1.0"
 dependencies = [
- "click-derive",
- "twilight-model 0.6.4",
+ "clokwerk",
 ]
 
 [[package]]
@@ -1634,7 +1590,7 @@ dependencies = [
  "twilight-gateway",
  "twilight-http",
  "twilight-mention",
- "twilight-model 0.6.5",
+ "twilight-model",
  "twilight-standby",
  "twilight-util",
 ]
@@ -1810,15 +1766,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "threadpool"
-version = "1.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d050e60b33d41c19108b32cea32164033a9013fe3b46cbd4457559bfbf77afaa"
-dependencies = [
- "num_cpus",
-]
-
-[[package]]
 name = "time"
 version = "0.1.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1826,17 +1773,6 @@ checksum = "ca8a50ef2360fbd1eeb0ecd46795a87a19024eb4b53c5dc916ca1fd95fe62438"
 dependencies = [
  "libc",
  "winapi 0.3.9",
-]
-
-[[package]]
-name = "timestream"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "parking_lot",
- "serde",
- "supernova",
- "threadpool",
 ]
 
 [[package]]
@@ -2053,7 +1989,7 @@ dependencies = [
  "bitflags",
  "dashmap",
  "serde",
- "twilight-model 0.6.5",
+ "twilight-model",
 ]
 
 [[package]]
@@ -2061,7 +1997,7 @@ name = "twilight-embed-builder"
 version = "0.6.0"
 source = "git+https://github.com/PyroTechniac/twilight.git#dc9d27cd68ea5822c186da9c66c498ea8110abe2"
 dependencies = [
- "twilight-model 0.6.5",
+ "twilight-model",
 ]
 
 [[package]]
@@ -2081,7 +2017,7 @@ dependencies = [
  "tracing",
  "twilight-gateway-queue",
  "twilight-http",
- "twilight-model 0.6.5",
+ "twilight-model",
  "url",
 ]
 
@@ -2109,7 +2045,7 @@ dependencies = [
  "simd-json",
  "tokio",
  "tracing",
- "twilight-model 0.6.5",
+ "twilight-model",
 ]
 
 [[package]]
@@ -2117,19 +2053,7 @@ name = "twilight-mention"
 version = "0.6.0"
 source = "git+https://github.com/PyroTechniac/twilight.git#dc9d27cd68ea5822c186da9c66c498ea8110abe2"
 dependencies = [
- "twilight-model 0.6.5",
-]
-
-[[package]]
-name = "twilight-model"
-version = "0.6.4"
-source = "git+https://github.com/twilight-rs/twilight.git#ef284d55fffe78096ffe9336ce4a6e5e7dcf19e8"
-dependencies = [
- "bitflags",
- "serde",
- "serde-value",
- "serde_repr",
- "tracing",
+ "twilight-model",
 ]
 
 [[package]]
@@ -2153,7 +2077,7 @@ dependencies = [
  "futures-util",
  "tokio",
  "tracing",
- "twilight-model 0.6.5",
+ "twilight-model",
 ]
 
 [[package]]
@@ -2161,7 +2085,7 @@ name = "twilight-util"
 version = "0.6.2"
 source = "git+https://github.com/PyroTechniac/twilight.git#dc9d27cd68ea5822c186da9c66c498ea8110abe2"
 dependencies = [
- "twilight-model 0.6.5",
+ "twilight-model",
 ]
 
 [[package]]

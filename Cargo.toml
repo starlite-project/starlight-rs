@@ -120,4 +120,4 @@ strip = "symbols"
 lto = "fat"
 
 [workspace]
-members = ["./click-derive", "./constella", "./nebula", "./supernova", "./star-test", "./timestream"]
+members = ["./click-derive", "./constella", "./nebula", "./supernova", "./star-test"]

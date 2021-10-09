@@ -6,5 +6,4 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-click-derive = { path = "../click-derive" }
-twilight-model = { git = "https://github.com/twilight-rs/twilight.git" }
+clokwerk = "0.3.5"
