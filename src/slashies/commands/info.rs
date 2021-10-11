@@ -173,7 +173,7 @@ impl SlashCommand for Info {
 		interaction
 			.response(
 				Response::from(embed_builder.build().into_diagnostic()?)
-					.allowed_mentions(|builder| builder.replied_user().user_ids([user.id])),
+					.allowed_mentions(|builder| builder.replied_user().user_ids([user.id]))
 			)
 			.await
 			.into_diagnostic()?;

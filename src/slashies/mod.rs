@@ -82,7 +82,7 @@ impl Response {
 	#[must_use]
 	#[allow(clippy::missing_const_for_fn)]
 	pub fn clear_components(mut self) -> Self {
-		self.0.components = None;
+		self.0.components = Some(vec![]);
 
 		self
 	}
@@ -129,8 +129,6 @@ impl Response {
 		Self::from(message.to_string()).exec()
 	}
 
-	#[must_use]
-	#[allow(clippy::missing_const_for_fn)]
 	pub fn exec(self) -> InteractionResponse {
 		InteractionResponse::ChannelMessageWithSource(self.0)
 	}
@@ -176,8 +174,14 @@ impl From<Vec<Embed>> for Response {
 }
 
 impl From<Response> for InteractionResponse {
-	fn from(value: Response) -> Self {
-		value.exec()
+	fn from(response: Response) -> Self {
+		response.exec()
+	}
+}
+
+impl From<Response> for CallbackData {
+	fn from(response: Response) -> Self {
+		response.0
 	}
 }
 

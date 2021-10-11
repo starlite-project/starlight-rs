@@ -49,21 +49,13 @@ impl SlashCommand for Click {
 		let click_data =
 			Self::wait_for_click(interaction, interaction_author(interaction.command)).await?;
 
-		interaction
-			.update()?
-			.content(Some(
-				format!(
-					"Success! You clicked {}",
-					Self::parse(interaction, &click_data.data.custom_id).into_diagnostic()?
-				)
-				.as_str(),
-			))
-			.into_diagnostic()?
-			.components(Self::EMPTY_COMPONENTS)
-			.into_diagnostic()?
-			.exec()
-			.await
-			.into_diagnostic()?;
+		let response = Response::from(format!(
+			"Success! You clicked {}",
+			Self::parse(interaction, &click_data.data.custom_id).into_diagnostic()?
+		))
+		.clear_components();
+
+		interaction.update(response).await?;
 
 		Ok(())
 	}

@@ -108,9 +108,7 @@ pub trait ParseCommand {
 		Ok(output)
 	}
 
-	fn parse_button<const N: usize>(
-		input: &str,
-	) -> Result<Button, ParseError>
+	fn parse_button<const N: usize>(input: &str) -> Result<Button, ParseError>
 	where
 		Self: ClickCommand<N>,
 	{

@@ -1574,6 +1574,7 @@ dependencies = [
  "once_cell",
  "persy",
  "serde",
+ "serde_json",
  "star-utils",
  "static_assertions",
  "structsy",

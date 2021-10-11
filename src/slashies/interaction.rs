@@ -1,9 +1,13 @@
 use super::Response;
 use crate::{persistence::Database, state::State};
 use miette::{IntoDiagnostic, Result as MietteResult};
-use twilight_http::{request::application::interaction::UpdateOriginalResponse, Error};
+use serde_json::to_string;
+use twilight_http::Error;
 use twilight_model::{
-	application::{callback::InteractionResponse, interaction::ApplicationCommand},
+	application::{
+		callback::{CallbackData, InteractionResponse},
+		interaction::ApplicationCommand,
+	},
 	channel::Message,
 };
 
@@ -46,11 +50,27 @@ impl<'a> Interaction<'a> {
 		Ok(supernova::model!(@diagnostic get_original_response))
 	}
 
-	pub fn update(&self) -> MietteResult<UpdateOriginalResponse<'_>> {
-		self.state
+	pub async fn update<T: Send + Sync + Into<CallbackData>>(
+		&self,
+		response: T,
+	) -> MietteResult<()> {
+
+		let callback_data: CallbackData = response.into();
+		let update_interaction = self
+			.state
 			.http
 			.update_interaction_original(&self.command.token)
-			.into_diagnostic()
+			.into_diagnostic()?;
+
+		let bytes = to_string(&callback_data).into_diagnostic()?;
+
+		update_interaction
+			.payload_json(bytes.as_bytes())
+			.exec()
+			.await
+			.into_diagnostic()?;
+
+		Ok(())
 	}
 
 	#[must_use]
