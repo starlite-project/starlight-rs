@@ -1,4 +1,4 @@
-use super::{Components, Config, State};
+use super::{ClientComponents, Config, State};
 use crate::persistence::Database;
 use miette::{IntoDiagnostic, Result, WrapErr};
 use nebula::Leak;
@@ -133,7 +133,7 @@ impl StateBuilder {
 			.into_diagnostic()?;
 		let standby = Standby::new();
 
-		let components = Components {
+		let components = ClientComponents {
 			cache,
 			cluster,
 			standby,

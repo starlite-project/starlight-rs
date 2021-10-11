@@ -1779,6 +1779,11 @@ dependencies = [
 [[package]]
 name = "timestream"
 version = "0.1.0"
+dependencies = [
+ "clokwerk",
+ "nebula",
+ "tokio",
+]
 
 [[package]]
 name = "tinyvec"

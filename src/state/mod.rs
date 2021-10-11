@@ -21,7 +21,7 @@ mod events;
 pub use self::{builder::StateBuilder, config::Config};
 
 #[derive(Debug, Clone, Copy)]
-pub struct State(pub &'static Components);
+pub struct State(pub &'static ClientComponents);
 
 impl State {
 	pub async fn connect(self) -> Result<()> {
@@ -98,7 +98,7 @@ impl State {
 }
 
 impl Deref for State {
-	type Target = Components;
+	type Target = ClientComponents;
 
 	fn deref(&self) -> &Self::Target {
 		self.0
@@ -106,7 +106,7 @@ impl Deref for State {
 }
 
 #[derive(Debug, Clone)]
-pub struct Components {
+pub struct ClientComponents {
 	pub cache: Cache,
 	pub cluster: Cluster,
 	pub http: HttpClient,

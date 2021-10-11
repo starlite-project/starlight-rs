@@ -2,7 +2,7 @@ use miette::{IntoDiagnostic, Result};
 use starlight::{
 	persistence::settings::GuildHelper,
 	slashies::commands::Commands,
-	state::{Components, Config, StateBuilder},
+	state::{ClientComponents, Config, StateBuilder},
 	utils::CacheReliant,
 };
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -103,7 +103,7 @@ async fn run() -> Result<()> {
 
 	client.shutdown();
 
-	let client_ptr = unsafe { Box::from_raw(client.0 as *const Components as *mut Components) };
+	let client_ptr = unsafe { Box::from_raw(client.0 as *const ClientComponents as *mut ClientComponents) };
 
 	// Drop the client components pointer so it's memory can be freed
 	drop(client_ptr);
