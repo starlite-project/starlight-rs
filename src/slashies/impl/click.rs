@@ -12,7 +12,7 @@ use thiserror::Error;
 use twilight_gateway::Event;
 use twilight_model::{
 	application::{
-		component::{button::ButtonStyle, Button, Component},
+		component::{button::ButtonStyle, Button, Component, ComponentType},
 		interaction::{Interaction as DiscordInteraction, MessageComponentInteraction},
 	},
 	id::UserId,
@@ -83,8 +83,9 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 		interaction
 			.state
 			.standby
-			.wait_for_button(message_id, move |event: &MessageComponentInteraction| {
+			.wait_for_component(message_id, move |event: &MessageComponentInteraction| {
 				event.author_id().unwrap_or_default() == user_id
+					&& event.data.component_type == ComponentType::Button
 			})
 			.await
 			.into_diagnostic()
