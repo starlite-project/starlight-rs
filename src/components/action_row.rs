@@ -14,6 +14,10 @@ impl ActionRowBuilder {
 		Self { components: vec![] }
 	}
 
+	pub fn len(&self) -> usize {
+		self.components.len()
+	}
+
 	pub fn add_menu(&mut self, builder: SelectMenuBuilder) -> Self {
 		let menu = builder.build_component().unwrap();
 

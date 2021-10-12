@@ -37,8 +37,8 @@ fn parse(input: DeriveInput) -> Result<TokenStream2> {
 
 	let size = buttons.size;
 
-	if size > 5 {
-		panic!("cannot have more than 5 buttons")
+	if size > 25 {
+		panic!("cannot have more than 25 buttons")
 	}
 
 	let tokens = quote! {

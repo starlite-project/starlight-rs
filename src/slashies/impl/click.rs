@@ -1,14 +1,15 @@
 use super::SlashCommand;
 use crate::{
-	components::{BuildError, ButtonBuilder, ComponentBuilder},
+	components::{ActionRowBuilder, BuildError, ButtonBuilder, ComponentBuilder},
 	slashies::interaction::Interaction,
 };
 use async_trait::async_trait;
 use base64::encode;
 use miette::{IntoDiagnostic, Result};
 use nebula::Leak;
-use std::{any::type_name, collections::HashMap, lazy::Lazy, mem::MaybeUninit};
+use std::{any::type_name, collections::HashMap, lazy::Lazy, mem::MaybeUninit, time::Duration};
 use thiserror::Error;
+use tokio::time::timeout;
 use twilight_gateway::Event;
 use twilight_model::{
 	application::{
@@ -49,7 +50,23 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 	const EMPTY_COMPONENTS: Option<&'static [Component]> = Some(&[]);
 
 	fn components() -> Result<Vec<Component>, BuildError> {
-		Ok(vec![Self::define_buttons()?.build_component()?])
+		let buttons = Self::define_buttons()?;
+		if buttons.len() <= 5 {
+			return Ok(vec![buttons.to_vec().build_component()?]);
+		}
+		let mut output = Vec::with_capacity(N / 5);
+		let mut builder = ActionRowBuilder::new();
+
+		for button in buttons {
+			if builder.len() == 5 {
+				output.push(builder.build_component()?);
+				builder = ActionRowBuilder::new();
+			}
+
+			builder = builder.push_component(Component::Button(button));
+		}
+
+		Ok(output)
 	}
 
 	fn define_buttons() -> Result<[Button; N], BuildError> {
@@ -78,17 +95,33 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 	async fn wait_for_click<'a>(
 		interaction: Interaction<'a>,
 		user_id: UserId,
+		timeout_in_secs: u64
 	) -> Result<MessageComponentInteraction> {
+		// let message_id = interaction.get_message().await?.id;
+		// interaction
+		// 	.state
+		// 	.standby
+		// 	.wait_for_component(message_id, move |event: &MessageComponentInteraction| {
+		// 		event.author_id().unwrap_or_default() == user_id
+		// 			&& event.data.component_type == ComponentType::Button
+		// 	})
+		// 	.await
+		// 	.into_diagnostic()
 		let message_id = interaction.get_message().await?.id;
-		interaction
-			.state
-			.standby
-			.wait_for_component(message_id, move |event: &MessageComponentInteraction| {
-				event.author_id().unwrap_or_default() == user_id
-					&& event.data.component_type == ComponentType::Button
-			})
-			.await
-			.into_diagnostic()
+		timeout(
+			Duration::from_secs(timeout_in_secs),
+			interaction.state.standby.wait_for_component(
+				message_id,
+				move |event: &MessageComponentInteraction| {
+					event.author_id() == Some(user_id)
+						&& event.data.component_type == ComponentType::Button
+				},
+			),
+		)
+		.await
+		.into_diagnostic()
+		.map(|res| res.into_diagnostic())
+		.flatten()
 	}
 
 	async fn wait_for_click_old<'a>(

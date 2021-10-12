@@ -9,7 +9,7 @@ use async_trait::async_trait;
 use miette::{IntoDiagnostic, Result};
 use twilight_model::application::{
 	command::{Command, CommandType},
-	interaction::ApplicationCommand,
+	interaction::{ApplicationCommand, MessageComponentInteraction},
 };
 
 #[derive(Debug, Clone, ClickCommand)]
@@ -46,8 +46,24 @@ impl SlashCommand for Click {
 
 		interaction.response(response).await.into_diagnostic()?;
 
-		let click_data =
-			Self::wait_for_click(interaction, interaction_author(interaction.command)).await?;
+		// let click_data =
+		// Self::wait_for_click(interaction, interaction_author(interaction.command)).await;
+
+		let click_data: MessageComponentInteraction = match Self::wait_for_click(
+			interaction,
+			interaction_author(interaction.command),
+			10
+		)
+		.await
+		{
+			Ok(res) => res,
+			Err(_) => {
+				let response =
+					Response::from(format!("Uh oh! Button timed out")).clear_components();
+
+				return interaction.update(response).await;
+			}
+		};
 
 		let response = Response::from(format!(
 			"Success! You clicked {}",
