@@ -129,6 +129,8 @@ impl Response {
 		Self::from(message.to_string()).exec()
 	}
 
+	#[allow(clippy::missing_const_for_fn)]
+	#[must_use]
 	pub fn exec(self) -> InteractionResponse {
 		InteractionResponse::ChannelMessageWithSource(self.0)
 	}

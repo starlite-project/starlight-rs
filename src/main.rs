@@ -103,7 +103,8 @@ async fn run() -> Result<()> {
 
 	client.shutdown();
 
-	let client_ptr = unsafe { Box::from_raw(client.0 as *const ClientComponents as *mut ClientComponents) };
+	let client_ptr =
+		unsafe { Box::from_raw(client.0 as *const ClientComponents as *mut ClientComponents) };
 
 	// Drop the client components pointer so it's memory can be freed
 	drop(client_ptr);

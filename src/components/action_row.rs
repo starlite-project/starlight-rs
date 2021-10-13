@@ -14,8 +14,14 @@ impl ActionRowBuilder {
 		Self { components: vec![] }
 	}
 
+	#[must_use]
 	pub fn len(&self) -> usize {
 		self.components.len()
+	}
+
+	#[must_use]
+	pub fn is_empty(&self) -> bool {
+		self.components.is_empty()
 	}
 
 	pub fn add_menu(&mut self, builder: SelectMenuBuilder) -> Self {

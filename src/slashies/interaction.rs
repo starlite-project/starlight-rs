@@ -54,7 +54,6 @@ impl<'a> Interaction<'a> {
 		&self,
 		response: T,
 	) -> MietteResult<()> {
-
 		let callback_data: CallbackData = response.into();
 		let update_interaction = self
 			.state

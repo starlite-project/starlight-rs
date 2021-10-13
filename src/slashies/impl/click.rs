@@ -58,9 +58,16 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 
 		for i in 0..=(N / 5) {
 			output.push(
-				ActionRowBuilder::from(buttons.iter().skip(i * 5).take(5).cloned().collect::<Vec<_>>())
-					.build_component()?,
-			)
+				ActionRowBuilder::from(
+					buttons
+						.iter()
+						.skip(i * 5)
+						.take(5)
+						.cloned()
+						.collect::<Vec<_>>(),
+				)
+				.build_component()?,
+			);
 		}
 
 		Ok(output)
@@ -117,8 +124,7 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 		)
 		.await
 		.into_diagnostic()
-		.map(|res| res.into_diagnostic())
-		.flatten()
+		.and_then(IntoDiagnostic::into_diagnostic)
 	}
 
 	async fn wait_for_click_old<'a>(
