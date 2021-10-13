@@ -54,16 +54,13 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 		if buttons.len() <= 5 {
 			return Ok(vec![buttons.to_vec().build_component()?]);
 		}
-		let mut output = Vec::with_capacity(N / 5);
-		let mut builder = ActionRowBuilder::new();
+		let mut output = Vec::with_capacity((N / 5) + 1);
 
-		for button in buttons {
-			if builder.len() == 5 {
-				output.push(builder.build_component()?);
-				builder = ActionRowBuilder::new();
-			}
-
-			builder = builder.push_component(Component::Button(button));
+		for i in 0..=(N / 5) {
+			output.push(
+				ActionRowBuilder::from(buttons.iter().skip(i * 5).take(5).cloned().collect::<Vec<_>>())
+					.build_component()?,
+			)
 		}
 
 		Ok(output)
@@ -95,7 +92,7 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 	async fn wait_for_click<'a>(
 		interaction: Interaction<'a>,
 		user_id: UserId,
-		timeout_in_secs: u64
+		timeout_in_secs: u64,
 	) -> Result<MessageComponentInteraction> {
 		// let message_id = interaction.get_message().await?.id;
 		// interaction

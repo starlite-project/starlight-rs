@@ -16,7 +16,10 @@ use twilight_model::application::{
 #[buttons(
 	Link("To me!", "https://github.com/pyrotechniac/starlight-rs"),
 	Success("A button!"),
-	Danger("Another button!")
+	Danger("Another button!"),
+	Success("Even more buttons!"),
+	Primary("Testing many buttons"),
+	Secondary("Last one!")
 )]
 pub struct Click(pub(super) ApplicationCommand);
 
@@ -39,6 +42,10 @@ impl SlashCommand for Click {
 
 	async fn run(&self, state: State) -> Result<()> {
 		let interaction = state.interaction(&self.0);
+
+		dbg!(Self::define_buttons().into_diagnostic()?);
+
+		dbg!(Self::components().into_diagnostic()?);
 
 		let response = Response::new()
 			.message("Click this")
