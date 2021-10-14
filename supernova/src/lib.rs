@@ -45,16 +45,6 @@ macro_rules! debug_unreachable {
 }
 
 #[macro_export]
-macro_rules! model_old {
-	($request:expr) => {
-		$crate::finish_request!($request, model)
-	};
-	(@diagnostic $request:expr) => {
-		$crate::finish_request!(@diagnostic $request, model)
-	};
-}
-
-#[macro_export]
 macro_rules! status {
 	($request:expr) => {
 		$crate::finish_request!($request, status)
@@ -133,7 +123,7 @@ macro_rules! cloned {
 mod tests {
 	use std::string::FromUtf8Error;
 
-	use super::{bytes, cloned, debug_unreachable, model_old as model, status, text};
+	use super::{bytes, cloned, debug_unreachable, status, text};
 	use thiserror::Error;
 
 	#[derive(Debug, Error, Clone, Copy)]
@@ -251,12 +241,6 @@ mod tests {
 			Ok(String::from_utf8(self.inner.clone())?)
 		}
 
-		async fn model(&self) -> TestResult<Message> {
-			Ok(Message {
-				content: String::from_utf8(self.inner.clone())?,
-			})
-		}
-
 		async fn random(&self) -> TestResult<u8> {
 			Ok(10)
 		}
@@ -314,34 +298,6 @@ mod tests {
 		let decoded = text!(@diagnostic RESPONSE_FUTURE);
 
 		assert_eq!(decoded, String::from("Hello, world!"));
-
-		Ok(())
-	}
-
-	#[tokio::test]
-	async fn model() -> TestResult {
-		let decoded = model!(RESPONSE_FUTURE);
-
-		assert_eq!(
-			decoded,
-			Message {
-				content: String::from("Hello, world!")
-			}
-		);
-
-		Ok(())
-	}
-
-	#[tokio::test]
-	async fn model_diagnostic() -> DiagnosticResult {
-		let decoded = model!(@diagnostic RESPONSE_FUTURE);
-
-		assert_eq!(
-			decoded,
-			Message {
-				content: String::from("Hello, world!")
-			}
-		);
 
 		Ok(())
 	}
