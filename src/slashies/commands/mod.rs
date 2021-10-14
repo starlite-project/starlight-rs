@@ -4,7 +4,6 @@ use click::Click;
 use info::Info;
 use miette::Result;
 use ping::Ping;
-use settings::Settings;
 use stats::Stats;
 use twilight_cache_inmemory::ResourceType;
 use twilight_model::application::{command::Command, interaction::ApplicationCommand};
@@ -12,17 +11,15 @@ use twilight_model::application::{command::Command, interaction::ApplicationComm
 mod click;
 mod info;
 mod ping;
-mod settings;
 mod stats;
 
 #[must_use]
-pub fn get_slashies() -> [Command; 5] {
+pub fn get_slashies() -> [Command; 4] {
 	[
 		Ping::define(),
 		Click::define(),
 		Info::define(),
 		Stats::define(),
-		Settings::define(),
 	]
 }
 
@@ -32,7 +29,6 @@ pub enum Commands {
 	Click(Click),
 	Info(Info),
 	Stats(Stats),
-	Settings(Settings),
 }
 
 impl Commands {
@@ -43,7 +39,6 @@ impl Commands {
 			Click::NAME => Some(Self::Click(Click(command))),
 			Info::NAME => Some(Self::Info(Info(command))),
 			Stats::NAME => Some(Self::Stats(Stats(command))),
-			Settings::NAME => Some(Self::Settings(Settings(command))),
 			_ => None,
 		}
 	}
@@ -54,13 +49,12 @@ impl Commands {
 			Self::Click(c) => c.run(state).await,
 			Self::Info(c) => c.run(state).await,
 			Self::Stats(c) => c.run(state).await,
-			Self::Settings(c) => c.run(state).await,
 		}
 	}
 }
 
 impl CacheReliant for Commands {
 	fn needs() -> ResourceType {
-		Info::needs() | Settings::needs() | Stats::needs()
+		Info::needs() |  Stats::needs()
 	}
 }

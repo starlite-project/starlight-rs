@@ -1,5 +1,4 @@
 use super::{ClientComponents, Config, State};
-use crate::persistence::Database;
 use miette::{IntoDiagnostic, Result, WrapErr};
 use nebula::Leak;
 use supernova::cloned;
@@ -140,7 +139,6 @@ impl StateBuilder {
 			http,
 			runtime: Instant::now(),
 			config,
-			database: Database::open()?,
 		}
 		.leak();
 

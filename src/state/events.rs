@@ -83,12 +83,10 @@ mod internal {
 		clippy::unused_async
 	)]
 	use crate::{
-		persistence::settings::{GuildHelper, SettingsHelper},
 		slashies,
 		state::State,
 	};
-	use miette::{IntoDiagnostic, Result};
-	use nebula::Id;
+	use miette::{ Result};
 	use tracing::{event, Level};
 	use twilight_model::{
 		application::interaction::Interaction,
@@ -118,7 +116,7 @@ mod internal {
 		gateway_invalidate_session: [bool];
 		gateway_reconnect: [];
 		gift_code_update: [];
-		// guild_create: [GuildCreate];
+		guild_create: [GuildCreate];
 		guild_delete: [GuildDelete];
 		guild_emojis_update: [GuildEmojisUpdate];
 		guild_integrations_update: [GuildIntegrationsUpdate];
@@ -166,16 +164,6 @@ mod internal {
 	pub(super) async fn ready(state: State, ready: Ready) -> Result<()> {
 		event!(Level::INFO, user_name = %ready.user.name);
 		event!(Level::INFO, guilds = %ready.guilds.len());
-		Ok(())
-	}
-
-	pub(super) async fn guild_create(state: State, created_guild: GuildCreate) -> Result<()> {
-		let guild_helper = state.database.helper::<GuildHelper>();
-
-		guild_helper
-			.acquire(Id::from(created_guild.id).into())
-			.into_diagnostic()?;
-
 		Ok(())
 	}
 

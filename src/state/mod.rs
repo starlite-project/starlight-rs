@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 use crate::{
-	persistence::Database,
 	slashies::{commands::get_slashies, interaction::Interaction},
 };
 use futures::StreamExt;
@@ -113,5 +112,4 @@ pub struct ClientComponents {
 	pub standby: Standby,
 	pub runtime: Instant,
 	pub config: Config,
-	pub database: Database,
 }

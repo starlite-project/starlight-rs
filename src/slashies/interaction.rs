@@ -1,5 +1,5 @@
 use super::Response;
-use crate::{persistence::Database, state::State};
+use crate::{ state::State};
 use miette::{IntoDiagnostic, Result as MietteResult};
 use serde_json::to_string;
 use supernova::model;
@@ -74,10 +74,5 @@ impl<'a> Interaction<'a> {
 			.into_diagnostic()?;
 
 		Ok(())
-	}
-
-	#[must_use]
-	pub fn database(&'a self) -> &'a Database {
-		&self.state.database
 	}
 }

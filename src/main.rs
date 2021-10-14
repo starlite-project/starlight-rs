@@ -1,6 +1,5 @@
 use miette::{IntoDiagnostic, Result};
 use starlight::{
-	persistence::settings::GuildHelper,
 	slashies::commands::Commands,
 	state::{ClientComponents, Config, StateBuilder},
 	utils::CacheReliant,
@@ -70,7 +69,7 @@ async fn run() -> Result<()> {
 		.config(config)?
 		.intents(Intents::empty())?
 		.cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))?
-		.cache_builder(|builder| builder.resource_types(Commands::needs() | GuildHelper::needs()))?
+		.cache_builder(|builder| builder.resource_types(Commands::needs()))?
 		.build()
 		.await?;
 

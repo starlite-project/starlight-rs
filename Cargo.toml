@@ -16,7 +16,6 @@ dotenv = "0.15.0"
 futures = "0.3.17"
 num_cpus = "1.13.0"
 once_cell = "1.8"
-persy = "1"
 serde_json = "1"
 sysinfo = "0.20.3"
 thiserror = "1.0.29"
@@ -34,9 +33,6 @@ git = "https://github.com/clap-rs/clap.git"
 [dependencies.click-derive]
 path = "./click-derive"
 
-[dependencies.constella]
-path = "./constella"
-
 [dependencies.miette]
 version = "3.0.1"
 features = ["fancy"]
@@ -48,13 +44,6 @@ path = "./nebula"
 default-features = false
 features = ["derive"]
 version = "1.0.130"
-
-[dependencies.structsy]
-features = ["serde_info"]
-git = "https://gitlab.com/tglman/structsy.git"
-
-[dependencies.structsy-derive]
-git = "https://gitlab.com/tglman/structsy.git"
 
 [dependencies.star-utils]
 git = "https://github.com/PyroTechniac/starlight-rs-utils.git"
@@ -129,4 +118,4 @@ strip = "symbols"
 lto = "fat"
 
 [workspace]
-members = ["./click-derive", "./constella", "./nebula", "./supernova", "./star-test"]
+members = ["./click-derive", "./nebula", "./supernova", "./star-test"]

@@ -11,7 +11,7 @@
 
 mod id;
 
-pub use self::id::{Id, IdKey, ToIdKey};
+pub use self::id::{Id};
 
 pub trait Leak {
 	fn leak(self) -> &'static Self;

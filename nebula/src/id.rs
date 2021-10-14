@@ -1,7 +1,3 @@
-use constella::{
-	external::{Description, FieldDescription, StructDescription},
-	Describer, Transformer,
-};
 use serde::{Deserialize, Serialize};
 use std::{
 	convert::AsRef,
@@ -14,10 +10,6 @@ use twilight_model::id::{
 	ApplicationId, AttachmentId, AuditLogEntryId, ChannelId, CommandId, EmojiId, GenericId,
 	GuildId, IntegrationId, InteractionId, MessageId, RoleId, StageId, UserId, WebhookId,
 };
-
-mod key;
-
-pub use self::key::{IdKey, ToIdKey};
 
 #[derive(
 	Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
@@ -38,11 +30,6 @@ impl Id {
 	#[must_use]
 	pub fn as_id<T: private::Sealed + From<Self>>(self) -> T {
 		T::from(self)
-	}
-
-	#[must_use]
-	pub fn as_id_key<T: private::Sealed + Into<Self>>(id: T) -> IdKey {
-		IdKey::from(id.into())
 	}
 }
 
@@ -66,13 +53,6 @@ impl Display for Id {
 	}
 }
 
-impl Describer for Id {
-	fn description() -> Description {
-		let field = FieldDescription::new::<u64>(0, "id", None);
-		Description::Struct(StructDescription::new("Id", &[field]))
-	}
-}
-
 impl From<u64> for Id {
 	fn from(value: u64) -> Self {
 		Self::new(value)
@@ -90,18 +70,6 @@ impl FromStr for Id {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		s.parse::<u64>().map(From::from)
-	}
-}
-
-impl Transformer for Id {
-	type DataType = u64;
-
-	fn transform(&self) -> Self::DataType {
-		self.0
-	}
-
-	fn revert(value: &Self::DataType) -> Self {
-		Self(*value)
 	}
 }
 
