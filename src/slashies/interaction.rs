@@ -2,6 +2,7 @@ use super::Response;
 use crate::{persistence::Database, state::State};
 use miette::{IntoDiagnostic, Result as MietteResult};
 use serde_json::to_string;
+use supernova::model;
 use twilight_http::Error;
 use twilight_model::{
 	application::{
@@ -47,7 +48,10 @@ impl<'a> Interaction<'a> {
 			.get_interaction_original(&self.command.token)
 			.into_diagnostic()?;
 
-		Ok(supernova::model!(@diagnostic get_original_response))
+		// Ok(supernova::model!(@diagnostic get_original_response))
+		model!(get_original_response as Message)
+			.await
+			.into_diagnostic()
 	}
 
 	pub async fn update<T: Send + Sync + Into<CallbackData>>(

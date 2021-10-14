@@ -1,3 +1,4 @@
+use supernova::ModelError;
 use thiserror::Error;
 use twilight_http::{response::DeserializeBodyError, Error as HttpError};
 
@@ -9,6 +10,8 @@ pub enum CacheHelperError {
 	Http(#[from] HttpError),
 	#[error("the requested model was not found")]
 	ModelNotFound,
+	#[error(transparent)]
+	Other(#[from] ModelError),
 }
 
 impl CacheHelperError {

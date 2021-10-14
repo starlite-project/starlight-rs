@@ -1,5 +1,34 @@
 #![deny(clippy::all)]
 #![warn(clippy::pedantic, clippy::nursery, clippy::suspicious)]
+#![allow(clippy::module_name_repetitions, clippy::missing_errors_doc)]
+
+#[doc(hidden)]
+pub mod model;
+
+#[doc(inline)]
+pub use model::{ModelError, ModelInput};
+
+mod private {
+	use serde::de::DeserializeOwned;
+	use twilight_model::{
+		channel::{Channel, Message},
+		guild::{Emoji, Member, Role},
+		user::{CurrentUser, User},
+	};
+
+	pub trait Sealed: Sized + DeserializeOwned {}
+
+	impl Sealed for Message {}
+	impl Sealed for Role {}
+	impl Sealed for CurrentUser {}
+	impl Sealed for Emoji {}
+	impl Sealed for User {}
+	impl Sealed for Channel {}
+	impl Sealed for Member {}
+
+	impl<T: Sealed> Sealed for Option<T> {}
+	impl<T: Sealed> Sealed for Vec<T> {}
+}
 
 #[macro_export]
 macro_rules! debug_unreachable {
@@ -16,7 +45,7 @@ macro_rules! debug_unreachable {
 }
 
 #[macro_export]
-macro_rules! model {
+macro_rules! model_old {
 	($request:expr) => {
 		$crate::finish_request!($request, model)
 	};
@@ -104,7 +133,7 @@ macro_rules! cloned {
 mod tests {
 	use std::string::FromUtf8Error;
 
-	use super::{bytes, cloned, debug_unreachable, model, status, text};
+	use super::{bytes, cloned, debug_unreachable, model_old as model, status, text};
 	use thiserror::Error;
 
 	#[derive(Debug, Error, Clone, Copy)]

@@ -2,12 +2,13 @@
 
 use crate::state::State;
 use std::result::Result as StdResult;
+use supernova::ModelError;
 use tracing::{info, instrument};
 use twilight_cache_inmemory::InMemoryCache;
 use twilight_http::Client;
 use twilight_model::{
 	channel::{Channel, Group, GuildChannel, PrivateChannel},
-	guild::Role,
+	guild::{Emoji, Role},
 	id::{ChannelId, EmojiId, GuildId, RoleId, UserId},
 	user::{CurrentUser, User},
 };
@@ -44,13 +45,15 @@ impl<'a> CacheHelper<'a> {
 	}
 
 	#[instrument(level = "info", skip(self))]
-	pub async fn current_user(&self) -> Result<CurrentUser> {
+	pub async fn current_user(&self) -> StdResult<CurrentUser, ModelError> {
 		if let Some(user) = self.cache().current_user() {
 			info!("getting user from cache");
 			Ok(user)
 		} else {
 			info!("getting user from http");
-			Ok(supernova::model!(self.http().current_user()))
+			// Ok(supernova::model!(self.http().current_user()))
+			let future = self.http().current_user();
+			supernova::model!(future as CurrentUser).await
 		}
 	}
 
@@ -66,7 +69,11 @@ impl<'a> CacheHelper<'a> {
 			Ok(role)
 		} else {
 			info!("getting role from http");
-			let models: Vec<Role> = supernova::model!(self.http().roles(guild_id));
+			let models = {
+				let future = self.http().roles(guild_id);
+
+				supernova::model!(future as list of Role).await?
+			};
 			models
 				.iter()
 				.find(|role| role.id == role_id)
@@ -76,7 +83,7 @@ impl<'a> CacheHelper<'a> {
 	}
 
 	#[instrument(level = "info", skip(self))]
-	pub async fn roles(&self, guild_id: GuildId) -> Result<Vec<Role>> {
+	pub async fn roles(&self, guild_id: GuildId) -> StdResult<Vec<Role>, ModelError> {
 		if let Some(role_ids) = self.cache().guild_roles(guild_id) {
 			let mut roles = Vec::with_capacity(role_ids.len());
 			for role_id in role_ids.iter().copied() {
@@ -91,27 +98,34 @@ impl<'a> CacheHelper<'a> {
 				Ok(roles)
 			} else {
 				info!("getting roles from http");
-				Ok(supernova::model!(self.http().roles(guild_id)))
+				let future = self.http().roles(guild_id);
+				supernova::model!(future as list of Role).await
 			}
 		} else {
 			info!("getting roles from http");
-			Ok(supernova::model!(self.http().roles(guild_id)))
+			let future = self.http().roles(guild_id);
+			supernova::model!(future as list of Role).await
 		}
 	}
 
 	#[instrument(level = "info", skip(self))]
-	pub async fn emoji(&self, guild_id: GuildId, emoji_id: EmojiId) -> Result<EmojiHelper> {
+	pub async fn emoji(
+		&self,
+		guild_id: GuildId,
+		emoji_id: EmojiId,
+	) -> StdResult<EmojiHelper, ModelError> {
 		if let Some(emoji) = self.cache().emoji(emoji_id) {
 			info!("getting emoji from cache");
 			Ok(emoji.into())
 		} else {
 			info!("getting emoji from http");
-			Ok(supernova::model!(self.http().emoji(guild_id, emoji_id)).into())
+			let future = self.http().emoji(guild_id, emoji_id);
+			Ok(supernova::model!(future as Emoji).await?.into())
 		}
 	}
 
 	#[instrument(level = "info", skip(self))]
-	pub async fn emojis(&self, guild_id: GuildId) -> Result<Vec<EmojiHelper>> {
+	pub async fn emojis(&self, guild_id: GuildId) -> StdResult<Vec<EmojiHelper>, ModelError> {
 		if let Some(emoji_ids) = self.cache().guild_emojis(guild_id) {
 			let mut emojis = Vec::with_capacity(emoji_ids.len());
 			for emoji_id in emoji_ids.iter().copied() {
@@ -126,28 +140,33 @@ impl<'a> CacheHelper<'a> {
 				Ok(emojis)
 			} else {
 				info!("getting emojis from http");
-				Ok(supernova::model!(self.http().emojis(guild_id))
-					.into_iter()
-					.map(EmojiHelper::from)
-					.collect())
+				let models = {
+					let future = self.http().emojis(guild_id);
+
+					supernova::model!(future as list of Emoji).await?
+				};
+				Ok(models.into_iter().map(Into::into).collect())
 			}
 		} else {
 			info!("getting emojis from http");
-			Ok(supernova::model!(self.http().emojis(guild_id))
-				.into_iter()
-				.map(EmojiHelper::from)
-				.collect())
+			let models = {
+				let future = self.http().emojis(guild_id);
+
+				supernova::model!(future as list of Emoji).await?
+			};
+			Ok(models.into_iter().map(Into::into).collect())
 		}
 	}
 
 	#[instrument(level = "info", skip(self))]
-	pub async fn user(&self, user_id: UserId) -> Result<User> {
+	pub async fn user(&self, user_id: UserId) -> StdResult<User, ModelError> {
 		if let Some(user) = self.cache().user(user_id) {
 			info!("getting user from cache");
 			Ok(user)
 		} else {
 			info!("getting user from http");
-			Ok(supernova::model!(self.http().user(user_id)))
+			let future = self.http().user(user_id);
+			supernova::model!(future as User).await
 		}
 	}
 
@@ -158,7 +177,11 @@ impl<'a> CacheHelper<'a> {
 			Ok(channel)
 		} else {
 			info!("getting guild channel from http");
-			let model: Channel = supernova::model!(self.http().channel(channel_id));
+			let model = {
+				let future = self.http().channel(channel_id);
+
+				supernova::model!(future as Channel).await?
+			};
 			match model {
 				Channel::Guild(guild) => Ok(guild),
 				_ => Err(CacheHelperError::model_not_found()),
@@ -173,7 +196,11 @@ impl<'a> CacheHelper<'a> {
 			Ok(channel)
 		} else {
 			info!("getting private channel from http");
-			let model: Channel = supernova::model!(self.http().channel(channel_id));
+			let model = {
+				let future = self.http().channel(channel_id);
+
+				supernova::model!(future as Channel).await?
+			};
 			match model {
 				Channel::Private(private) => Ok(private),
 				_ => Err(CacheHelperError::model_not_found()),
@@ -188,7 +215,11 @@ impl<'a> CacheHelper<'a> {
 			Ok(channel)
 		} else {
 			info!("getting group channel from http");
-			let model: Channel = supernova::model!(self.http().channel(channel_id));
+			let model = {
+				let future = self.http().channel(channel_id);
+
+				supernova::model!(future as Channel).await?
+			};
 			match model {
 				Channel::Group(group) => Ok(group),
 				_ => Err(CacheHelperError::model_not_found()),
@@ -203,7 +234,14 @@ impl<'a> CacheHelper<'a> {
 			Ok(member.into())
 		} else {
 			info!("getting member from http");
-			Ok(supernova::model!(self.http().guild_member(guild_id, user_id)).into())
+			Ok(self
+				.http()
+				.guild_member(guild_id, user_id)
+				.exec()
+				.await?
+				.model()
+				.await?
+				.into())
 		}
 	}
 
@@ -223,17 +261,21 @@ impl<'a> CacheHelper<'a> {
 				Ok(members)
 			} else {
 				info!("getting members from http");
-				Ok(supernova::model!(self.http().guild_members(guild_id))
-					.into_iter()
-					.map(MemberHelper::from)
-					.collect())
+				let models = {
+					let future = self.http().guild_members(guild_id);
+
+					future.exec().await?.models().await?
+				};
+				Ok(models.into_iter().map(Into::into).collect())
 			}
 		} else {
 			info!("getting members from http");
-			Ok(supernova::model!(self.http().guild_members(guild_id))
-				.into_iter()
-				.map(MemberHelper::from)
-				.collect())
+			let models = {
+				let future = self.http().guild_members(guild_id);
+
+				future.exec().await?.models().await?
+			};
+			Ok(models.into_iter().map(Into::into).collect())
 		}
 	}
 
