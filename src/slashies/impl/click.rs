@@ -54,19 +54,17 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 		if buttons.len() <= 5 {
 			return Ok(vec![buttons.to_vec().build_component()?]);
 		}
-		let mut output = Vec::with_capacity((N / 5) + 1);
+		let mut output: Vec<Component> = Vec::with_capacity((N / 5) + 1);
 
 		for i in 0..=(N / 5) {
 			output.push(
-				ActionRowBuilder::from(
-					buttons
-						.iter()
-						.skip(i * 5)
-						.take(5)
-						.cloned()
-						.collect::<Vec<_>>(),
-				)
-				.build_component()?,
+				buttons
+					.iter()
+					.skip(i * 5)
+					.take(5)
+					.cloned()
+					.collect::<ActionRowBuilder>()
+					.build_component()?,
 			);
 		}
 

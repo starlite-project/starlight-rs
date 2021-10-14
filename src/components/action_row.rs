@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 use super::{BuildError, ButtonBuilder, ComponentBuilder, SelectMenuBuilder};
+use std::iter::FromIterator;
 use twilight_model::application::component::{ActionRow, Button, Component, ComponentType};
 
 #[derive(Debug, Default, Clone, PartialEq, Hash)]
@@ -59,6 +60,12 @@ impl ActionRowBuilder {
 
 		self.clone()
 	}
+
+	pub fn push_button(&mut self, button: Button) -> Self {
+		self.components.push(Component::Button(button));
+
+		self.clone()
+	}
 }
 
 impl ComponentBuilder for ActionRowBuilder {
@@ -92,6 +99,30 @@ impl ComponentBuilder for Vec<Button> {
 
 	fn build_component(self) -> Result<Component, BuildError> {
 		ActionRowBuilder::from(self).build_component()
+	}
+}
+
+impl FromIterator<Component> for ActionRowBuilder {
+	fn from_iter<T: IntoIterator<Item = Component>>(iter: T) -> Self {
+		let mut row = Self::new();
+
+		for component in iter {
+			row.push_component(component);
+		}
+
+		row
+	}
+}
+
+impl FromIterator<Button> for ActionRowBuilder {
+	fn from_iter<T: IntoIterator<Item = Button>>(iter: T) -> Self {
+		let mut row = Self::new();
+
+		for component in iter {
+			row.push_button(component);
+		}
+
+		row
 	}
 }
 
