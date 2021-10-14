@@ -9,14 +9,13 @@ pub mod model;
 pub use model::{ModelError, ModelInput};
 
 mod private {
-	use serde::de::DeserializeOwned;
 	use twilight_model::{
 		channel::{Channel, Message},
 		guild::{Emoji, Member, Role},
 		user::{CurrentUser, User},
 	};
 
-	pub trait Sealed: Sized + DeserializeOwned {}
+	pub trait Sealed {}
 
 	impl Sealed for Message {}
 	impl Sealed for Role {}

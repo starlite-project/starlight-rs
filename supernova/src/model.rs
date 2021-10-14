@@ -1,3 +1,4 @@
+use serde::de::DeserializeOwned;
 use thiserror::Error;
 use twilight_http::{
 	response::{marker::ListBody, DeserializeBodyError, ResponseFuture},
@@ -38,6 +39,6 @@ pub async fn unravel_many<T: ModelInput + Unpin + Send>(
 	Ok(future.await?.models().await?)
 }
 
-pub trait ModelInput: super::private::Sealed {}
+pub trait ModelInput: super::private::Sealed + DeserializeOwned + Sized {}
 
-impl<T: super::private::Sealed> ModelInput for T {}
+impl<T: super::private::Sealed + DeserializeOwned + Sized> ModelInput for T {}
