@@ -102,6 +102,14 @@ impl ComponentBuilder for Vec<Button> {
 	}
 }
 
+impl Extend<Component> for ActionRowBuilder {
+	fn extend<T: IntoIterator<Item = Component>>(&mut self, iter: T) {
+		for elem in iter {
+			self.push_component(elem);
+		}
+	}
+}
+
 impl FromIterator<Component> for ActionRowBuilder {
 	fn from_iter<T: IntoIterator<Item = Component>>(iter: T) -> Self {
 		let mut row = Self::new();
