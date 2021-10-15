@@ -19,6 +19,12 @@ pub use self::id::Id;
 /// The current implementation uses [`box leaking`].
 /// 
 /// [`box leaking`]: std::boxed::Box::leak
+/// 
+/// # Safety
+/// 
+/// The pointer created must be manually dropped, see the [`function-level documentation`] for more details.
+/// 
+/// [`function-level documentation`]: Self::leak#safety
 pub unsafe trait Leak {
 	/// Leaks the value out, causing it to require manual cleanup later on.
 	/// 
