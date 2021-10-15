@@ -1,0 +1,12 @@
+*
+.git/*
+!Cargo.toml
+!Cargo.lock
+!.cargo/*
+!src/*
+!click-derive/*
+!nebula/*
+!supernova/*
+!star-test/*
+!build.rs
+!rust-toolchain.toml
