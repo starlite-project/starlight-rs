@@ -1,7 +1,7 @@
 #![deny(clippy::all, missing_docs)]
 #![warn(clippy::pedantic, clippy::nursery, clippy::suspicious)]
 #![allow(clippy::module_name_repetitions)]
-//! todo
+//! A crate for macros used in the starlight discord bot.
 
 #[doc(hidden)]
 pub mod model;
@@ -30,7 +30,16 @@ mod private {
 	impl<T: Sealed> Sealed for Vec<T> {}
 }
 
-/// todo
+/// A macro for when a branch is unreachable.
+/// 
+/// Under the hood this macro uses [`panic`] in debug builds,
+/// and [`unreachable_unchecked`] in release builds, so extensive testing
+/// should be done to ensure the branch is truly unreachable, as [`UB`]
+/// will happen on release builds if this branch is reached.
+/// 
+/// [`panic`]: std::panic!
+/// [`unreachable_unchecked`]: std::hint::unreachable_unchecked
+/// [`UB`]: std::hint::unreachable_unchecked#safety
 #[macro_export]
 macro_rules! debug_unreachable {
 	() => {
@@ -45,7 +54,21 @@ macro_rules! debug_unreachable {
 	};
 }
 
-/// todo
+/// A macro to get the status for a [`ResponseFuture`].
+/// 
+/// # Usage
+/// 
+/// This macro requires an `async` context.
+/// 
+/// The `@diagnostic` prefix is used when the surrounding context returns a [`MietteResult`],
+/// otherwise the surrounding context needs to return a [`Result<T, E>`] where `E` implements both [`From`]`<`[`HttpError`]`>` and [`From`]`<`[`DeserializeBodyError`]`>`.
+/// 
+/// [`ResponseFuture`]: twilight_http::response::ResponseFuture
+/// [`MietteResult`]: miette::Result
+/// [`Result<T, E>`]: std::result::Result
+/// [`From`]: std::convert::From
+/// [`HttpError`]: twilight_http::Error
+/// [`DeserializeBodyError`]: twilight_http::response::DeserializeBodyError
 #[macro_export]
 macro_rules! status {
 	($request:expr) => {
@@ -56,7 +79,21 @@ macro_rules! status {
 	};
 }
 
-/// todo
+/// A macro used to get the text from a [`ResponseFuture`].
+/// 
+/// # Usage
+/// 
+/// This macro requires an `async` context.
+/// 
+/// The `@diagnostic` prefix is used when the surrounding context returns a [`MietteResult`],
+/// otherwise the surrounding context needs to return a [`Result<T, E>`] where `E` implements both [`From`]`<`[`HttpError`]`>` and [`From`]`<`[`DeserializeBodyError`]`>`.
+/// 
+/// [`ResponseFuture`]: twilight_http::response::ResponseFuture
+/// [`MietteResult`]: miette::Result
+/// [`Result<T, E>`]: std::result::Result
+/// [`From`]: std::convert::From
+/// [`HttpError`]: twilight_http::Error
+/// [`DeserializeBodyError`]: twilight_http::response::DeserializeBodyError
 #[macro_export]
 macro_rules! text {
 	($request:expr) => {
@@ -67,7 +104,22 @@ macro_rules! text {
 	};
 }
 
-/// todo
+/// A macro used to get [`bytes`] from a [`ResponseFuture`].
+/// 
+/// # Usage
+/// 
+/// This macro requires an `async` context.
+/// 
+/// The `@diagnostic` prefix is used when the surrounding context returns a [`MietteResult`],
+/// otherwise the surrounding context needs to return a [`Result<T, E>`] where `E` implements both [`From`]`<`[`HttpError`]`>` and [`From`]`<`[`DeserializeBodyError`]`>`.
+/// 
+/// [`ResponseFuture`]: twilight_http::response::ResponseFuture
+/// [`MietteResult`]: miette::Result
+/// [`Result<T, E>`]: std::result::Result
+/// [`From`]: std::convert::From
+/// [`HttpError`]: twilight_http::Error
+/// [`DeserializeBodyError`]: twilight_http::response::DeserializeBodyError
+/// [`bytes`]: std::vec::Vec
 #[macro_export]
 macro_rules! bytes {
 	($request:expr) => {
@@ -78,7 +130,21 @@ macro_rules! bytes {
 	}
 }
 
-/// todo
+/// A macro used to finish a request, and uses whatever method passed.
+/// 
+/// # Usage
+/// 
+/// This macro requires an `async` context.
+/// 
+/// The `@diagnostic` prefix is used when the surrounding context returns a [`MietteResult`],
+/// otherwise the surrounding context needs to return a [`Result<T, E>`] where `E` implements both [`From`]`<`[`HttpError`]`>` and [`From`]`<`[`DeserializeBodyError`]`>`.
+/// 
+/// [`ResponseFuture`]: twilight_http::response::ResponseFuture
+/// [`MietteResult`]: miette::Result
+/// [`Result<T, E>`]: std::result::Result
+/// [`From`]: std::convert::From
+/// [`HttpError`]: twilight_http::Error
+/// [`DeserializeBodyError`]: twilight_http::response::DeserializeBodyError
 #[macro_export]
 macro_rules! finish_request {
 	($request:expr, status) => {{
@@ -103,7 +169,35 @@ macro_rules! finish_request {
 	}};
 }
 
-/// todo
+/// A macro used to clone all params passed, while still allowing them to be used outside of the macro.
+/// 
+/// This is a workaround for [Rust RFC #2407](https://github.com/rust-lang/rfcs/issues/2407).
+/// 
+/// # Examples
+/// 
+/// ```
+/// # fn main() {
+/// use supernova::cloned;
+/// 
+/// #[derive(Clone)]
+/// struct Person {
+///     name: String,
+///     age: u64
+/// }
+/// 
+/// let bob = Person { name: String::from("Bob"), age: 24 };
+/// 
+/// // Clone bob and pass it into the closure
+/// let print_name = cloned!(bob => move || {
+///     println!("Name: {}", bob.name);
+/// });
+/// 
+/// print_name();
+/// 
+/// // bob is still valid, he hasn't been moved!
+/// println!("Age: {}", bob.age);
+/// 
+/// # }
 #[macro_export]
 macro_rules! cloned {
 	(@param $n:ident) => (

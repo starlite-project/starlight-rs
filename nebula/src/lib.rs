@@ -8,7 +8,7 @@
 )]
 #![deny(clippy::all, missing_docs)]
 #![allow(clippy::module_name_repetitions)]
-//! Crate for utility types used in the starlight discord bot.
+//! A crate for utility types used in the starlight discord bot.
 
 mod id;
 
@@ -21,6 +21,14 @@ pub use self::id::Id;
 /// [`box leaking`]: std::boxed::Box::leak
 pub unsafe trait Leak {
 	/// Leaks the value out, causing it to require manual cleanup later on.
+	/// 
+	/// # Safety
+	/// 
+	/// The struct pointer needs to be held, and manually dropped at the end of the function.
+	/// 
+	/// This can be done by casting the pointer to `*mut T*` and dropping it with [`Box::from_raw`].
+	/// 
+	/// [`Box::from_raw`]: std::boxed::Box::from_raw
 	unsafe fn leak(self) -> &'static Self;
 }
 

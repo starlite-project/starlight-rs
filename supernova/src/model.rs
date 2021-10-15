@@ -41,26 +41,31 @@ pub enum ModelError {
 ///
 /// Implicit deserializing is done by just passing the variable into the macro.
 ///
-/// Implicit deserializing requires assistance to infer the type properly, such as via return type or explicitly typing the variable.
+/// Implicit deserializing requires assistance to infer the type properly,
+/// such as via return type or explicitly typing the variable.
 ///
+/// <br>
+/// 
 /// # Lists
 /// 
 /// If the [`ResponseFuture`] passed has a [`ListBody`], then you must deserialize into a [`Vec`] of items.
 /// 
-/// Deserializing into a [`Vec`] can be done with `as list( of)`
+/// Deserializing into a [`Vec`] can be done with `as list( of)`.
 /// 
 /// [`ResponseFuture`]: twilight_http::response::ResponseFuture
 /// [`ListBody`]: twilight_http::response::marker::ListBody
 /// [`Vec`]: std::vec::Vec
 /// 
+/// <br>
+/// 
 /// # Examples
 /// 
-/// Explicit deserializing a list
+/// Explicit deserializing a list.
 /// ```no_run
 /// use supernova::model;
 /// use twilight_model::{
-/// 	channel::Message,
-/// 	id::{ChannelId, MessageId},
+///     channel::Message,
+///     id::{ChannelId, MessageId},
 /// };
 /// use twilight_http::Client;
 ///
@@ -80,12 +85,12 @@ pub enum ModelError {
 /// # Ok(()) }
 /// ```
 /// 
-/// Implicit deserializing
+/// Implicit deserializing.
 /// ```no_run
 /// use supernova::model;
 /// use twilight_model::{
-/// 	channel::Message,
-/// 	id::{ChannelId, MessageId},
+///     channel::Message,
+///     id::{ChannelId, MessageId},
 /// };
 /// use twilight_http::Client;
 ///
@@ -123,12 +128,14 @@ macro_rules! model {
 	}};
 }
 
+#[doc(hidden)]
 pub async fn unravel<T: ModelInput + Unpin + Send>(
 	future: ResponseFuture<T>,
 ) -> Result<T, ModelError> {
 	Ok(future.await?.model().await?)
 }
 
+#[doc(hidden)]
 pub async fn unravel_many<T: ModelInput + Unpin + Send>(
 	future: ResponseFuture<ListBody<T>>,
 ) -> Result<Vec<T>, ModelError> {
