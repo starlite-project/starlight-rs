@@ -48,8 +48,7 @@ impl<'a> Interaction<'a> {
 			.get_interaction_original(&self.command.token)
 			.into_diagnostic()?;
 
-		// Ok(supernova::model!(@diagnostic get_original_response))
-		model!(get_original_response as Message)
+		model!(get_original_response)
 			.await
 			.into_diagnostic()
 	}

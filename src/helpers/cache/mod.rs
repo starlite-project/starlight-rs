@@ -51,9 +51,8 @@ impl<'a> CacheHelper<'a> {
 			Ok(user)
 		} else {
 			info!("getting user from http");
-			// Ok(supernova::model!(self.http().current_user()))
 			let future = self.http().current_user();
-			supernova::model!(future as CurrentUser).await
+			supernova::model!(future).await
 		}
 	}
 
@@ -72,7 +71,7 @@ impl<'a> CacheHelper<'a> {
 			let models = {
 				let future = self.http().roles(guild_id);
 
-				supernova::model!(future as list of Role).await?
+				supernova::model!(future as list).await?
 			};
 			models
 				.iter()

@@ -1,6 +1,7 @@
-#![deny(clippy::all)]
+#![deny(clippy::all, missing_docs)]
 #![warn(clippy::pedantic, clippy::nursery, clippy::suspicious)]
-#![allow(clippy::module_name_repetitions, clippy::missing_errors_doc)]
+#![allow(clippy::module_name_repetitions)]
+//! todo
 
 #[doc(hidden)]
 pub mod model;
@@ -29,6 +30,7 @@ mod private {
 	impl<T: Sealed> Sealed for Vec<T> {}
 }
 
+/// todo
 #[macro_export]
 macro_rules! debug_unreachable {
 	() => {
@@ -43,6 +45,7 @@ macro_rules! debug_unreachable {
 	};
 }
 
+/// todo
 #[macro_export]
 macro_rules! status {
 	($request:expr) => {
@@ -53,6 +56,7 @@ macro_rules! status {
 	};
 }
 
+/// todo
 #[macro_export]
 macro_rules! text {
 	($request:expr) => {
@@ -63,6 +67,7 @@ macro_rules! text {
 	};
 }
 
+/// todo
 #[macro_export]
 macro_rules! bytes {
 	($request:expr) => {
@@ -73,6 +78,7 @@ macro_rules! bytes {
 	}
 }
 
+/// todo
 #[macro_export]
 macro_rules! finish_request {
 	($request:expr, status) => {{
@@ -97,6 +103,7 @@ macro_rules! finish_request {
 	}};
 }
 
+/// todo
 #[macro_export]
 macro_rules! cloned {
 	(@param $n:ident) => (

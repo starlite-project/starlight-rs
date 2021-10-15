@@ -86,6 +86,6 @@ impl Config {
 			},
 		)?;
 
-		Ok(token.leak())
+		Ok(unsafe { token.leak() })
 	}
 }

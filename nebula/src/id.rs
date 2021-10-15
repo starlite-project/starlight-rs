@@ -11,22 +11,31 @@ use twilight_model::id::{
 	GuildId, IntegrationId, InteractionId, MessageId, RoleId, StageId, UserId, WebhookId,
 };
 
+/// The Id struct for easily converting between different IDs, such as [`ApplicationId`] to [`UserId`].
+/// 
+/// [`ApplicationId`]: twilight_model::id::ApplicationId
+/// [`UserId`]: twilight_model::id::UserId
 #[derive(
 	Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
 )]
 pub struct Id(pub u64);
 
 impl Id {
+	/// Create a new Id from a Snowflake.
 	#[must_use]
 	pub const fn new(value: u64) -> Self {
 		Self(value)
 	}
 
+	/// Get the inner snowflake.
 	#[must_use]
 	pub const fn as_u64(self) -> u64 {
 		self.0
 	}
 
+	/// Converts from an Id to a correct [`id`].
+	/// 
+	/// [`id`]: twilight_model::id
 	#[must_use]
 	pub fn as_id<T: private::Sealed + From<Self>>(self) -> T {
 		T::from(self)

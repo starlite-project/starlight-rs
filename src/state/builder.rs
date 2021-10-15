@@ -132,15 +132,17 @@ impl StateBuilder {
 			.into_diagnostic()?;
 		let standby = Standby::new();
 
-		let components = ClientComponents {
-			cache,
-			cluster,
-			standby,
-			http,
-			runtime: Instant::now(),
-			config,
-		}
-		.leak();
+		let components = unsafe {
+			ClientComponents {
+				cache,
+				cluster,
+				standby,
+				http,
+				runtime: Instant::now(),
+				config,
+			}
+			.leak()
+		};
 
 		Ok((State(components), events))
 	}
