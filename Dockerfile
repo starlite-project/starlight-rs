@@ -18,7 +18,7 @@ COPY ./src ./src
 RUN rm ./target/release/deps/starlight*
 RUN cargo build --release
 
-FROM scratch
+FROM rustlang/rust:nightly-buster-slim
 COPY --from=build /starlight/target/release/starlight .
 
 CMD ["./starlight"]

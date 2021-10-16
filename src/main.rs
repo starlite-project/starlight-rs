@@ -61,7 +61,7 @@ async fn run() -> Result<()> {
 		.try_init()
 		.into_diagnostic()?;
 
-	dotenv::dotenv().into_diagnostic()?;
+	// dotenv::dotenv().into_diagnostic()?;
 
 	let config = Config::new()?;
 
