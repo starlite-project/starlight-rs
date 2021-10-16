@@ -18,7 +18,9 @@ COPY ./src ./src
 RUN rm ./target/release/deps/starlight*
 RUN cargo build --release
 
-FROM rustlang/rust:nightly-buster-slim
+# FROM rustlang/rust:nightly-buster-slim
+FROM ubuntu
 COPY --from=build /starlight/target/release/starlight .
+RUN apt-get update && apt-get install -y ca-certificates
 
 CMD ["./starlight"]
