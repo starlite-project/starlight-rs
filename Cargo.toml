@@ -119,3 +119,4 @@ lto = "fat"
 
 [workspace]
 members = ["./click-derive", "./nebula", "./supernova", "./star-test"]
+exclude = ["./proxy"]

@@ -4,3 +4,4 @@ expanded.rs
 !.example.env
 test/db/*
 cg.dot
+/proxy/target
