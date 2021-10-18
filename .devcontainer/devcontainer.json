@@ -12,6 +12,7 @@
 	"settings": {
 		"editor.formatOnSave": true,
 		"files.autoSave": "off",
+		"terminal.integrated.defaultProfile.linux": "zsh",
 		"terminal.integrated.profiles.linux": {
 			"bash": {
 				"path": "bash",
