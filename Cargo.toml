@@ -30,8 +30,8 @@ version = "0.4.19"
 [dependencies.clap]
 git = "https://github.com/clap-rs/clap.git"
 
-[dependencies.click-derive]
-path = "./click-derive"
+[dependencies.star-derive]
+path = "./star-derive"
 
 [dependencies.miette]
 version = "3.0.1"
@@ -118,5 +118,4 @@ strip = "symbols"
 lto = "fat"
 
 [workspace]
-members = ["./click-derive", "./nebula", "./supernova", "./star-test"]
-exclude = ["./proxy"]
+members = ["./star-derive", "./nebula", "./supernova", "./star-test"]

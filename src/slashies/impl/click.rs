@@ -19,7 +19,7 @@ use twilight_model::{
 	id::UserId,
 };
 
-pub use click_derive::*;
+pub use star_derive::*;
 
 #[derive(Debug, Error, Clone, Copy)]
 #[error("an error occurred getting data from the interaction")]
