@@ -5,8 +5,8 @@ services:
     environment:
       - DISCORD_TOKEN
     image: 'twilightrs/http-proxy:latest'
-    # networks:
-    #   - starlight
+    networks:
+      - starlight
     ports:
       - '3000'
     restart: always
@@ -21,8 +21,8 @@ services:
     image: "starlitepyro/starlight:latest"
     restart: always
     tty: true
-    # networks:
-    #   - starlight
+    networks:
+      - starlight
 
-# networks:
-#   starlight:
+networks:
+  starlight:

@@ -70,7 +70,7 @@ async fn run() -> Result<()> {
 		.intents(Intents::empty())?
 		.http_builder(|builder| {
 			builder
-				.proxy("0.0.0.0:3000".to_string(), true)
+				.proxy("http://proxy:3000".to_string(), true)
 				.ratelimiter(None)
 		})?
 		.cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))?
