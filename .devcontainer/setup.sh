@@ -14,7 +14,8 @@ apt-get install -y \
   cmake \
   apt-transport-https \
   ca-certificates \
-  lsb-release
+  lsb-release \
+  iptables
 
 curl https://sh.rustup.rs -sSf | sh -s -- -y
 rustup install nightly

@@ -9,6 +9,13 @@
 		"ms-azuretools.vscode-docker"
 	],
 	"dockerFile": "Dockerfile",
+	"runArgs": [
+		"--init"
+	],
+	"mounts": [
+		"source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind"
+	],
+	"overrideCommand": false,
 	"settings": {
 		"editor.formatOnSave": true,
 		"files.autoSave": "off",
