@@ -1,5 +1,3 @@
-DEBIAN_FRONTEND="noninteractive"
-TZ="America/New_York"
 apt-get update
 apt-get install -y \
   curl \
