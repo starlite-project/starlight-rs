@@ -14,5 +14,5 @@ services:
             - proxy
         environment:
             - DISCORD_TOKEN
-            - RUST_LOG=debug
+            - GUILD_ID
         tty: true
