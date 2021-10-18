@@ -5,12 +5,33 @@
 		"ms-vsliveshare.vsliveshare",
 		"matklad.rust-analyzer",
 		"serayuzgur.crates",
-		"vadimcn.vscode-lldb"
+		"vadimcn.vscode-lldb",
+		"microsoft.docker"
 	],
 	"dockerFile": "Dockerfile",
 	"settings": {
 		"editor.formatOnSave": true,
-        },
+		"files.autoSave": "off",
+		"terminal.integrated.profiles.linux": {
+			"bash": {
+				"path": "bash",
+				"icon": "terminal-bash"
+			},
+			"zsh": {
+				"path": "/usr/bin/zsh"
+			},
+			"fish": {
+				"path": "fish"
+			},
+			"tmux": {
+				"path": "tmux",
+				"icon": "terminal-tmux"
+			},
+			"pwsh": {
+				"path": "pwsh",
+				"icon": "terminal-powershell"
+			}
+		},
 		"files.exclude": {
 			"**/CODE_OF_CONDUCT.md": true,
 			"**/LICENSE": true
