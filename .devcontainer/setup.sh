@@ -1,3 +1,5 @@
+DEBIAN_FRONTEND="noninteractive"
+TZ="America/New_York"
 apt-get update
 apt-get install -y \
   curl \
@@ -5,6 +7,7 @@ apt-get install -y \
   gnupg2 \
   jq \
   sudo \
+  zsh \
   vim \
   build-essential \
   openssl \
