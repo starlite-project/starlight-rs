@@ -10,26 +10,6 @@
 	"dockerFile": "Dockerfile",
 	"settings": {
 		"editor.formatOnSave": true,
-		// "terminal.integrated.shell.linux": "/usr/bin/zsh",
-        "terminal.integrated.profiles.linux": {
-            "bash": {
-                "path": "bash",
-                "icon": "terminal-bash"
-            },
-            "zsh": {
-                "path": "/usr/bin/zsh"
-            },
-            "fish": {
-                "path": "fish"
-            },
-            "tmux": {
-                "path": "tmux",
-                "icon": "terminal-tmux"
-            },
-            "pwsh": {
-                "path": "pwsh",
-                "icon": "terminal-powershell"
-            }
         },
 		"files.exclude": {
 			"**/CODE_OF_CONDUCT.md": true,
