@@ -23,7 +23,7 @@ RUN cargo build --release
 # Remove the empty source and add ours, to prevent rebuilding of deps on every change
 RUN rm -rf src/
 COPY ./src ./src
-RUN rm ./target/release/deps/starlight*
+# RUN rm ./target/release/deps/starlight*
 RUN cargo build --release
 RUN strip -s ./target/release/starlight
 
