@@ -1,12 +1,12 @@
 {
-    "name": "Starlight Dev Container",
-    "extensions": [
+	"name": "Starlight Dev Container",
+	"extensions": [
 		"cschleiden.vscode-github-actions",
 		"ms-vsliveshare.vsliveshare",
 		"matklad.rust-analyzer",
 		"serayuzgur.crates",
 		"vadimcn.vscode-lldb",
-		"microsoft.docker"
+		"ms-azuretools.vscode-docker"
 	],
 	"dockerFile": "Dockerfile",
 	"settings": {
