@@ -7,13 +7,17 @@ WORKDIR /starlight
 
 RUN apt-get update && apt-get install -y cmake
 
-# Copy everything because we have subcrates within the main crate, and remove the main crate
-COPY ./ ./
-RUN rm -rf src/
-
+# Copy everything because we have subcrates within the main crate
+COPY ./.cargo ./.cargo
+COPY ./nebula ./nebula
+COPY ./star-derive ./star-derive
+COPY ./star-test ./star-test
+COPY ./supernova ./supernova
+COPY ./build.rs ./build.rs
+COPY ./Cargo.lock ./Cargo.lock
+COPY ./Cargo.toml ./Cargo.toml
+COPY ./rust-toolchain.toml ./rust-toolchain.toml
 # Replace our actual main with an empty one, to build deps
-RUN mkdir src/
-RUN echo 'fn main() {}' > ./src/main.rs
 RUN cargo build --release
 
 # Remove the empty source and add ours, to prevent rebuilding of deps on every change
@@ -24,14 +28,15 @@ RUN cargo build --release
 RUN strip -s ./target/release/starlight
 
 # Download certs from an alpine image
-FROM alpine:3.6 as certs
+FROM alpine:3.6 as deps
 
-RUN apk add -U --no-cache ca-certificates
+RUN apk add -U --no-cache ca-certificates dumb-init
 
 # Use slim image for final build
 FROM debian:buster-slim
 COPY --from=build /starlight/target/release/starlight .
-COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=deps /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=deps /usr/bin/dumb-init .
 # RUN apt-get update && apt-get install -y ca-certificates
 
-CMD ["./starlight"]
+CMD ["./dumb-init", "./starlight"]

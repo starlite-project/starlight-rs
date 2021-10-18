@@ -1,11 +1,28 @@
 version: "2.4"
 services:
+  proxy:
+    container_name: http-proxy
+    environment:
+      - DISCORD_TOKEN
+    image: 'twilightrs/http-proxy:latest'
+    # networks:
+    #   - starlight
+    ports:
+      - '3000'
+    restart: always
   starlight:
     build:
-      context: ../
+      context: .
     container_name: starlight
+    depends_on:
+      - proxy
     environment:
       - DISCORD_TOKEN
     image: "starlitepyro/starlight:latest"
     restart: always
     tty: true
+    # networks:
+    #   - starlight
+
+# networks:
+#   starlight:
