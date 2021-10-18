@@ -4,7 +4,7 @@ WORKDIR /home/
 
 COPY . .
 
-ENV TZ=America/New_York
+ENV TZ="America/New_York"
 
 RUN bash ./setup.sh
 
