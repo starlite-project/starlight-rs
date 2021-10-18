@@ -1,1 +1,11 @@
-version: "3.9"
+version: "2.4"
+services:
+  starlight:
+    build:
+      context: ../
+    container_name: starlight
+    environment:
+      - DISCORD_TOKEN
+    image: "starlitepyro/starlight:latest"
+    restart: always
+    tty: true
