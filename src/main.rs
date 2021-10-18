@@ -68,6 +68,11 @@ async fn run() -> Result<()> {
 	let (client, events) = StateBuilder::new()
 		.config(config)?
 		.intents(Intents::empty())?
+		.http_builder(|builder| {
+			builder
+				.proxy("localhost:80".to_string(), true)
+				.ratelimiter(None)
+		})?
 		.cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))?
 		.cache_builder(|builder| builder.resource_types(Commands::needs()))?
 		.build()

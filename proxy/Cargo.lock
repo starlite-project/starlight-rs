@@ -851,25 +851,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "proxy"
-version = "0.1.0"
-dependencies = [
- "dashmap",
- "http",
- "hyper",
- "hyper-rustls",
- "lazy_static",
- "metrics",
- "metrics-exporter-prometheus",
- "miette",
- "thiserror",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "twilight-http",
-]
-
-[[package]]
 name = "quanta"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1153,6 +1134,25 @@ name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
+
+[[package]]
+name = "star-proxy"
+version = "0.1.0"
+dependencies = [
+ "dashmap",
+ "http",
+ "hyper",
+ "hyper-rustls",
+ "lazy_static",
+ "metrics",
+ "metrics-exporter-prometheus",
+ "miette",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "twilight-http",
+]
 
 [[package]]
 name = "supports-color"
