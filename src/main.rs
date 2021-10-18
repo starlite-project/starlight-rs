@@ -1,9 +1,13 @@
+#![feature(string_remove_matches)]
+
 use miette::{IntoDiagnostic, Result};
 use starlight::{
 	slashies::commands::Commands,
 	state::{ClientComponents, Config, StateBuilder},
 	utils::CacheReliant,
 };
+#[cfg(feature = "docker")]
+use std::net::ToSocketAddrs;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use tokio::runtime::Builder;
 use tracing::{event, Level};
@@ -52,7 +56,7 @@ async fn run() -> Result<()> {
 			.add_directive("starlight[act]=debug".parse().into_diagnostic()?)
 			.add_directive("starlight=trace".parse().into_diagnostic()?)
 	} else {
-		log_filter_layer.add_directive("starlight_rs=info".parse().into_diagnostic()?)
+		log_filter_layer.add_directive("starlight=info".parse().into_diagnostic()?)
 	};
 
 	tracing_subscriber::registry()
@@ -61,22 +65,8 @@ async fn run() -> Result<()> {
 		.try_init()
 		.into_diagnostic()?;
 
-	// dotenv::dotenv().into_diagnostic()?;
-
 	let config = Config::new()?;
-
-	let (client, events) = StateBuilder::new()
-		.config(config)?
-		.intents(Intents::empty())?
-		.http_builder(|builder| {
-			builder
-				.proxy("http://0.0.0.0:3000".to_string(), true)
-				.ratelimiter(None)
-		})?
-		.cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))?
-		.cache_builder(|builder| builder.resource_types(Commands::needs()))?
-		.build()
-		.await?;
+	let (client, events) = get_builder(config)?.build().await?;
 
 	client.connect().await?;
 
@@ -114,4 +104,29 @@ async fn run() -> Result<()> {
 	drop(client_ptr);
 
 	Ok(())
+}
+
+#[cfg(feature = "docker")]
+fn get_builder(config: Config) -> Result<StateBuilder> {
+	let host = ("twilight_proxy", 3000)
+		.to_socket_addrs()
+		.into_diagnostic()?
+		.next()
+		.unwrap()
+		.to_string();
+	StateBuilder::new()
+		.config(config)?
+		.intents(Intents::empty())?
+		.cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))?
+		.cache_builder(|builder| builder.resource_types(Commands::needs()))?
+		.http_builder(|builder| builder.proxy(host, true).ratelimiter(None))
+}
+
+#[cfg(not(feature = "docker"))]
+fn get_builder(config: Config) -> Result<StateBuilder> {
+	StateBuilder::new()
+		.config(config)?
+		.intents(Intents::empty())?
+		.cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))?
+		.cache_builder(|builder| builder.resource_types(Commands::needs()))
 }

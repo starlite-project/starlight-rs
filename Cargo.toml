@@ -76,7 +76,7 @@ rev = "05b7a38c952cb4da509054e788283f8fc0f7e47f"
 
 [dependencies.twilight-http]
 default-features = false
-features = ["tracing", "simd-json", "rustls"]
+features = ["tracing", "simd-json", "native"]
 git = "https://github.com/PyroTechniac/twilight.git"
 rev = "05b7a38c952cb4da509054e788283f8fc0f7e47f"
 
@@ -119,3 +119,7 @@ lto = "fat"
 
 [workspace]
 members = ["./star-derive", "./nebula", "./supernova", "./star-test"]
+
+[features]
+default = []
+docker = []
