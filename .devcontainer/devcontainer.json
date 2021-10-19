@@ -7,8 +7,7 @@
 		"serayuzgur.crates",
 		"vadimcn.vscode-lldb",
 		"ms-azuretools.vscode-docker",
-		"be5invis.toml",
-		"redhat.vscode-yaml"
+		"be5invis.toml"
 	],
 	"dockerFile": "Dockerfile",
 	"runArgs": [
