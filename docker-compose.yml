@@ -1,18 +1,35 @@
 version: '2.4'
 services:
-    twilight_proxy:
-        image: twilightrs/http-proxy:latest
-        container_name: http-proxy
-        environment:
-            - DISCORD_TOKEN
-            - HOST=0.0.0.0
-            - PORT=3000
-    starlight:
-        build: .
-        container_name: starlight
-        depends_on:
-            - proxy
-        environment:
-            - DISCORD_TOKEN
-            - GUILD_ID
-        tty: true
+  postgres:
+    image: postgres:alpine
+    container_name: postgres
+    restart: always
+    volumes:
+      - 'postgres-data:/var/lib/postgres/data'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=starlight
+  twilight_proxy:
+    image: twilightrs/http-proxy:latest
+    container_name: twilight_proxy
+    environment:
+      - DISCORD_TOKEN
+      - HOST=0.0.0.0
+      - PORT=3000
+    restart: always
+  starlight:
+    build: .
+    container_name: starlight
+    depends_on:
+      - twilight_proxy
+      - postgres
+    environment:
+      - DISCORD_TOKEN
+      - GUILD_ID
+    tty: true
+    restart: always
+
+volumes:
+  postgres-data:
+    external: true
