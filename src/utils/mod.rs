@@ -1,4 +1,6 @@
 use once_cell::sync::Lazy;
+#[cfg(feature = "docker")]
+use std::{io::Error as IoError, net::ToSocketAddrs};
 use sysinfo::{get_current_pid, Process, System, SystemExt};
 use thiserror::Error;
 use twilight_cache_inmemory::ResourceType;
@@ -6,12 +8,19 @@ use twilight_model::{application::interaction::ApplicationCommand, id::UserId};
 
 pub mod constants;
 
-#[derive(Debug, Error, Clone, Copy)]
+#[derive(Debug, Error)]
+#[allow(missing_copy_implementations)]
 pub enum UtilError {
 	#[error("an error occurred getting the pid")]
 	Pid,
 	#[error("an error occurred getting the current process")]
 	Process,
+	#[cfg(feature = "docker")]
+	// #[error("an error occurred getting the socket")]
+	#[cfg_attr(feature = "docker", error("an erorr occurred getting the socket"))]
+	Address(#[from] IoError),
+	#[error("the {0} was an option value that was None")]
+	OptionWasNone(&'static str),
 }
 
 static mut SYSTEM: Lazy<System> = Lazy::new(System::new);
@@ -40,6 +49,15 @@ pub const fn interaction_author(command: &ApplicationCommand) -> UserId {
 	}
 
 	UserId(0)
+}
+
+#[cfg(feature = "docker")]
+pub fn get_host(host: &str, port: u16) -> Result<String, UtilError> {
+	(host, port)
+		.to_socket_addrs()?
+		.next()
+		.ok_or(UtilError::OptionWasNone("socket"))
+		.map(|socket| socket.to_string())
 }
 
 pub trait CacheReliant {

@@ -2,13 +2,13 @@
 
 use clap::Parser;
 use miette::{IntoDiagnostic, Result};
+#[cfg(feature = "docker")]
+use starlight::utils::get_host;
 use starlight::{
 	slashies::commands::Commands,
 	state::{ClientComponents, Config, StateBuilder},
 	utils::CacheReliant,
 };
-#[cfg(feature = "docker")]
-use std::net::ToSocketAddrs;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use tokio::runtime::Builder;
 use tracing::{event, Level};
@@ -110,12 +110,7 @@ async fn run() -> Result<()> {
 
 #[cfg(feature = "docker")]
 fn get_builder(config: Config) -> Result<StateBuilder> {
-	let host = ("twilight_proxy", 3000)
-		.to_socket_addrs()
-		.into_diagnostic()?
-		.next()
-		.unwrap()
-		.to_string();
+	let host = get_host("twilight_proxy", 3000).into_diagnostic()?;
 	StateBuilder::new()
 		.config(config)?
 		.intents(Intents::empty())?
