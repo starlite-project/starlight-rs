@@ -20,6 +20,7 @@ services:
     restart: always
   starlight:
     build: .
+    image: starlightpyro/starlight:latest
     container_name: starlight
     depends_on:
       - twilight_proxy
