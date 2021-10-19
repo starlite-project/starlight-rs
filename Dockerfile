@@ -19,24 +19,28 @@ COPY ./Cargo.toml ./Cargo.toml
 COPY ./rust-toolchain.toml ./rust-toolchain.toml
 # COPY [^src]* ./
 # Replace our actual main with an empty one, to build deps
-RUN cargo build --features=docker
+RUN cargo build --release --features=docker
 
 # Remove the empty source and add ours, to prevent rebuilding of deps on every change
 RUN rm -rf src/
 COPY ./src ./src
-# RUN rm ./target/release/deps/starlight*
-RUN cargo build --features=docker
-# RUN strip -s ./target/debug/starlight
+
+# Remove old build, and rebuild
+RUN rm ./target/release/deps/starlight*
+RUN cargo build --release --features=docker
+RUN strip -s ./target/release/starlight
 
 # Download certs from an alpine image
 FROM alpine:3.6 as deps
 
-RUN apk add -U --no-cache ca-certificates
+RUN apk add -U --no-cache ca-certificates dumb-init
 
 # Use slim image for final build
 FROM debian:buster-slim
-COPY --from=build /starlight/target/debug/starlight .
+COPY --from=build /starlight/target/release/starlight .
 COPY --from=deps /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-# RUN apt-get update && apt-get install -y ca-certificates
+COPY --from=deps /usr/bin/dumb-init /usr/bin/dumb-init
+
+ENTRYPOINT ["/usr/bin/dumb-init"]
 
 CMD ["./starlight"]

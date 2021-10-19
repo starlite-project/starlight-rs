@@ -34,8 +34,8 @@ git = "https://github.com/clap-rs/clap.git"
 path = "./star-derive"
 
 [dependencies.miette]
-version = "3.0.1"
 features = ["fancy"]
+version = "3.0.1"
 
 [dependencies.nebula]
 path = "./nebula"
