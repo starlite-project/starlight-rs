@@ -1,5 +1,6 @@
 #![feature(string_remove_matches)]
 
+use clap::Parser;
 use miette::{IntoDiagnostic, Result};
 use starlight::{
 	slashies::commands::Commands,
@@ -65,7 +66,8 @@ async fn run() -> Result<()> {
 		.try_init()
 		.into_diagnostic()?;
 
-	let config = Config::new()?;
+	// let config = Config::new()?
+	let config = Config::parse();
 	let (client, events) = get_builder(config)?.build().await?;
 
 	client.connect().await?;

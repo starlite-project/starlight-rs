@@ -1,21 +1,38 @@
+use clap::Parser;
 use clap::{crate_authors, crate_description, crate_license, crate_name, crate_version, App, Arg};
 use miette::{IntoDiagnostic, Result};
 use nebula::Id;
 use nebula::Leak;
 use serde::{Deserialize, Serialize};
-use std::{env, ffi::OsStr, fs, path::PathBuf};
-use tracing::{event, instrument, Level};
+use std::env;
+use tracing::instrument;
 use twilight_model::id::GuildId;
 
 const REMOVE_SLASH_COMMANDS_KEY: &str = "remove-slash-commands";
 const GUILD_ID_KEY: &str = "guild-id";
 
+static mut TOKEN: Option<&'static str> = None;
+
+fn parse_guild_id(value: &str) -> Result<GuildId, &'static str> {
+	if let Ok(snowflake) = value.parse() {
+		Ok(GuildId(snowflake))
+	} else {
+		Err("expected valid u64")
+	}
+}
+
 #[allow(clippy::unsafe_derive_deserialize)]
-#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize, Parser)]
+#[clap(author, about, version)]
 pub struct Config {
+	/// The Guild ID to set slash commands in, used for testing
+	#[clap(long, short, env = "GUILD_ID", parse(try_from_str = parse_guild_id))]
 	pub guild_id: Option<GuildId>,
+	/// Whether or not to remove all set slash commands, will use the [`guild_id`] if it's set
+	///
+	/// [`guild_id`]: Self::guild_id
+	#[clap(long, parse(from_flag))]
 	pub remove_slash_commands: bool,
-	pub token: &'static str,
 }
 
 impl Config {
@@ -45,17 +62,15 @@ impl Config {
 		};
 
 		let remove_slash_commands = matches.is_present(REMOVE_SLASH_COMMANDS_KEY);
-		let token = Self::get_token()?;
 
 		Ok(Self {
 			guild_id,
 			remove_slash_commands,
-			token,
 		})
 	}
 
-	pub fn get_user_id(self) -> Result<Id> {
-		let first_part_of_token = self.token.split('.').next().unwrap_or_default();
+	pub fn application_id() -> Result<Id> {
+		let first_part_of_token = Self::token()?.split('.').next().unwrap_or_default();
 
 		let decoded = base64::decode(first_part_of_token).unwrap();
 
@@ -68,24 +83,34 @@ impl Config {
 
 	#[instrument]
 	#[allow(clippy::let_unit_value)]
-	fn get_token() -> Result<&'static str> {
-		let token = env::var_os("CREDENTIALS_DIRECTORY").map_or_else(
-			|| {
-				event!(
-					Level::WARN,
-					"falling back to `DISCORD_TOKEN` environment variable"
-				);
-				env::var("DISCORD_TOKEN").into_diagnostic()
-			},
-			|credential_dir| {
-				event!(Level::INFO, "using systemd credential storage");
-				let path = [&credential_dir, OsStr::new("token")]
-					.iter()
-					.collect::<PathBuf>();
-				fs::read_to_string(path).into_diagnostic()
-			},
-		)?;
+	pub fn token() -> Result<&'static str> {
+		// let token = env::var_os("CREDENTIALS_DIRECTORY").map_or_else(
+		// 	|| {
+		// 		event!(
+		// 			Level::WARN,
+		// 			"falling back to `DISCORD_TOKEN` environment variable"
+		// 		);
+		// 		env::var("DISCORD_TOKEN").into_diagnostic()
+		// 	},
+		// 	|credential_dir| {
+		// 		event!(Level::INFO, "using systemd credential storage");
+		// 		let path = [&credential_dir, OsStr::new("token")]
+		// 			.iter()
+		// 			.collect::<PathBuf>();
+		// 		fs::read_to_string(path).into_diagnostic()
+		// 	},
+		// )?;
 
-		Ok(unsafe { token.leak() })
+		// Ok(unsafe { token.leak() })
+		if let Some(token) = unsafe { TOKEN } {
+			Ok(token)
+		} else {
+			let token = env::var("DISCORD_TOKEN").into_diagnostic()?;
+			unsafe {
+				let leaked: &'static str = token.leak();
+				TOKEN = Some(leaked);
+				Ok(leaked)
+			}
+		}
 	}
 }

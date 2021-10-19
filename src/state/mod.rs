@@ -1,7 +1,5 @@
 #![allow(dead_code)]
-use crate::{
-	slashies::{commands::get_slashies, interaction::Interaction},
-};
+use crate::slashies::{commands::get_slashies, interaction::Interaction};
 use futures::StreamExt;
 use miette::{IntoDiagnostic, Result};
 use std::ops::Deref;
@@ -24,7 +22,8 @@ pub struct State(pub &'static ClientComponents);
 
 impl State {
 	pub async fn connect(self) -> Result<()> {
-		let id = self.0.config.get_user_id()?.into();
+		// let id = self.0.config.get_user_id()?.into();
+		let id = Config::application_id()?.as_id();
 		self.http.set_application_id(id);
 
 		if self.0.config.remove_slash_commands {

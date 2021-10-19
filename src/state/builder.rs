@@ -64,12 +64,12 @@ impl StateBuilder {
 			.ok_or(StateBuilderError::Intents)
 			.into_diagnostic()
 			.context("need intents to build cluster")?;
-		let token = self
-			.config
-			.ok_or(StateBuilderError::Config)
-			.into_diagnostic()
-			.context("need config to build cluster")?
-			.token;
+		// let token = self
+		// 	.config
+		// 	.ok_or(StateBuilderError::Config)
+		// 	.into_diagnostic()
+		// 	.context("need config to build cluster")?
+		let token = Config::token()?;
 
 		let cluster = cluster_fn((token, intents).into());
 
@@ -93,12 +93,13 @@ impl StateBuilder {
 	where
 		F: FnOnce(HttpBuilder) -> HttpBuilder,
 	{
-		let token = self
-			.config
-			.ok_or(StateBuilderError::Config)
-			.into_diagnostic()
-			.context("need config to build http")?
-			.token;
+		// let token = self
+		// 	.config
+		// 	.ok_or(StateBuilderError::Config)
+		// 	.into_diagnostic()
+		// 	.context("need config to build http")?
+		// 	.token;
+		let token = Config::token()?;
 		let http_builder = self.http.map_or_else(
 			move || HttpBuilder::new().token(token.to_owned()),
 			|builder| builder,
@@ -112,7 +113,7 @@ impl StateBuilder {
 
 	pub async fn build(self) -> Result<(State, Events)> {
 		let config = self.config.unwrap_or_default();
-		let token = config.token.to_owned();
+		let token = Config::token()?.to_owned();
 		let http_builder = self
 			.http
 			.unwrap_or_else(cloned!((token) => move || HttpBuilder::new().token(token)));
