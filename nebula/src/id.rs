@@ -12,7 +12,7 @@ use twilight_model::id::{
 };
 
 /// The Id struct for easily converting between different IDs, such as [`ApplicationId`] to [`UserId`].
-/// 
+///
 /// [`ApplicationId`]: twilight_model::id::ApplicationId
 /// [`UserId`]: twilight_model::id::UserId
 #[derive(
@@ -34,7 +34,7 @@ impl Id {
 	}
 
 	/// Converts from an Id to a correct [`id`].
-	/// 
+	///
 	/// [`id`]: twilight_model::id
 	#[must_use]
 	pub fn as_id<T: private::Sealed + From<Self>>(self) -> T {

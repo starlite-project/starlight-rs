@@ -45,21 +45,21 @@ pub enum ModelError {
 /// such as via return type or explicitly typing the variable.
 ///
 /// <br>
-/// 
+///
 /// # Lists
-/// 
+///
 /// If the [`ResponseFuture`] passed has a [`ListBody`], then you must deserialize into a [`Vec`] of items.
-/// 
+///
 /// Deserializing into a [`Vec`] can be done with `as list( of)`.
-/// 
+///
 /// [`ResponseFuture`]: twilight_http::response::ResponseFuture
 /// [`ListBody`]: twilight_http::response::marker::ListBody
 /// [`Vec`]: std::vec::Vec
-/// 
+///
 /// <br>
-/// 
+///
 /// # Examples
-/// 
+///
 /// Explicit deserializing a list.
 /// ```no_run
 /// use supernova::model;
@@ -77,14 +77,14 @@ pub enum ModelError {
 /// let client = get_client();
 ///
 /// let message_future = client.channel_messages(ChannelId(123));
-/// 
+///
 /// let messages = model!(message_future as list of Message).await?;
-/// 
+///
 /// assert!(!messages.is_empty());
 ///
 /// # Ok(()) }
 /// ```
-/// 
+///
 /// Implicit deserializing.
 /// ```no_run
 /// use supernova::model;
@@ -99,13 +99,13 @@ pub enum ModelError {
 /// # }
 /// # #[tokio::main(flavor = "current_thread")] async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let client = get_client();
-/// 
+///
 /// let message_future = client.message(ChannelId(456), MessageId(789));
-/// 
+///
 /// let message: Message = model!(message_future).await?;
-/// 
+///
 /// assert_eq!(message.content, String::from("Hello, world!"));
-/// 
+///
 /// # Ok(()) }
 /// ```
 #[macro_export]

@@ -1,5 +1,5 @@
 use super::Response;
-use crate::{ state::State};
+use crate::state::State;
 use miette::{IntoDiagnostic, Result as MietteResult};
 use serde_json::to_string;
 use supernova::model;
@@ -48,9 +48,7 @@ impl<'a> Interaction<'a> {
 			.get_interaction_original(&self.command.token)
 			.into_diagnostic()?;
 
-		model!(get_original_response)
-			.await
-			.into_diagnostic()
+		model!(get_original_response).await.into_diagnostic()
 	}
 
 	pub async fn update<T: Send + Sync + Into<CallbackData>>(

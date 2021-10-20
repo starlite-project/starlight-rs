@@ -25,6 +25,7 @@
 )]
 
 pub mod components;
+pub mod database;
 pub mod helpers;
 pub mod slashies;
 pub mod state;

@@ -55,6 +55,6 @@ impl Commands {
 
 impl CacheReliant for Commands {
 	fn needs() -> ResourceType {
-		Info::needs() |  Stats::needs()
+		Info::needs() | Stats::needs()
 	}
 }

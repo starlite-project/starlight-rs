@@ -82,11 +82,8 @@ mod internal {
 		clippy::wildcard_imports,
 		clippy::unused_async
 	)]
-	use crate::{
-		slashies,
-		state::State,
-	};
-	use miette::{ Result};
+	use crate::{slashies, state::State};
+	use miette::Result;
 	use tracing::{event, Level};
 	use twilight_model::{
 		application::interaction::Interaction,
