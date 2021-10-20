@@ -1,15 +1,11 @@
 version: '2.4'
 services:
   postgres:
-    image: postgres:alpine
+    image: starlightpyro/postgres:latest
     container_name: postgres
     restart: always
     volumes:
       - 'postgres-data:/var/lib/postgres/data'
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=starlight
   twilight_proxy:
     image: twilightrs/http-proxy:latest
     container_name: twilight_proxy
