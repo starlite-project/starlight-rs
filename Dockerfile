@@ -5,7 +5,8 @@ FROM rustlang/rust:nightly-buster-slim as build
 RUN USER=root cargo new --bin starlight
 WORKDIR /starlight
 
-RUN apt-get update && apt-get install -y cmake pkg-config openssl libssl-dev
+# Install needed deps 
+RUN apt-get update && apt-get install -y cmake
 
 # Copy everything because we have subcrates within the main crate
 COPY ./.cargo ./.cargo
@@ -17,8 +18,9 @@ COPY ./build.rs ./build.rs
 COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
 COPY ./rust-toolchain.toml ./rust-toolchain.toml
-# COPY [^src]* ./
-# Replace our actual main with an empty one, to build deps
+
+
+# Build the empty ./src, which contains the default main.rs from cargo new
 RUN cargo build --release --features=docker
 
 # Remove the empty source and add ours, to prevent rebuilding of deps on every change
