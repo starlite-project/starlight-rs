@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y cmake
 COPY ./.cargo ./.cargo
 COPY ./nebula ./nebula
 COPY ./star-derive ./star-derive
-COPY ./star-test ./star-test
 COPY ./supernova ./supernova
 COPY ./build.rs ./build.rs
 COPY ./Cargo.lock ./Cargo.lock

@@ -3,6 +3,7 @@ pub mod guild;
 #[doc(inline)]
 pub use self::guild::GuildSettings;
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! make_model {
     () => {
