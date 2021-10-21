@@ -281,7 +281,7 @@ set -e
 if [ -d "/run/systemd/system" ]; then
     exec /bin/systemctl/systemctl "$@"
 else
-    echo '\n"systemd" is not running in this container due to its overhead.\nUse the "service" command to start services intead. e.g.: \n\nservice --status-all'
+    echo '\n"systemd" is not running in this container due to its overhead.\nUse the "service" command to start services instead. e.g.: \n\nservice --status-all'
 fi
 EOF
 chmod +x /usr/local/bin/systemctl
@@ -341,7 +341,7 @@ omb_readme="$(cat \
 "Oh My Bash!" has been removed from this image in favor of a simple shell prompt. If you 
 still wish to use it, remove "~/.oh-my-bash" and install it from: https://github.com/ohmybash/oh-my-bash
 You may also want to consider "Bash-it" as an alternative: https://github.com/bash-it/bash-it
-See here for infomation on adding it to your image or dotfiles: https://aka.ms/codespaces/omb-remove
+See here for information on adding it to your image or dotfiles: https://aka.ms/codespaces/omb-remove
 EOF
 )"
 omb_stub="$(cat \
