@@ -40,6 +40,11 @@ version = "3.0.1"
 [dependencies.nebula]
 path = "./nebula"
 
+[dependencies.sea-orm]
+version = "0.3"
+default-features = false
+features = ["sqlx-postgres", "runtime-tokio-rustls", "macros", "debug-print"]
+
 [dependencies.serde]
 default-features = false
 features = ["derive"]

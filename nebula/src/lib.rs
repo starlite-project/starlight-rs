@@ -24,7 +24,7 @@ pub use self::id::Id;
 ///
 /// The pointer created must be manually dropped, see the [`function-level documentation`] for more details.
 ///
-/// [`function-level documentation`]: Self::leak#safety
+/// [`function-level documentation`]: Self::leak
 pub unsafe trait Leak {
 	/// Leaks the value out, causing it to require manual cleanup later on.
 	///
