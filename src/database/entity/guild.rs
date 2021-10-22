@@ -3,8 +3,7 @@ use crate::make_model;
 use async_trait::async_trait;
 use sea_orm::{
 	entity::prelude::*,
-	sea_query::{ColumnDef, Table},
-	ExecResult, StatementBuilder,
+	sea_query::{ColumnDef, Table, TableCreateStatement, TableDropStatement},
 };
 use serde::{Deserialize, Serialize};
 
@@ -20,17 +19,15 @@ pub struct Model {
 
 #[async_trait]
 impl EntityDefinition for GuildSettings {
-	async fn create_table(conn: &DbConn) -> Result<ExecResult, DbErr> {
-		let table = Table::create()
-		.table(Entity)
-		.to_owned();
-
-		Self::execute(conn, &table).await
+	fn create_statement() -> TableCreateStatement {
+		Table::create()
+			.table(Entity)
+			.if_not_exists()
+			.col(ColumnDef::new(Column::Id).not_null().big_integer())
+			.take()
 	}
 
-	async fn drop_table(conn: &DbConn) -> Result<ExecResult, DbErr> {
-		let table = Table::drop().table(Entity).clone();
-
-        Self::execute(conn, &table).await
+	fn drop_statement() -> TableDropStatement {
+		Table::drop().table(Entity).take()
 	}
 }

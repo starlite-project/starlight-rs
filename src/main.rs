@@ -66,7 +66,6 @@ async fn run() -> Result<()> {
 		.try_init()
 		.into_diagnostic()?;
 
-	// let config = Config::new()?
 	let config = Config::parse();
 	let (client, events) = get_builder(config)?.build().await?;
 
