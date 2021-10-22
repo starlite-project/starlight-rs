@@ -43,7 +43,7 @@ path = "./nebula"
 [dependencies.sea-orm]
 version = "0.3"
 default-features = false
-features = ["sqlx-postgres", "runtime-tokio-rustls", "macros", "debug-print"]
+features = ["runtime-tokio-rustls", "macros", "debug-print"]
 
 [dependencies.serde]
 default-features = false
@@ -126,5 +126,5 @@ lto = "fat"
 members = ["./star-derive", "./nebula", "./supernova"]
 
 [features]
-default = []
-docker = []
+default = ["sea-orm/sqlx-sqlite"]
+docker = ["sea-orm/sqlx-postgres"]

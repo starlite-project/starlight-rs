@@ -1,26 +1,44 @@
 pub mod guild;
 
 use async_trait::async_trait;
-use sea_orm::{ConnectionTrait, DbConn, DbErr, ExecResult, Iden, StatementBuilder, sea_query::{TableCreateStatement, TableDropStatement}};
+use sea_orm::{ConnectionTrait, DbConn, DbErr, ExecResult, StatementBuilder,Iden, sea_query::{TableCreateStatement, TableDropStatement}};
 
 #[doc(inline)]
 pub use self::guild::GuildSettings;
 
 #[async_trait]
-pub trait EntityDefinition: Iden + Sized {
-	fn create_statement() -> TableCreateStatement;
+// pub trait TableDefinition: Iden + Sized {
+// 	fn create_statement() -> TableCreateStatement;
 
-	fn drop_statement() -> TableDropStatement;
+// 	fn drop_statement() -> TableDropStatement;
 
-    async fn execute<T: StatementBuilder + Sync>(conn: &DbConn, stmt: &T) -> Result<ExecResult, DbErr> {
-        let builder = conn.get_database_backend();
-        conn.execute(builder.build(stmt)).await
-    }
+//     async fn execute<T: StatementBuilder + Sync>(conn: &DbConn, stmt: &T) -> Result<ExecResult, DbErr> {
+//         let builder = conn.get_database_backend();
+//         conn.execute(builder.build(stmt)).await
+//     }
 
-	async fn create_table(conn: &DbConn) -> Result<ExecResult, DbErr> {
-		Self::execute(conn, &Self::create_statement()).await
+// 	async fn create_table(conn: &DbConn) -> Result<ExecResult, DbErr> {
+// 		Self::execute(conn, &Self::create_statement()).await
+// 	}
+// }
+
+#[async_trait]
+pub trait SchemaDefinition {
+	async fn execute<T: StatementBuilder + Send + Sync>(conn: &DbConn, stmt: &T) -> Result<ExecResult, DbErr> {
+		let builder = conn.get_database_backend();
+		conn.execute(builder.build(stmt)).await
 	}
 }
+
+pub trait CreateTable: SchemaDefinition {
+	fn schema() -> TableCreateStatement;
+}
+
+pub trait DropTable: SchemaDefinition {
+	fn schema() -> TableDropStatement;
+}
+
+impl<T> SchemaDefinition for T where T: Iden + Sized {}
 
 #[doc(hidden)]
 #[macro_export]

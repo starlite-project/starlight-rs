@@ -20,7 +20,7 @@ COPY ./rust-toolchain.toml ./rust-toolchain.toml
 
 
 # Build the empty ./src, which contains the default main.rs from cargo new
-RUN cargo build --release --features=docker
+RUN cargo build --release --features docker
 
 # Remove the empty source and add ours, to prevent rebuilding of deps on every change
 RUN rm -rf src/
@@ -28,7 +28,7 @@ COPY ./src ./src
 
 # Remove old build, and rebuild
 RUN rm ./target/release/deps/starlight*
-RUN cargo build --release --features=docker
+RUN cargo build --release --features docker
 RUN strip -s ./target/release/starlight
 
 # Download certs from an alpine image

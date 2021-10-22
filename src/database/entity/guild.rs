@@ -1,6 +1,5 @@
-use super::EntityDefinition;
+use super::{CreateTable, DropTable};
 use crate::make_model;
-use async_trait::async_trait;
 use sea_orm::{
 	entity::prelude::*,
 	sea_query::{ColumnDef, Table, TableCreateStatement, TableDropStatement},
@@ -12,22 +11,31 @@ make_model!(GuildSettings);
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, DeriveEntityModel)]
 #[sea_orm(table_name = "guilds")]
 pub struct Model {
-	#[sea_orm(primary_key)]
+	#[sea_orm(primary_key, auto_increment = false)]
 	#[serde(skip_deserializing)]
 	pub id: u64,
 }
 
-#[async_trait]
-impl EntityDefinition for GuildSettings {
-	fn create_statement() -> TableCreateStatement {
+impl CreateTable for GuildSettings {
+	fn schema() -> TableCreateStatement {
 		Table::create()
 			.table(Entity)
 			.if_not_exists()
-			.col(ColumnDef::new(Column::Id).not_null().big_integer())
+			.col(
+				ColumnDef::new(Column::Id)
+					.not_null()
+					.big_integer()
+					.primary_key(),
+			)
 			.take()
 	}
+}
 
-	fn drop_statement() -> TableDropStatement {
-		Table::drop().table(Entity).take()
+impl DropTable for GuildSettings {
+	fn schema() -> TableDropStatement {
+		Table::drop()
+		.table(Entity)
+		.if_exists()
+		.take()
 	}
 }
