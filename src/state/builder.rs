@@ -1,3 +1,5 @@
+use crate::database::StarChart;
+
 use super::{ClientComponents, Config, State};
 use miette::{IntoDiagnostic, Result, WrapErr};
 use nebula::Leak;
@@ -20,6 +22,8 @@ pub enum StateBuilderError {
 	Config,
 	#[error("cluster not built")]
 	Cluster,
+	#[error("database url not set")]
+	Database
 }
 
 #[derive(Debug, Default)]
@@ -29,6 +33,7 @@ pub struct StateBuilder {
 	http: Option<HttpBuilder>,
 	intents: Option<Intents>,
 	config: Option<Config>,
+	database_url: Option<String>,
 }
 
 impl StateBuilder {
@@ -40,6 +45,7 @@ impl StateBuilder {
 			http: None,
 			intents: None,
 			config: None,
+			database_url: None,
 		}
 	}
 
@@ -55,6 +61,12 @@ impl StateBuilder {
 		Ok(self)
 	}
 
+	pub fn database_url(mut self, url: impl Into<String>) -> Result<Self> {
+		self.database_url = Some(url.into());
+
+		Ok(self)
+	}
+
 	pub fn cluster_builder<F>(mut self, cluster_fn: F) -> Result<Self>
 	where
 		F: FnOnce(ClusterBuilder) -> ClusterBuilder,
@@ -64,11 +76,6 @@ impl StateBuilder {
 			.ok_or(StateBuilderError::Intents)
 			.into_diagnostic()
 			.context("need intents to build cluster")?;
-		// let token = self
-		// 	.config
-		// 	.ok_or(StateBuilderError::Config)
-		// 	.into_diagnostic()
-		// 	.context("need config to build cluster")?
 		let token = Config::token()?;
 
 		let cluster = cluster_fn((token, intents).into());
@@ -93,12 +100,6 @@ impl StateBuilder {
 	where
 		F: FnOnce(HttpBuilder) -> HttpBuilder,
 	{
-		// let token = self
-		// 	.config
-		// 	.ok_or(StateBuilderError::Config)
-		// 	.into_diagnostic()
-		// 	.context("need config to build http")?
-		// 	.token;
 		let token = Config::token()?;
 		let http_builder = self.http.map_or_else(
 			move || HttpBuilder::new().token(token.to_owned()),
@@ -133,6 +134,12 @@ impl StateBuilder {
 			.into_diagnostic()?;
 		let standby = Standby::new();
 
+		let database = {
+			let database_url: String = self.database_url.ok_or(StateBuilderError::Database).into_diagnostic()?;
+
+			StarChart::new(&database_url).await.into_diagnostic()?
+		};
+
 		let components = unsafe {
 			ClientComponents {
 				cache,
@@ -141,6 +148,7 @@ impl StateBuilder {
 				http,
 				runtime: Instant::now(),
 				config,
+				database,
 			}
 			.leak()
 		};

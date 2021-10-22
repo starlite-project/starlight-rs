@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use crate::slashies::{commands::get_slashies, interaction::Interaction};
+use crate::{database::StarChart, slashies::{commands::get_slashies, interaction::Interaction}};
 use futures::StreamExt;
 use miette::{IntoDiagnostic, Result};
 use std::ops::Deref;
@@ -111,4 +111,5 @@ pub struct ClientComponents {
 	pub standby: Standby,
 	pub runtime: Instant,
 	pub config: Config,
+	pub database: StarChart
 }
