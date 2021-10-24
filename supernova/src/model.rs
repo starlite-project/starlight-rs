@@ -76,7 +76,7 @@ pub enum ModelError {
 /// # #[tokio::main(flavor = "current_thread")] async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let client = get_client();
 ///
-/// let message_future = client.channel_messages(ChannelId(123));
+/// let message_future = client.channel_messages(ChannelId::new(123).expect("non zero"));
 ///
 /// let messages = model!(message_future as list of Message).await?;
 ///
@@ -100,7 +100,7 @@ pub enum ModelError {
 /// # #[tokio::main(flavor = "current_thread")] async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let client = get_client();
 ///
-/// let message_future = client.message(ChannelId(456), MessageId(789));
+/// let message_future = client.message(ChannelId::new(456).expect("non zero"), MessageId::new(789).expect("non zero"));
 ///
 /// let message: Message = model!(message_future).await?;
 ///
