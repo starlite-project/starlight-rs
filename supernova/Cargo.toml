@@ -6,9 +6,9 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-thiserror = "1.0.30"
 miette = "3.0.1"
 serde = "1"
+thiserror = "1.0.30"
 
 [dependencies.twilight-http]
 git = "https://github.com/PyroTechniac/twilight.git"
@@ -19,10 +19,10 @@ git = "https://github.com/PyroTechniac/twilight.git"
 rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
 
 [dev-dependencies.miette]
-version = "3.0.1"
 features = ["fancy"]
+version = "3.0.1"
 
 [dev-dependencies.tokio]
-version = "1"
 default-features = false
 features = ["rt", "macros"]
+version = "1"

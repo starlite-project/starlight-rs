@@ -118,7 +118,7 @@ strip = "symbols"
 lto = "fat"
 
 [workspace]
-members = ["./star-derive", "./nebula", "./supernova"]
+members = ["./star-derive", "./starchart", "./nebula", "./supernova"]
 
 [features]
 default = []

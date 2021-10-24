@@ -1482,6 +1482,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "starchart"
+version = "0.1.0"
+
+[[package]]
 name = "starlight"
 version = "0.1.0"
 dependencies = [
