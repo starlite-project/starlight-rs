@@ -67,42 +67,42 @@ version = "0.2.20"
 [dependencies.twilight-cache-inmemory]
 default-features = false
 git = "https://github.com/PyroTechniac/twilight.git"
-rev = "05b7a38c952cb4da509054e788283f8fc0f7e47f"
+rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
 
 [dependencies.twilight-embed-builder]
 git = "https://github.com/PyroTechniac/twilight.git"
-rev = "05b7a38c952cb4da509054e788283f8fc0f7e47f"
+rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
 
 [dependencies.twilight-gateway]
 default-features = false
 features = ["zlib-simd", "metrics", "rustls", "tracing"]
 git = "https://github.com/PyroTechniac/twilight.git"
-rev = "05b7a38c952cb4da509054e788283f8fc0f7e47f"
+rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
 
 [dependencies.twilight-http]
 default-features = false
 features = ["tracing", "simd-json", "rustls"]
 git = "https://github.com/PyroTechniac/twilight.git"
-rev = "05b7a38c952cb4da509054e788283f8fc0f7e47f"
+rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
 
 [dependencies.twilight-mention]
 git = "https://github.com/PyroTechniac/twilight.git"
-rev = "05b7a38c952cb4da509054e788283f8fc0f7e47f"
+rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
 
 [dependencies.twilight-model]
 git = "https://github.com/PyroTechniac/twilight.git"
-rev = "05b7a38c952cb4da509054e788283f8fc0f7e47f"
+rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
 
 [dependencies.twilight-standby]
 features = ["tracing"]
 git = "https://github.com/PyroTechniac/twilight.git"
-rev = "05b7a38c952cb4da509054e788283f8fc0f7e47f"
+rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
 
 [dependencies.twilight-util]
 default-features = false
 features = ["snowflake"]
 git = "https://github.com/PyroTechniac/twilight.git"
-rev = "05b7a38c952cb4da509054e788283f8fc0f7e47f"
+rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
 
 [dev-dependencies]
 static_assertions = "1.1.0"

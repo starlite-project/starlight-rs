@@ -12,11 +12,11 @@ serde = "1"
 
 [dependencies.twilight-http]
 git = "https://github.com/PyroTechniac/twilight.git"
-rev = "05b7a38c952cb4da509054e788283f8fc0f7e47f"
+rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
 
 [dependencies.twilight-model]
 git = "https://github.com/PyroTechniac/twilight.git"
-rev = "05b7a38c952cb4da509054e788283f8fc0f7e47f"
+rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
 
 [dev-dependencies.miette]
 version = "3.0.1"

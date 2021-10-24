@@ -923,6 +923,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
+name = "leaky-bucket-lite"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4cbc90428928528dc9ad276fe4d50d30aa26b6a148006e0269ef6915357bad16"
+dependencies = [
+ "tokio",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2452,8 +2461,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-cache-inmemory"
-version = "0.6.4"
-source = "git+https://github.com/PyroTechniac/twilight.git?rev=05b7a38c952cb4da509054e788283f8fc0f7e47f#05b7a38c952cb4da509054e788283f8fc0f7e47f"
+version = "0.7.0"
+source = "git+https://github.com/PyroTechniac/twilight.git?rev=31aeb9f2bc79b129384322d42c6cf045e601a547#31aeb9f2bc79b129384322d42c6cf045e601a547"
 dependencies = [
  "bitflags",
  "dashmap",
@@ -2463,22 +2472,22 @@ dependencies = [
 
 [[package]]
 name = "twilight-embed-builder"
-version = "0.6.0"
-source = "git+https://github.com/PyroTechniac/twilight.git?rev=05b7a38c952cb4da509054e788283f8fc0f7e47f#05b7a38c952cb4da509054e788283f8fc0f7e47f"
+version = "0.7.0"
+source = "git+https://github.com/PyroTechniac/twilight.git?rev=31aeb9f2bc79b129384322d42c6cf045e601a547#31aeb9f2bc79b129384322d42c6cf045e601a547"
 dependencies = [
  "twilight-model",
 ]
 
 [[package]]
 name = "twilight-gateway"
-version = "0.6.5"
-source = "git+https://github.com/PyroTechniac/twilight.git?rev=05b7a38c952cb4da509054e788283f8fc0f7e47f#05b7a38c952cb4da509054e788283f8fc0f7e47f"
+version = "0.7.0"
+source = "git+https://github.com/PyroTechniac/twilight.git?rev=31aeb9f2bc79b129384322d42c6cf045e601a547#31aeb9f2bc79b129384322d42c6cf045e601a547"
 dependencies = [
  "bitflags",
  "flate2",
  "futures-util",
+ "leaky-bucket-lite",
  "metrics",
- "once_cell",
  "serde",
  "serde_json",
  "tokio",
@@ -2492,8 +2501,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-gateway-queue"
-version = "0.6.0"
-source = "git+https://github.com/PyroTechniac/twilight.git?rev=05b7a38c952cb4da509054e788283f8fc0f7e47f#05b7a38c952cb4da509054e788283f8fc0f7e47f"
+version = "0.7.0"
+source = "git+https://github.com/PyroTechniac/twilight.git?rev=31aeb9f2bc79b129384322d42c6cf045e601a547#31aeb9f2bc79b129384322d42c6cf045e601a547"
 dependencies = [
  "tokio",
  "tracing",
@@ -2502,8 +2511,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-http"
-version = "0.6.6"
-source = "git+https://github.com/PyroTechniac/twilight.git?rev=05b7a38c952cb4da509054e788283f8fc0f7e47f#05b7a38c952cb4da509054e788283f8fc0f7e47f"
+version = "0.7.0"
+source = "git+https://github.com/PyroTechniac/twilight.git?rev=31aeb9f2bc79b129384322d42c6cf045e601a547#31aeb9f2bc79b129384322d42c6cf045e601a547"
 dependencies = [
  "brotli",
  "hyper",
@@ -2520,16 +2529,16 @@ dependencies = [
 
 [[package]]
 name = "twilight-mention"
-version = "0.6.0"
-source = "git+https://github.com/PyroTechniac/twilight.git?rev=05b7a38c952cb4da509054e788283f8fc0f7e47f#05b7a38c952cb4da509054e788283f8fc0f7e47f"
+version = "0.7.0"
+source = "git+https://github.com/PyroTechniac/twilight.git?rev=31aeb9f2bc79b129384322d42c6cf045e601a547#31aeb9f2bc79b129384322d42c6cf045e601a547"
 dependencies = [
  "twilight-model",
 ]
 
 [[package]]
 name = "twilight-model"
-version = "0.6.5"
-source = "git+https://github.com/PyroTechniac/twilight.git?rev=05b7a38c952cb4da509054e788283f8fc0f7e47f#05b7a38c952cb4da509054e788283f8fc0f7e47f"
+version = "0.7.0"
+source = "git+https://github.com/PyroTechniac/twilight.git?rev=31aeb9f2bc79b129384322d42c6cf045e601a547#31aeb9f2bc79b129384322d42c6cf045e601a547"
 dependencies = [
  "bitflags",
  "serde",
@@ -2540,8 +2549,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-standby"
-version = "0.6.2"
-source = "git+https://github.com/PyroTechniac/twilight.git?rev=05b7a38c952cb4da509054e788283f8fc0f7e47f#05b7a38c952cb4da509054e788283f8fc0f7e47f"
+version = "0.7.0"
+source = "git+https://github.com/PyroTechniac/twilight.git?rev=31aeb9f2bc79b129384322d42c6cf045e601a547#31aeb9f2bc79b129384322d42c6cf045e601a547"
 dependencies = [
  "dashmap",
  "futures-util",
@@ -2552,8 +2561,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-util"
-version = "0.6.2"
-source = "git+https://github.com/PyroTechniac/twilight.git?rev=05b7a38c952cb4da509054e788283f8fc0f7e47f#05b7a38c952cb4da509054e788283f8fc0f7e47f"
+version = "0.7.0"
+source = "git+https://github.com/PyroTechniac/twilight.git?rev=31aeb9f2bc79b129384322d42c6cf045e601a547#31aeb9f2bc79b129384322d42c6cf045e601a547"
 dependencies = [
  "twilight-model",
 ]
