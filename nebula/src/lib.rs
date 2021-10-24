@@ -12,7 +12,7 @@
 
 mod id;
 
-pub use self::id::Id;
+pub use self::id::{ConvertError, Id};
 
 /// Leaks a value, causing it to be a static reference, but requiring manual cleanup.
 ///

@@ -1,58 +1,58 @@
 use serde::{Deserialize, Serialize};
 use std::{
-	convert::AsRef,
 	fmt::{Display, Formatter, Result as FmtResult},
-	num::ParseIntError,
-	ops::Deref,
+	num::{NonZeroU64, ParseIntError},
 	str::FromStr,
 };
+use thiserror::Error;
 use twilight_model::id::{
 	ApplicationId, AttachmentId, AuditLogEntryId, ChannelId, CommandId, EmojiId, GenericId,
 	GuildId, IntegrationId, InteractionId, MessageId, RoleId, StageId, UserId, WebhookId,
 };
 
+/// Error when converting from a [`u64`] to an [`Id`].
+/// 
+/// [`u64`]: prim@u64
+#[derive(Debug, Default, Error, Clone, Copy)]
+#[error("could not convert the u64 to an Id")]
+pub struct ConvertError;
+
 /// The Id struct for easily converting between different IDs, such as [`ApplicationId`] to [`UserId`].
 ///
 /// [`ApplicationId`]: twilight_model::id::ApplicationId
 /// [`UserId`]: twilight_model::id::UserId
-#[derive(
-	Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
-)]
-pub struct Id(pub u64);
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub struct Id(pub NonZeroU64);
 
 impl Id {
-	/// Create a new Id from a Snowflake.
-	#[must_use]
-	pub const fn new(value: u64) -> Self {
-		Self(value)
+	/// Create a new ID from a Snowflake.
+	pub const fn new(n: u64) -> Option<Self> {
+		if let Some(n) = NonZeroU64::new(n) {
+			Some(Id(n))
+		} else {
+			None
+		}
 	}
 
-	/// Get the inner snowflake.
-	#[must_use]
-	pub const fn as_u64(self) -> u64 {
-		self.0
+	/// Create a new ID from a Snowflake, without checking if the ID is non-zero.
+	///
+	/// # Safety
+	///
+	/// The value must not be zero.
+	pub const unsafe fn new_unchecked(n: u64) -> Self {
+		Self(NonZeroU64::new_unchecked(n))
 	}
 
-	/// Converts from an Id to a correct [`id`].
+	/// Get the underlying value of the ID.
+	pub const fn get(self) -> u64 {
+		self.0.get()
+	}
+
+	/// Turns the ID into an appropriate [`id`].
 	///
 	/// [`id`]: twilight_model::id
-	#[must_use]
 	pub fn as_id<T: private::Sealed + From<Self>>(self) -> T {
 		T::from(self)
-	}
-}
-
-impl AsRef<u64> for Id {
-	fn as_ref(&self) -> &u64 {
-		&self.0
-	}
-}
-
-impl Deref for Id {
-	type Target = u64;
-
-	fn deref(&self) -> &Self::Target {
-		&self.0
 	}
 }
 
@@ -62,13 +62,21 @@ impl Display for Id {
 	}
 }
 
-impl From<u64> for Id {
-	fn from(value: u64) -> Self {
-		Self::new(value)
+impl TryFrom<u64> for Id {
+	type Error = ConvertError;
+
+	fn try_from(value: u64) -> Result<Self, Self::Error> {
+		Id::new(value).ok_or(ConvertError)
 	}
 }
 
-impl From<Id> for u64 {
+impl From<NonZeroU64> for Id {
+	fn from(value: NonZeroU64) -> Self {
+		Self(value)
+	}
+}
+
+impl From<Id> for NonZeroU64 {
 	fn from(value: Id) -> Self {
 		value.0
 	}
@@ -78,7 +86,7 @@ impl FromStr for Id {
 	type Err = ParseIntError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		s.parse::<u64>().map(From::from)
+		s.parse::<NonZeroU64>().map(From::from)
 	}
 }
 
