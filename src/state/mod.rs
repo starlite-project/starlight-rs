@@ -114,27 +114,33 @@ pub struct ClientComponents {
 }
 
 impl ClientComponents {
+	#[must_use]
 	pub fn cache(&self) -> &Cache {
 		&*self.cache
 	}
 
+	#[must_use]
 	pub fn cluster(&self) -> &Cluster {
 		&*self.cluster
 	}
 
+	#[must_use]
 	pub fn http(&self) -> &HttpClient {
 		&*self.http
 	}
 
+	#[must_use]
 	pub fn standby(&self) -> &Standby {
 		&*self.standby
 	}
 
-	pub fn runtime(&self) -> Instant {
+	#[must_use]
+	pub const fn runtime(&self) -> Instant {
 		self.runtime
 	}
 
-	pub fn config(&self) -> Config {
+	#[must_use]
+	pub const fn config(&self) -> Config {
 		self.config
 	}
 }
