@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use twilight_cache_inmemory::model::CachedMember;
 use twilight_model::{
+	datetime::Timestamp,
 	guild::Member,
 	id::{GuildId, RoleId, UserId},
 };
@@ -9,11 +10,11 @@ use twilight_model::{
 pub struct MemberHelper {
 	pub deaf: Option<bool>,
 	pub guild_id: GuildId,
-	pub joined_at: Option<String>,
+	pub joined_at: Option<Timestamp>,
 	pub mute: Option<bool>,
 	pub nick: Option<String>,
 	pub pending: bool,
-	pub premium_since: Option<String>,
+	pub premium_since: Option<Timestamp>,
 	pub roles: Vec<RoleId>,
 	pub user_id: UserId,
 }
@@ -54,14 +55,14 @@ impl PartialEq<CachedMember> for MemberHelper {
 			&self.roles,
 			self.user_id,
 		) == (
-			other.deaf,
-			other.joined_at.as_ref(),
-			other.mute,
-			&other.nick,
-			other.pending,
-			other.premium_since.as_ref(),
-			&other.roles,
-			other.user_id,
+			other.deaf(),
+			other.joined_at().as_ref(),
+			other.mute(),
+			&other.nick().map(ToOwned::to_owned),
+			other.pending(),
+			other.premium_since().as_ref(),
+			&other.roles().to_vec(),
+			other.user_id(),
 		)
 	}
 }
@@ -85,15 +86,15 @@ impl From<Member> for MemberHelper {
 impl From<CachedMember> for MemberHelper {
 	fn from(member: CachedMember) -> Self {
 		Self {
-			deaf: member.deaf,
-			guild_id: member.guild_id,
-			joined_at: member.joined_at,
-			mute: member.mute,
-			nick: member.nick,
-			pending: member.pending,
-			premium_since: member.premium_since,
-			roles: member.roles,
-			user_id: member.user_id,
+			deaf: member.deaf(),
+			guild_id: member.guild_id(),
+			joined_at: member.joined_at(),
+			mute: member.mute(),
+			nick: member.nick().map(ToOwned::to_owned),
+			pending: member.pending(),
+			premium_since: member.premium_since(),
+			roles: Vec::from(member.roles()),
+			user_id: member.user_id(),
 		}
 	}
 }

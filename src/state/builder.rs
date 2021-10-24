@@ -1,4 +1,4 @@
-use crate::database::StarChart;
+use std::sync::Arc;
 
 use super::{ClientComponents, Config, State};
 use miette::{IntoDiagnostic, Result, WrapErr};
@@ -12,7 +12,6 @@ use twilight_gateway::{
 	Intents,
 };
 use twilight_http::client::ClientBuilder as HttpBuilder;
-use twilight_standby::Standby;
 
 #[derive(Debug, Error, Clone, Copy)]
 pub enum StateBuilderError {
@@ -22,8 +21,6 @@ pub enum StateBuilderError {
 	Config,
 	#[error("cluster not built")]
 	Cluster,
-	#[error("database url not set")]
-	Database
 }
 
 #[derive(Debug, Default)]
@@ -33,7 +30,6 @@ pub struct StateBuilder {
 	http: Option<HttpBuilder>,
 	intents: Option<Intents>,
 	config: Option<Config>,
-	database_url: Option<String>,
 }
 
 impl StateBuilder {
@@ -45,7 +41,6 @@ impl StateBuilder {
 			http: None,
 			intents: None,
 			config: None,
-			database_url: None,
 		}
 	}
 
@@ -57,12 +52,6 @@ impl StateBuilder {
 
 	pub const fn intents(mut self, intents: Intents) -> Result<Self> {
 		self.intents = Some(intents);
-
-		Ok(self)
-	}
-
-	pub fn database_url(mut self, url: impl Into<String>) -> Result<Self> {
-		self.database_url = Some(url.into());
 
 		Ok(self)
 	}
@@ -125,30 +114,23 @@ impl StateBuilder {
 			.context("Need cluster to build state")?;
 		let cache_builder = self.cache.unwrap_or_default();
 
-		let http = http_builder.token(token).build();
-		let cache = cache_builder.build();
+		let http = Arc::new(http_builder.token(token).build());
+		let cache = Arc::new(cache_builder.build());
 		let (cluster, events) = cluster_builder
-			.http_client(http.clone())
+			.http_client(Arc::clone(&http))
 			.build()
 			.await
 			.into_diagnostic()?;
-		let standby = Standby::new();
-
-		let database = {
-			let database_url: String = self.database_url.ok_or(StateBuilderError::Database).into_diagnostic()?;
-
-			StarChart::new(&database_url).await.into_diagnostic()?
-		};
+		let standby = Arc::default();
 
 		let components = unsafe {
 			ClientComponents {
 				cache,
-				cluster,
+				cluster: Arc::new(cluster),
 				standby,
 				http,
 				runtime: Instant::now(),
 				config,
-				database,
 			}
 			.leak()
 		};

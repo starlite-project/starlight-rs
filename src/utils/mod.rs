@@ -48,7 +48,7 @@ pub const fn interaction_author(command: &ApplicationCommand) -> UserId {
 		return user.id;
 	}
 
-	UserId(0)
+	unsafe { UserId::new_unchecked(1) }
 }
 
 #[cfg(feature = "docker")]

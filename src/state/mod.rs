@@ -1,8 +1,8 @@
 #![allow(dead_code)]
-use crate::{database::StarChart, slashies::{commands::get_slashies, interaction::Interaction}};
+use crate::slashies::{commands::get_slashies, interaction::Interaction};
 use futures::StreamExt;
 use miette::{IntoDiagnostic, Result};
-use std::ops::Deref;
+use std::{ops::Deref, sync::Arc};
 use tokio::time::Instant;
 use tracing::{event, Level};
 use twilight_cache_inmemory::InMemoryCache as Cache;
@@ -105,11 +105,36 @@ impl Deref for State {
 
 #[derive(Debug, Clone)]
 pub struct ClientComponents {
-	pub cache: Cache,
-	pub cluster: Cluster,
-	pub http: HttpClient,
-	pub standby: Standby,
-	pub runtime: Instant,
-	pub config: Config,
-	pub database: StarChart
+	cache: Arc<Cache>,
+	cluster: Arc<Cluster>,
+	http: Arc<HttpClient>,
+	standby: Arc<Standby>,
+	runtime: Instant,
+	config: Config,
+}
+
+impl ClientComponents {
+	pub fn cache(&self) -> &Cache {
+		&*self.cache
+	}
+
+	pub fn cluster(&self) -> &Cluster {
+		&*self.cluster
+	}
+
+	pub fn http(&self) -> &HttpClient {
+		&*self.http
+	}
+
+	pub fn standby(&self) -> &Standby {
+		&*self.standby
+	}
+
+	pub fn runtime(&self) -> Instant {
+		self.runtime
+	}
+
+	pub fn config(&self) -> Config {
+		self.config
+	}
 }

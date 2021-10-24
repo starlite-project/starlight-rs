@@ -53,24 +53,6 @@ impl SlashCommand for Click {
 
 		interaction.response(response).await.into_diagnostic()?;
 
-		// let click_data =
-		// Self::wait_for_click(interaction, interaction_author(interaction.command)).await;
-
-		// let click_data: MessageComponentInteraction = match Self::wait_for_click(
-		// 	interaction,
-		// 	interaction_author(interaction.command),
-		// 	10
-		// )
-		// .await
-		// {
-		// 	Ok(res) => res,
-		// 	Err(_) => {
-		// 		let response =
-		// 			Response::from("Uh oh! button timed out".to_string()).clear_components();
-
-		// 		return interaction.update(response).await;
-		// 	}
-		// };
 		let click_data: MessageComponentInteraction = if let Ok(res) =
 			Self::wait_for_click(interaction, interaction_author(interaction.command), 10).await
 		{

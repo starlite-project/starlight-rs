@@ -11,4 +11,5 @@
     "rust-analyzer.server.extraEnv": {
         "rustflags": "-C target-cpu=native"
     },
+    "rust-analyzer.checkOnSave.command": "clippy"
 }

@@ -56,7 +56,7 @@ impl Config {
 			.get_matches();
 
 		let guild_id = match matches.value_of_t::<u64>(GUILD_ID_KEY) {
-			Ok(g) => Some(g.into()),
+			Ok(g) => GuildId::new(g),
 			Err(e) if e.kind == clap::ErrorKind::ArgumentNotFound => None,
 			Err(e) => e.exit(),
 		};

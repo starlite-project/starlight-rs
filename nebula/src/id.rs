@@ -11,7 +11,7 @@ use twilight_model::id::{
 };
 
 /// Error when converting from a [`u64`] to an [`Id`].
-/// 
+///
 /// [`u64`]: prim@u64
 #[derive(Debug, Default, Error, Clone, Copy)]
 #[error("could not convert the u64 to an Id")]
@@ -22,28 +22,32 @@ pub struct ConvertError;
 /// [`ApplicationId`]: twilight_model::id::ApplicationId
 /// [`UserId`]: twilight_model::id::UserId
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[allow(clippy::unsafe_derive_deserialize)]
 pub struct Id(pub NonZeroU64);
 
 impl Id {
-	/// Create a new ID from a Snowflake.
+	/// Create a new [`Id`] from a Snowflake.
+	#[must_use]
 	pub const fn new(n: u64) -> Option<Self> {
 		if let Some(n) = NonZeroU64::new(n) {
-			Some(Id(n))
+			Some(Self(n))
 		} else {
 			None
 		}
 	}
 
-	/// Create a new ID from a Snowflake, without checking if the ID is non-zero.
+	/// Create a new [`Id`] from a Snowflake, without checking if the value is non-zero.
 	///
 	/// # Safety
 	///
 	/// The value must not be zero.
+	#[must_use]
 	pub const unsafe fn new_unchecked(n: u64) -> Self {
 		Self(NonZeroU64::new_unchecked(n))
 	}
 
 	/// Get the underlying value of the ID.
+	#[must_use]
 	pub const fn get(self) -> u64 {
 		self.0.get()
 	}
@@ -51,6 +55,7 @@ impl Id {
 	/// Turns the ID into an appropriate [`id`].
 	///
 	/// [`id`]: twilight_model::id
+	#[must_use]
 	pub fn as_id<T: private::Sealed + From<Self>>(self) -> T {
 		T::from(self)
 	}
@@ -66,7 +71,7 @@ impl TryFrom<u64> for Id {
 	type Error = ConvertError;
 
 	fn try_from(value: u64) -> Result<Self, Self::Error> {
-		Id::new(value).ok_or(ConvertError)
+		Self::new(value).ok_or(ConvertError)
 	}
 }
 

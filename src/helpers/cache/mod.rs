@@ -36,12 +36,12 @@ impl<'a> CacheHelper<'a> {
 
 	#[must_use]
 	pub fn cache(&self) -> &InMemoryCache {
-		&self.state.cache
+		self.state.cache()
 	}
 
 	#[must_use]
 	pub fn http(&self) -> &Client {
-		&self.state.http
+		self.state.http()
 	}
 
 	#[instrument(level = "info", skip(self))]
@@ -65,7 +65,7 @@ impl<'a> CacheHelper<'a> {
 	pub async fn role(&self, guild_id: GuildId, role_id: RoleId) -> Result<Role> {
 		if let Some(role) = self.cache().role(role_id) {
 			info!("getting role from cache");
-			Ok(role)
+			Ok(role.resource().clone())
 		} else {
 			info!("getting role from http");
 			let models = {
@@ -87,7 +87,7 @@ impl<'a> CacheHelper<'a> {
 			let mut roles = Vec::with_capacity(role_ids.len());
 			for role_id in role_ids.iter().copied() {
 				match self.cache().role(role_id) {
-					Some(role) => roles.push(role),
+					Some(role) => roles.push(role.resource().clone()),
 					// Break so that we don't iterate through all the role IDs if we can't get them all
 					None => break,
 				}
@@ -115,7 +115,7 @@ impl<'a> CacheHelper<'a> {
 	) -> StdResult<EmojiHelper, ModelError> {
 		if let Some(emoji) = self.cache().emoji(emoji_id) {
 			info!("getting emoji from cache");
-			Ok(emoji.into())
+			Ok(emoji.resource().clone().into())
 		} else {
 			info!("getting emoji from http");
 			let future = self.http().emoji(guild_id, emoji_id);
@@ -129,7 +129,7 @@ impl<'a> CacheHelper<'a> {
 			let mut emojis = Vec::with_capacity(emoji_ids.len());
 			for emoji_id in emoji_ids.iter().copied() {
 				match self.cache().emoji(emoji_id) {
-					Some(emoji) => emojis.push(emoji.into()),
+					Some(emoji) => emojis.push(emoji.resource().clone().into()),
 					None => break,
 				}
 			}
@@ -161,7 +161,7 @@ impl<'a> CacheHelper<'a> {
 	pub async fn user(&self, user_id: UserId) -> StdResult<User, ModelError> {
 		if let Some(user) = self.cache().user(user_id) {
 			info!("getting user from cache");
-			Ok(user)
+			Ok(user.value().clone())
 		} else {
 			info!("getting user from http");
 			let future = self.http().user(user_id);
@@ -173,7 +173,7 @@ impl<'a> CacheHelper<'a> {
 	pub async fn guild_channel(&self, channel_id: ChannelId) -> Result<GuildChannel> {
 		if let Some(channel) = self.cache().guild_channel(channel_id) {
 			info!("getting guild channel from cache");
-			Ok(channel)
+			Ok(channel.resource().clone())
 		} else {
 			info!("getting guild channel from http");
 			let model = {
@@ -192,7 +192,7 @@ impl<'a> CacheHelper<'a> {
 	pub async fn private_channel(&self, channel_id: ChannelId) -> Result<PrivateChannel> {
 		if let Some(channel) = self.cache().private_channel(channel_id) {
 			info!("getting private channel from cache");
-			Ok(channel)
+			Ok(channel.value().clone())
 		} else {
 			info!("getting private channel from http");
 			let model = {
@@ -211,7 +211,7 @@ impl<'a> CacheHelper<'a> {
 	pub async fn group_channel(&self, channel_id: ChannelId) -> Result<Group> {
 		if let Some(channel) = self.cache().group(channel_id) {
 			info!("getting group channel from cache");
-			Ok(channel)
+			Ok(channel.value().clone())
 		} else {
 			info!("getting group channel from http");
 			let model = {
@@ -230,7 +230,7 @@ impl<'a> CacheHelper<'a> {
 	pub async fn member(&self, guild_id: GuildId, user_id: UserId) -> Result<MemberHelper> {
 		if let Some(member) = self.cache().member(guild_id, user_id) {
 			info!("getting member from cache");
-			Ok(member.into())
+			Ok(member.value().clone().into())
 		} else {
 			info!("getting member from http");
 			Ok(self
@@ -250,7 +250,7 @@ impl<'a> CacheHelper<'a> {
 			let mut members = Vec::with_capacity(member_ids.len());
 			for member_id in member_ids.iter().copied() {
 				match self.cache().member(guild_id, member_id) {
-					Some(member) => members.push(member.into()),
+					Some(member) => members.push(member.value().clone().into()),
 					None => break,
 				}
 			}

@@ -112,7 +112,7 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 		let message_id = interaction.get_message().await?.id;
 		timeout(
 			Duration::from_secs(timeout_in_secs),
-			interaction.state.standby.wait_for_component(
+			interaction.state.standby().wait_for_component(
 				message_id,
 				move |event: &MessageComponentInteraction| {
 					event.author_id() == Some(user_id)
@@ -133,7 +133,10 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 			if let Event::InteractionCreate(interaction_create) = event {
 				if let DiscordInteraction::MessageComponent(ref button) = interaction_create.0 {
 					if Self::COMPONENT_IDS.contains(&button.data.custom_id.as_str())
-						&& button.author_id().unwrap_or_default() == user_id
+						&& button
+							.author_id()
+							.unwrap_or_else(unsafe { || UserId::new_unchecked(1) })
+							== user_id
 					{
 						return true;
 					}
@@ -145,14 +148,14 @@ pub trait ClickCommand<const N: usize>: SlashCommand {
 		let event = if let Some(guild_id) = interaction.command.guild_id {
 			interaction
 				.state
-				.standby
+				.standby()
 				.wait_for(guild_id, waiter)
 				.await
 				.into_diagnostic()?
 		} else {
 			interaction
 				.state
-				.standby
+				.standby()
 				.wait_for_event(waiter)
 				.await
 				.into_diagnostic()?

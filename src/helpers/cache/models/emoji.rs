@@ -29,12 +29,12 @@ impl PartialEq<Emoji> for EmojiHelper {
 
 impl PartialEq<CachedEmoji> for EmojiHelper {
 	fn eq(&self, other: &CachedEmoji) -> bool {
-		self.id == other.id
-			&& self.animated == other.animated
-			&& self.name == other.name
-			&& self.require_colons == other.require_colons
-			&& self.roles == other.roles
-			&& self.available == other.available
+		self.id == other.id()
+			&& self.animated == other.animated()
+			&& self.name == other.name()
+			&& self.require_colons == other.require_colons()
+			&& self.roles == other.roles()
+			&& self.available == other.available()
 	}
 }
 
@@ -55,13 +55,13 @@ impl From<Emoji> for EmojiHelper {
 impl From<CachedEmoji> for EmojiHelper {
 	fn from(emoji: CachedEmoji) -> Self {
 		Self {
-			id: emoji.id,
-			animated: emoji.animated,
-			name: emoji.name,
-			managed: emoji.managed,
-			require_colons: emoji.require_colons,
-			roles: emoji.roles,
-			available: emoji.available,
+			id: emoji.id(),
+			animated: emoji.animated(),
+			name: emoji.name().to_owned(),
+			managed: emoji.managed(),
+			require_colons: emoji.require_colons(),
+			roles: emoji.roles().to_vec(),
+			available: emoji.available(),
 		}
 	}
 }

@@ -18,9 +18,12 @@ use sysinfo::{get_current_pid, ProcessExt, System, SystemExt};
 use thiserror::Error;
 use twilight_cache_inmemory::ResourceType;
 use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder};
-use twilight_model::application::{
-	command::{Command, CommandType},
-	interaction::ApplicationCommand,
+use twilight_model::{
+	application::{
+		command::{Command, CommandType},
+		interaction::ApplicationCommand,
+	},
+	id::GuildId,
 };
 
 const DOT: &str = "\u{2022}";
@@ -160,13 +163,19 @@ pub struct Stats(pub(super) ApplicationCommand);
 
 impl Stats {
 	fn statistics(interaction: Interaction) -> String {
-		let cache_stats = interaction.state.cache.stats();
+		let cache_stats = interaction.state.cache().stats();
 
 		let channels_size = {
 			let current_guild_count = interaction
 				.state
-				.cache
-				.guild_channels(interaction.command.guild_id.unwrap_or_default())
+				.cache()
+				.guild_channels(
+					interaction
+						.command
+						.guild_id
+						.unwrap_or_else(|| unsafe { GuildId::new_unchecked(1) }),
+				)
+				.map(|r| r.value().clone())
 				.unwrap_or_default()
 				.len();
 
@@ -193,7 +202,7 @@ impl Stats {
 		let system = System::new();
 		let bot_uptime: Uptime = interaction
 			.state
-			.runtime
+			.runtime()
 			.elapsed()
 			.try_into()
 			.into_diagnostic()?;

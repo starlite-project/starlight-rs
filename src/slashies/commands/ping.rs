@@ -34,12 +34,17 @@ impl SlashCommand for Ping {
 		let interaction = state.interaction(&self.0);
 
 		let ping = state
-			.cluster
+			.cluster()
 			.info()
 			.values()
 			.filter_map(|info| info.latency().average())
 			.sum::<Duration>()
-			/ state.cluster.shards().len().try_into().into_diagnostic()?;
+			/ state
+				.cluster()
+				.shards()
+				.len()
+				.try_into()
+				.into_diagnostic()?;
 
 		let response = match ping.as_millis() {
 			0 => Response::from("Pong! Couldn't quite get average latency"),

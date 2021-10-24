@@ -15,6 +15,8 @@ use twilight_model::{
 		command::{BaseCommandOptionData, Command, CommandOption, CommandType},
 		interaction::ApplicationCommand,
 	},
+	datetime::Timestamp,
+	guild::Role,
 	id::UserId,
 	user::{CurrentUser, User},
 };
@@ -58,7 +60,7 @@ impl SlashCommand for Info {
 		}
 	}
 
-	#[allow(clippy::too_many_lines)]
+	#[allow(clippy::too_many_lines, clippy::cast_sign_loss)]
 	async fn run(&self, state: State) -> Result<()> {
 		let interaction = state.interaction(&self.0);
 
@@ -109,13 +111,17 @@ impl SlashCommand for Info {
 			.format(Self::FORMAT_TYPE)
 			.to_string();
 
-		let joined_at_timestamp: Option<String> = member.joined_at.map(|timestamp| {
-			let parsed: DateTime<Utc> = timestamp.parse().expect("failed to parse into datetime");
+		let joined_at_timestamp: Option<String> = member.joined_at.map(|timestamp: Timestamp| {
+			let parsed: DateTime<Utc> = timestamp
+				.iso_8601()
+				.to_string()
+				.parse()
+				.expect("failed to parse into datetime");
 
 			parsed.format(Self::FORMAT_TYPE).to_string()
 		});
 
-		let mut roles = helper
+		let mut roles: Vec<Role> = helper
 			.member_roles(guild_id, user.id)
 			.await
 			.into_diagnostic()?;
@@ -136,7 +142,10 @@ impl SlashCommand for Info {
 					.icon_url(ImageSource::url(user_avatar(&current_user_enum)).into_diagnostic()?),
 			)
 			.field(EmbedFieldBuilder::new("Created At", created_at_formatted))
-			.timestamp(format!("{:?}", Utc::now()));
+			.timestamp(
+				Timestamp::from_micros(Utc::now().timestamp_millis() as u64)
+					.expect("failed to create timestamp (this shouldn't happen)"),
+			);
 
 		let user_color = roles
 			.iter()
@@ -203,10 +212,10 @@ impl<'a> UserOrCurrentUser<'a> {
 		}
 	}
 
-	const fn discriminator(&self) -> &'a String {
+	const fn discriminator(&self) -> u16 {
 		match *self {
-			Self::CurrentUser(user) => &user.discriminator,
-			Self::User(user) => &user.discriminator,
+			Self::CurrentUser(user) => user.discriminator,
+			Self::User(user) => user.discriminator,
 		}
 	}
 }
@@ -228,12 +237,7 @@ fn user_avatar(user: &UserOrCurrentUser) -> String {
 		|| {
 			format!(
 				"https://cdn.discordapp.com/embed/avatars/{}.png",
-				user.discriminator()
-					.chars()
-					.last()
-					.unwrap_or_else(|| supernova::debug_unreachable!())
-					.to_digit(10)
-					.unwrap_or_else(|| supernova::debug_unreachable!())
+				user.discriminator() % 5
 			)
 		},
 		|hash| {

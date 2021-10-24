@@ -87,7 +87,7 @@ mod internal {
 	use tracing::{event, Level};
 	use twilight_model::{
 		application::interaction::Interaction,
-		gateway::{event::shard::*, payload::*},
+		gateway::{event::shard::*, payload::incoming::*},
 	};
 
 	macro_rules! gen_empty_handlers {

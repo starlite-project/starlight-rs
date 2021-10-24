@@ -22,7 +22,7 @@ pub struct Interaction<'a> {
 impl<'a> Interaction<'a> {
 	pub async fn ack(&self) -> Result<(), Error> {
 		self.state
-			.http
+			.http()
 			.interaction_callback(self.command.id, &self.command.token, &Response::ack())
 			.exec()
 			.await?;
@@ -34,7 +34,7 @@ impl<'a> Interaction<'a> {
 		response: T,
 	) -> Result<(), Error> {
 		self.state
-			.http
+			.http()
 			.interaction_callback(self.command.id, &self.command.token, &response.into())
 			.exec()
 			.await?;
@@ -44,7 +44,7 @@ impl<'a> Interaction<'a> {
 	pub async fn get_message(&self) -> MietteResult<Message> {
 		let get_original_response = self
 			.state
-			.http
+			.http()
 			.get_interaction_original(&self.command.token)
 			.into_diagnostic()?;
 
@@ -58,7 +58,7 @@ impl<'a> Interaction<'a> {
 		let callback_data: CallbackData = response.into();
 		let update_interaction = self
 			.state
-			.http
+			.http()
 			.update_interaction_original(&self.command.token)
 			.into_diagnostic()?;
 

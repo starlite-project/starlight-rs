@@ -21,11 +21,11 @@
 	clippy::missing_panics_doc,
 	clippy::module_name_repetitions,
 	clippy::struct_excessive_bools,
-	clippy::suspicious_else_formatting
+	clippy::suspicious_else_formatting,
+	clippy::no_effect_underscore_binding
 )]
 
 pub mod components;
-pub mod database;
 pub mod helpers;
 pub mod slashies;
 pub mod state;
