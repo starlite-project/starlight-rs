@@ -17,7 +17,7 @@ pub enum UtilError {
 	Process,
 	#[cfg(feature = "docker")]
 	// #[error("an error occurred getting the socket")]
-	#[cfg_attr(feature = "docker", error("an erorr occurred getting the socket"))]
+	#[cfg_attr(feature = "docker", error("an error occurred getting the socket"))]
 	Address(#[from] IoError),
 	#[error("the {0} was an option value that was None")]
 	OptionWasNone(&'static str),
