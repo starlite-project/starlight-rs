@@ -1,11 +1,108 @@
-use heed::{flags::Flags, types::SerdeBincode, BytesEncode, Env, EnvOpenOptions, Result};
+use crate::{StarMap, Value};
+use bitflags::bitflags;
+use heed::{flags::Flags, Env, EnvOpenOptions, Result};
 use serde::{Deserialize, Serialize};
 use std::{
 	fmt::{Debug, Formatter, Result as FmtResult},
 	path::Path,
 };
 
-use crate::StarMap;
+bitflags! {
+	/// [`Flags`] to use for LMDB.
+	/// 
+	/// [`Flags`]: heed::flags::Flags
+	#[derive(Serialize, Deserialize)]
+	pub struct LmdbFlags: u32 {
+		#[allow(missing_docs)]
+		const FIXED_MAP = 1;
+		#[allow(missing_docs)]
+		const NO_SUB_DIR = 1 << 1;
+		#[allow(missing_docs)]
+		const NO_SYNC = 1 << 2;
+		#[allow(missing_docs)]
+		const RD_ONLY = 1 << 3;
+		#[allow(missing_docs)]
+		const NO_META_SYNC = 1 << 4;
+		#[allow(missing_docs)]
+		const WRITE_MAP = 1 << 5;
+		#[allow(missing_docs)]
+		const MAP_ASYNC = 1 << 6;
+		#[allow(missing_docs)]
+		const NO_TLS = 1 << 7;
+		#[allow(missing_docs)]
+		const NO_LOCK = 1 << 8;
+		#[allow(missing_docs)]
+		const NO_RD_AHEAD = 1 << 9;
+		#[allow(missing_docs)]
+		const NO_MEM_INIT = 1 << 10;
+	}
+}
+
+impl LmdbFlags {
+	fn to_heed_flags(self) -> Vec<Flags> {
+		if self.is_empty() {
+			return Vec::new();
+		}
+
+		if self.is_all() {
+			return Vec::from([
+				Flags::MdbFixedmap,
+				Flags::MdbNoSubDir,
+				Flags::MdbNoSync,
+				Flags::MdbRdOnly,
+				Flags::MdbNoMetaSync,
+				Flags::MdbWriteMap,
+				Flags::MdbMapAsync,
+				Flags::MdbNoTls,
+				Flags::MdbNoLock,
+				Flags::MdbNoRdAhead,
+				Flags::MdbNoMemInit,
+			]);
+		}
+
+		let mut output = Vec::new();
+		if self.contains(Self::FIXED_MAP) {
+			output.push(Flags::MdbFixedmap);
+		}
+		if self.contains(Self::NO_SUB_DIR) {
+			output.push(Flags::MdbNoSubDir);
+		}
+		if self.contains(Self::NO_SYNC) {
+			output.push(Flags::MdbNoSync);
+		}
+		if self.contains(Self::RD_ONLY) {
+			output.push(Flags::MdbRdOnly);
+		}
+		if self.contains(Self::NO_META_SYNC) {
+			output.push(Flags::MdbNoMetaSync);
+		}
+		if self.contains(Self::WRITE_MAP) {
+			output.push(Flags::MdbWriteMap);
+		}
+		if self.contains(Self::MAP_ASYNC) {
+			output.push(Flags::MdbMapAsync);
+		}
+		if self.contains(Self::NO_TLS) {
+			output.push(Flags::MdbNoTls);
+		}
+		if self.contains(Self::NO_LOCK) {
+			output.push(Flags::MdbNoLock);
+		}
+		if self.contains(Self::NO_RD_AHEAD) {
+			output.push(Flags::MdbNoRdAhead);
+		}
+		if self.contains(Self::NO_MEM_INIT) {
+			output.push(Flags::MdbNoMemInit);
+		}
+		output
+	}
+}
+
+impl Default for LmdbFlags {
+	fn default() -> Self {
+		Self::empty()
+	}
+}
 
 /// A builder used to build a [`StarChart`].
 #[must_use = "the builder has no use if not built"]
@@ -15,7 +112,7 @@ pub struct StarChartBuilder {
 	size: Option<usize>,
 	readers: Option<u32>,
 	dbs: Option<u32>,
-	flags: u32,
+	flags: LmdbFlags,
 }
 
 impl StarChartBuilder {
@@ -25,7 +122,7 @@ impl StarChartBuilder {
 			size: None,
 			readers: None,
 			dbs: None,
-			flags: 0,
+			flags: LmdbFlags::empty(),
 		}
 	}
 
@@ -52,8 +149,8 @@ impl StarChartBuilder {
 	/// # Safety
 	///
 	/// Values must be valid flags
-	pub const unsafe fn flags(mut self, flags: Flags) -> Self {
-		self.flags |= flags as u32;
+	pub fn flags(mut self, flags: LmdbFlags) -> Self {
+		self.flags |= flags;
 		self
 	}
 
@@ -79,6 +176,13 @@ impl StarChartBuilder {
 
 		if let Some(dbs) = self.dbs {
 			env_options.max_dbs(dbs);
+		}
+		let flags = self.flags.to_heed_flags();
+
+		for flag in flags {
+			unsafe {
+				env_options.flag(flag);
+			}
 		}
 
 		let env = env_options.open(path)?;
@@ -113,17 +217,13 @@ impl StarChart {
 
 	/// Gets an existing [`StarMap`] for interacting with a single DB.
 	#[must_use]
-	pub fn get<'a, 'db, K, V>(
-		&self,
-		database_name: Option<&str>,
-	) -> Option<StarMap<K, SerdeBincode<V>>>
+	pub fn get<'a, S>(&'a self, database_name: Option<&str>) -> Option<StarMap<'a, S>>
 	where
-		K: 'static + BytesEncode<'a>,
-		V: 'static + Serialize + Deserialize<'db>,
+		S: Value + 'static,
 	{
 		let db = self.0.open_database(database_name).ok()??;
 
-		Some(StarMap::new(db))
+		Some(StarMap::new(db, &self.0))
 	}
 
 	/// Creates a new [`StarMap`] for interacting with a single DB.
@@ -133,17 +233,13 @@ impl StarChart {
 	/// See [`Error`]
 	///
 	/// [`Error`]: heed::Error
-	pub fn create<'a, 'db, K, V>(
-		&self,
-		database_name: Option<&str>,
-	) -> Result<StarMap<K, SerdeBincode<V>>>
+	pub fn create<'a, S>(&'a self, database_name: Option<&str>) -> Result<StarMap<S>>
 	where
-		K: 'static + BytesEncode<'a>,
-		V: 'static + Serialize + Deserialize<'db>,
+		S: Value + 'static,
 	{
 		let db = self.0.create_database(database_name)?;
 
-		Ok(StarMap::new(db))
+		Ok(StarMap::new(db, &self.0))
 	}
 
 	/// Acquires a DB by name, uses [`StarChart::get`] first, then [`StarChart::create`] if not found.
@@ -153,13 +249,9 @@ impl StarChart {
 	/// See [`Error`]
 	///
 	/// [`Error`]: heed::Error
-	pub fn acquire<'a, 'db, K, V>(
-		&self,
-		database_name: Option<&str>,
-	) -> Result<StarMap<K, SerdeBincode<V>>>
+	pub fn acquire<S>(&self, database_name: Option<&str>) -> Result<StarMap<S>>
 	where
-		K: 'static + BytesEncode<'a>,
-		V: 'static + Serialize + Deserialize<'db>,
+		S: Value + 'static,
 	{
 		self.get(database_name)
 			.map_or_else(|| self.create(database_name), Ok)

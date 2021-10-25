@@ -997,6 +997,7 @@ dependencies = [
 name = "nebula"
 version = "0.1.0"
 dependencies = [
+ "heed-traits",
  "serde",
  "thiserror",
  "twilight-model",
@@ -1585,6 +1586,7 @@ dependencies = [
 name = "starchart"
 version = "0.1.0"
 dependencies = [
+ "bitflags",
  "heed",
  "serde",
 ]
