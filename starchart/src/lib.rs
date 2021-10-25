@@ -1,8 +1,12 @@
-#[cfg(test)]
-mod tests {
-	#[test]
-	fn it_works() {
-		let result = 2 + 2;
-		assert_eq!(result, 4);
-	}
-}
+#![deny(clippy::all, missing_docs)]
+#![warn(clippy::pedantic, clippy::nursery, clippy::suspicious)]
+#![allow(clippy::module_name_repetitions)]
+//! todo
+
+mod chart;
+mod map;
+
+pub use self::{
+	chart::{StarChart, StarChartBuilder},
+	map::StarMap,
+};
