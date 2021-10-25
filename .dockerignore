@@ -7,6 +7,6 @@
 !star-derive/*
 !nebula/*
 !supernova/*
-!star-test/*
+!starchart/*
 !build.rs
 !rust-toolchain.toml
