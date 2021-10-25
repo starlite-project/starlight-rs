@@ -1,8 +1,7 @@
-use crate::Value;
+use crate::{ChartError, Value};
 use heed::{
 	types::{SerdeBincode, SerdeJson},
 	Database, Env,
-	Result
 };
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 
@@ -28,18 +27,44 @@ impl<'a, S: Value> StarMap<'a, S> {
 	}
 
 	/// todo
-	/// 
+	///
 	/// # Errors
-	/// 
+	///
 	/// todo
-	pub fn update(self, value: &S) -> Result<()>{
+	pub fn update(self, value: &S) -> Result<(), ChartError> {
 		let inner = self.0;
 
 		let mut wtxn = self.1.write_txn()?;
 
 		inner.put(&mut wtxn, &value.key(), value)?;
 
+		wtxn.commit()?;
+
 		Ok(())
+	}
+
+	/// todo
+	///
+	/// # Errors
+	///
+	/// todo
+	pub fn update_bulk(self, values: &[S]) -> Result<(), ChartError> {
+		let inner = self.0;
+
+		let mut wtxn = self.1.write_txn()?;
+
+		for value in values {
+			inner.put(&mut wtxn, &value.key(), value)?;
+		}
+
+		wtxn.commit()?;
+
+		Ok(())
+	}
+
+	/// todo
+	pub fn contains(self, key: &S::Key) -> bool {
+		matches!(self.get(key), Some(_))
 	}
 }
 

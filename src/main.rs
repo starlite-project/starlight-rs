@@ -9,7 +9,10 @@ use starlight::{
 	state::{ClientComponents, Config, StateBuilder},
 	utils::CacheReliant,
 };
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::{
+	path::Path,
+	sync::atomic::{AtomicUsize, Ordering},
+};
 use tokio::runtime::Builder;
 use tracing::{event, Level};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
@@ -110,19 +113,19 @@ async fn run() -> Result<()> {
 #[cfg(feature = "docker")]
 fn get_builder(config: Config) -> Result<StateBuilder> {
 	let host = get_host("twilight_proxy", 3000).into_diagnostic()?;
+	shared(config)?.http_builder(|builder| builder.proxy(host, true).ratelimiter(None))
+}
+
+#[cfg(not(feature = "docker"))]
+fn get_builder(config: Config) -> Result<StateBuilder> {
+	shared(config)
+}
+
+fn shared(config: Config) -> Result<StateBuilder> {
 	StateBuilder::new()
 		.config(config)?
 		.intents(Intents::empty())?
 		.cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))?
 		.cache_builder(|builder| builder.resource_types(Commands::needs()))?
-		.http_builder(|builder| builder.proxy(host, true).ratelimiter(None))
-}
-
-#[cfg(not(feature = "docker"))]
-fn get_builder(config: Config) -> Result<StateBuilder> {
-	StateBuilder::new()
-		.config(config)?
-		.intents(Intents::empty())?
-		.cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))?
-		.cache_builder(|builder| builder.resource_types(Commands::needs()))
+		.database_builder(Path::new("./target").join("stardb"), |builder| builder)
 }

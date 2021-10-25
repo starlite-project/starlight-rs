@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use starchart::Key;
 use std::{
 	fmt::{Display, Formatter, Result as FmtResult},
 	num::{NonZeroU64, ParseIntError},
@@ -66,6 +67,8 @@ impl Display for Id {
 		Display::fmt(&self.0, f)
 	}
 }
+
+impl Key for Id {}
 
 impl TryFrom<u64> for Id {
 	type Error = ConvertError;

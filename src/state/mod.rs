@@ -2,6 +2,7 @@
 use crate::slashies::{commands::get_slashies, interaction::Interaction};
 use futures::StreamExt;
 use miette::{IntoDiagnostic, Result};
+use starchart::StarChart;
 use std::{ops::Deref, sync::Arc};
 use tokio::time::Instant;
 use tracing::{event, Level};
@@ -111,6 +112,7 @@ pub struct ClientComponents {
 	standby: Arc<Standby>,
 	runtime: Instant,
 	config: Config,
+	database: StarChart,
 }
 
 impl ClientComponents {
@@ -142,5 +144,10 @@ impl ClientComponents {
 	#[must_use]
 	pub const fn config(&self) -> Config {
 		self.config
+	}
+
+	#[must_use]
+	pub const fn database(&self) -> &StarChart {
+		&self.database
 	}
 }

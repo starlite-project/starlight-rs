@@ -45,6 +45,9 @@ default-features = false
 features = ["derive"]
 version = "1.0.130"
 
+[dependencies.starchart]
+path = "./starchart"
+
 [dependencies.star-utils]
 git = "https://github.com/PyroTechniac/starlight-rs-utils.git"
 

@@ -13,6 +13,9 @@ thiserror = "1"
 features = ["derive"]
 version = "1"
 
+[dependencies.starchart]
+path = "../starchart"
+
 [dependencies.twilight-model]
 git = "https://github.com/PyroTechniac/twilight.git"
 rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"

@@ -643,7 +643,7 @@ dependencies = [
  "heed-traits",
  "heed-types",
  "libc",
- "lmdb-rkv-sys",
+ "mdbx-sys",
  "once_cell",
  "page_size",
  "serde",
@@ -857,17 +857,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lmdb-rkv-sys"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b27470ac25167b3afdfb6af8fcd3bc1be67de50ffbdaf4073378cfded6ae24a5"
-dependencies = [
- "cc",
- "libc",
- "pkg-config",
-]
-
-[[package]]
 name = "log"
 version = "0.4.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -890,6 +879,17 @@ name = "matches"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a3e378b66a060d48947b590737b30a1be76706c8dd7b8ba0f2fe3989c68a853f"
+
+[[package]]
+name = "mdbx-sys"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c95c2ebc939b476d871dcb8d3bd5e6ef07bddabb39e935dbd8a6bffc93dc6dd7"
+dependencies = [
+ "cc",
+ "libc",
+ "pkg-config",
+]
 
 [[package]]
 name = "memchr"
@@ -999,6 +999,7 @@ version = "0.1.0"
 dependencies = [
  "heed-traits",
  "serde",
+ "starchart",
  "thiserror",
  "twilight-model",
 ]
@@ -1589,6 +1590,8 @@ dependencies = [
  "bitflags",
  "heed",
  "serde",
+ "thiserror",
+ "tokio",
 ]
 
 [[package]]
@@ -1610,6 +1613,7 @@ dependencies = [
  "serde_json",
  "star-derive",
  "star-utils",
+ "starchart",
  "static_assertions",
  "supernova",
  "sysinfo",

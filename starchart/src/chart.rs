@@ -1,40 +1,36 @@
-use crate::{StarMap, Value};
+use crate::{ChartError as StarChartError, StarMap, Value};
 use bitflags::bitflags;
-use heed::{flags::Flags, Env, EnvOpenOptions, Result};
+use heed::{flags::Flags, Env, EnvOpenOptions};
 use serde::{Deserialize, Serialize};
 use std::{
 	fmt::{Debug, Formatter, Result as FmtResult},
+	future::Future,
 	path::Path,
 };
+use tokio::fs;
 
 bitflags! {
 	/// [`Flags`] to use for LMDB.
-	/// 
+	///
 	/// [`Flags`]: heed::flags::Flags
 	#[derive(Serialize, Deserialize)]
 	pub struct LmdbFlags: u32 {
 		#[allow(missing_docs)]
-		const FIXED_MAP = 1;
+		const NO_SUB_DIR = 1;
 		#[allow(missing_docs)]
-		const NO_SUB_DIR = 1 << 1;
+		const RD_ONLY = 1 << 1;
 		#[allow(missing_docs)]
-		const NO_SYNC = 1 << 2;
+		const NO_META_SYNC = 1 << 2;
 		#[allow(missing_docs)]
-		const RD_ONLY = 1 << 3;
+		const WRITE_MAP = 1 << 3;
 		#[allow(missing_docs)]
-		const NO_META_SYNC = 1 << 4;
+		const MAP_ASYNC = 1 << 4;
 		#[allow(missing_docs)]
-		const WRITE_MAP = 1 << 5;
+		const NO_TLS = 1 << 5;
 		#[allow(missing_docs)]
-		const MAP_ASYNC = 1 << 6;
+		const NO_RD_AHEAD = 1 << 6;
 		#[allow(missing_docs)]
-		const NO_TLS = 1 << 7;
-		#[allow(missing_docs)]
-		const NO_LOCK = 1 << 8;
-		#[allow(missing_docs)]
-		const NO_RD_AHEAD = 1 << 9;
-		#[allow(missing_docs)]
-		const NO_MEM_INIT = 1 << 10;
+		const NO_MEM_INIT = 1 << 7;
 	}
 }
 
@@ -46,29 +42,20 @@ impl LmdbFlags {
 
 		if self.is_all() {
 			return Vec::from([
-				Flags::MdbFixedmap,
 				Flags::MdbNoSubDir,
-				Flags::MdbNoSync,
 				Flags::MdbRdOnly,
 				Flags::MdbNoMetaSync,
 				Flags::MdbWriteMap,
 				Flags::MdbMapAsync,
 				Flags::MdbNoTls,
-				Flags::MdbNoLock,
 				Flags::MdbNoRdAhead,
 				Flags::MdbNoMemInit,
 			]);
 		}
 
 		let mut output = Vec::new();
-		if self.contains(Self::FIXED_MAP) {
-			output.push(Flags::MdbFixedmap);
-		}
 		if self.contains(Self::NO_SUB_DIR) {
 			output.push(Flags::MdbNoSubDir);
-		}
-		if self.contains(Self::NO_SYNC) {
-			output.push(Flags::MdbNoSync);
 		}
 		if self.contains(Self::RD_ONLY) {
 			output.push(Flags::MdbRdOnly);
@@ -84,9 +71,6 @@ impl LmdbFlags {
 		}
 		if self.contains(Self::NO_TLS) {
 			output.push(Flags::MdbNoTls);
-		}
-		if self.contains(Self::NO_LOCK) {
-			output.push(Flags::MdbNoLock);
 		}
 		if self.contains(Self::NO_RD_AHEAD) {
 			output.push(Flags::MdbNoRdAhead);
@@ -164,7 +148,11 @@ impl StarChartBuilder {
 	///
 	/// [`Error`]: heed::Error
 	#[must_use = "building the starchart has no side effects"]
-	pub fn build<P: AsRef<Path>>(self, path: P) -> Result<StarChart> {
+	pub async fn build<P: AsRef<Path> + Send + Sync>(
+		self,
+		path: P,
+	) -> Result<StarChart, StarChartError> {
+		let path = path.as_ref();
 		let mut env_options = EnvOpenOptions::new();
 		if let Some(map_size) = self.size {
 			env_options.map_size(map_size);
@@ -183,6 +171,10 @@ impl StarChartBuilder {
 			unsafe {
 				env_options.flag(flag);
 			}
+		}
+
+		if fs::read_dir(path).await.is_err() {
+			fs::create_dir_all(path).await?;
 		}
 
 		let env = env_options.open(path)?;
@@ -206,7 +198,12 @@ impl StarChart {
 	/// # Errors
 	///
 	/// See [`StarChartBuilder::build`]
-	pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
+	// pub fn new<P: AsRef<Path>>(path: P) -> Result<Self, StarChartError> {
+	// 	StarChartBuilder::default().build(path)
+	// }
+	pub fn new<P: AsRef<Path> + Send + Sync>(
+		path: P,
+	) -> impl Future<Output = Result<Self, StarChartError>> {
 		StarChartBuilder::default().build(path)
 	}
 
@@ -233,7 +230,10 @@ impl StarChart {
 	/// See [`Error`]
 	///
 	/// [`Error`]: heed::Error
-	pub fn create<'a, S>(&'a self, database_name: Option<&str>) -> Result<StarMap<S>>
+	pub fn create<'a, S>(
+		&'a self,
+		database_name: Option<&str>,
+	) -> Result<StarMap<S>, StarChartError>
 	where
 		S: Value + 'static,
 	{
@@ -249,12 +249,28 @@ impl StarChart {
 	/// See [`Error`]
 	///
 	/// [`Error`]: heed::Error
-	pub fn acquire<S>(&self, database_name: Option<&str>) -> Result<StarMap<S>>
+	pub fn acquire<S>(&self, database_name: Option<&str>) -> Result<StarMap<S>, StarChartError>
 	where
 		S: Value + 'static,
 	{
 		self.get(database_name)
 			.map_or_else(|| self.create(database_name), Ok)
+	}
+
+	/// Ensures a DB exists, uses [`StarChart::acquire`] internally but drops the DB at the end.
+	///
+	/// # Errors
+	///
+	/// See [`Error`]
+	///
+	/// [`Error`]: heed::Error
+	pub fn ensure<S>(&self, database_name: Option<&str>) -> Result<(), StarChartError>
+	where
+		S: Value + 'static,
+	{
+		self.acquire::<S>(database_name)?;
+
+		Ok(())
 	}
 }
 

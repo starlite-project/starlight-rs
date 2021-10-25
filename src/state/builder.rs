@@ -1,8 +1,12 @@
-use std::sync::Arc;
+use std::{
+	path::{Path, PathBuf},
+	sync::Arc,
+};
 
 use super::{ClientComponents, Config, State};
 use miette::{IntoDiagnostic, Result, WrapErr};
 use nebula::Leak;
+use starchart::StarChartBuilder;
 use supernova::cloned;
 use thiserror::Error;
 use tokio::time::Instant;
@@ -21,6 +25,8 @@ pub enum StateBuilderError {
 	Config,
 	#[error("cluster not built")]
 	Cluster,
+	#[error("database url not set")]
+	Database,
 }
 
 #[derive(Debug, Default)]
@@ -30,6 +36,8 @@ pub struct StateBuilder {
 	http: Option<HttpBuilder>,
 	intents: Option<Intents>,
 	config: Option<Config>,
+	database: Option<StarChartBuilder>,
+	database_path: Option<PathBuf>,
 }
 
 impl StateBuilder {
@@ -41,6 +49,8 @@ impl StateBuilder {
 			http: None,
 			intents: None,
 			config: None,
+			database: None,
+			database_path: None,
 		}
 	}
 
@@ -52,6 +62,20 @@ impl StateBuilder {
 
 	pub const fn intents(mut self, intents: Intents) -> Result<Self> {
 		self.intents = Some(intents);
+
+		Ok(self)
+	}
+
+	pub fn database_builder<P, F>(mut self, path: P, database_fn: F) -> Result<Self>
+	where
+		P: AsRef<Path>,
+		F: FnOnce(StarChartBuilder) -> StarChartBuilder,
+	{
+		self.database_path = Some(path.as_ref().to_path_buf());
+
+		let database = database_fn(StarChartBuilder::new());
+
+		self.database = Some(database);
 
 		Ok(self)
 	}
@@ -111,7 +135,7 @@ impl StateBuilder {
 			.cluster
 			.ok_or(StateBuilderError::Cluster)
 			.into_diagnostic()
-			.context("Need cluster to build state")?;
+			.context("need cluster to build state")?;
 		let cache_builder = self.cache.unwrap_or_default();
 
 		let http = Arc::new(http_builder.token(token).build());
@@ -122,6 +146,22 @@ impl StateBuilder {
 			.await
 			.into_diagnostic()?;
 		let standby = Arc::default();
+		let database_builder: StarChartBuilder = self
+			.database
+			.ok_or(StateBuilderError::Database)
+			.into_diagnostic()
+			.context("need database to build state")?;
+		let database_path: PathBuf = self
+			.database_path
+			.ok_or(StateBuilderError::Database)
+			.into_diagnostic()
+			.context("need database url to build state")?;
+
+		let database = database_builder
+			.build(database_path)
+			.await
+			.into_diagnostic()
+			.context("failed to build database")?;
 
 		let components = unsafe {
 			ClientComponents {
@@ -131,6 +171,7 @@ impl StateBuilder {
 				http,
 				runtime: Instant::now(),
 				config,
+				database,
 			}
 			.leak()
 		};
