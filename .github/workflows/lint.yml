@@ -21,12 +21,7 @@ jobs:
           override: true
 
       - name: Setup cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ runner.os }}-clippy-rustc-${{ steps.toolchain.outputs.rustc_hash }}-${{ hashFiles('**/Cargo.lock') }}
+        uses: Swatinem/rust-cache@v1
 
       - name: Run clippy
         uses: actions-rs/clippy-check@v1
