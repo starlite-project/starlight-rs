@@ -1,5 +1,5 @@
 use crate::{
-	helpers::CacheHelper,
+	helpers::{cache::MemberHelper, CacheHelper},
 	slashies::{interaction::Interaction, Response, SlashCommand},
 	utils::{constants::SlashiesErrorMessages, CacheReliant},
 };
@@ -97,7 +97,7 @@ impl SlashCommand for Info {
 
 		let helper = CacheHelper::new(&interaction.state);
 
-		let member = helper.member(guild_id, user.id).await.into_diagnostic()?;
+		let member: MemberHelper = helper.member(guild_id, user.id).await.into_diagnostic()?;
 		let created_at_timestamp = user.id.timestamp();
 		let current_user = helper.current_user().await.into_diagnostic()?;
 		let current_user_enum = UserOrCurrentUser::from(&current_user);
