@@ -30,6 +30,8 @@ jobs:
 
       - name: Run clippy
         uses: actions-rs/clippy-check@v1
+        env:
+          RUSTFLAGS: "-C target-cpu=haswell"
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --tests --workspace
