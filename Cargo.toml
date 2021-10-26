@@ -2,7 +2,7 @@ cargo-features = ["strip"]
 
 [package]
 authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
-edition = "2018"
+edition = "2021"
 license = "MIT"
 name = "starlight"
 version = "0.1.0"
