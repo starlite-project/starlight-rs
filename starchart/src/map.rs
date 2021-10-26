@@ -17,7 +17,9 @@ impl<'a, S: Value> StarMap<'a, S> {
 		Self(db, env)
 	}
 
-	/// todo
+	/// Get a value by the [`Key`].
+	///
+	/// [`Key`]: crate::Key
 	pub fn get(self, key: &S::Key) -> Option<S> {
 		let inner = self.0;
 
@@ -26,11 +28,15 @@ impl<'a, S: Value> StarMap<'a, S> {
 		inner.get(&rtxn, key).ok()?
 	}
 
-	/// todo
+	/// Updates a [`Value`].
+	///
+	/// [`Value`]: crate::Value
 	///
 	/// # Errors
 	///
-	/// todo
+	/// See [`Error`].
+	///
+	/// [`Error`]: heed::Error
 	pub fn update(self, value: &S) -> Result<(), ChartError> {
 		let inner = self.0;
 
@@ -43,12 +49,14 @@ impl<'a, S: Value> StarMap<'a, S> {
 		Ok(())
 	}
 
-	/// todo
+	/// Updates many [`Value`]s in a single transaction.
 	///
 	/// # Errors
 	///
-	/// todo
-	pub fn update_bulk(self, values: &[S]) -> Result<(), ChartError> {
+	/// See [`Error`].
+	///
+	/// [`Error`]: heed::Error
+	pub fn update_many(self, values: &[S]) -> Result<(), ChartError> {
 		let inner = self.0;
 
 		let mut wtxn = self.1.write_txn()?;
@@ -62,7 +70,9 @@ impl<'a, S: Value> StarMap<'a, S> {
 		Ok(())
 	}
 
-	/// todo
+	/// Checks if a [`Value`] exists. Uses [`get`] internally.
+	///
+	/// [`get`]: StarMap::get
 	pub fn contains(self, key: &S::Key) -> bool {
 		matches!(self.get(key), Some(_))
 	}
