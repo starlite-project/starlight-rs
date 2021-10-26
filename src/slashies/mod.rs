@@ -2,8 +2,11 @@
 
 use self::commands::Commands;
 use super::{components::ActionRowBuilder, state::State};
-use crate::{components::ComponentBuilder, utils::constants::SlashiesErrorMessages};
+use crate::{
+	components::ComponentBuilder, helpers::Color, utils::constants::SlashiesErrorMessages,
+};
 use tracing::{event, instrument, Level};
+use twilight_embed_builder::EmbedBuilder;
 use twilight_model::{
 	application::{
 		callback::{CallbackData, InteractionResponse},
@@ -45,14 +48,12 @@ impl Response {
 		InteractionResponse::DeferredChannelMessageWithSource(Self::BASE)
 	}
 
-	#[must_use]
-	pub fn add_component(self, component: Component) -> Self {
+	pub fn add_component(&mut self, component: Component) -> &mut Self {
 		self.add_components(vec![component])
 	}
 
 	#[allow(clippy::option_if_let_else)]
-	#[must_use]
-	pub fn add_components(mut self, components: Vec<Component>) -> Self {
+	pub fn add_components(&mut self, components: Vec<Component>) -> &mut Self {
 		let components = Self::check_components(components);
 		if let Some(ref mut current) = self.0.components {
 			current.extend(components);
@@ -72,22 +73,19 @@ impl Response {
 		self
 	}
 
-	#[must_use]
-	pub fn set_components(mut self, components: Vec<Component>) -> Self {
+	pub fn set_components(&mut self, components: Vec<Component>) -> &mut Self {
 		let components = Self::check_components(components);
 		self.0.components = Some(components);
 		self
 	}
 
-	#[must_use]
-	#[allow(clippy::missing_const_for_fn)]
-	pub fn clear_components(mut self) -> Self {
+	pub fn clear_components(&mut self) -> &mut Self {
 		self.0.components = Some(vec![]);
 
 		self
 	}
 
-	pub fn message<T: AsRef<str>>(mut self, content: T) -> Self {
+	pub fn message<T: AsRef<str>>(&mut self, content: T) -> &mut Self {
 		assert!(!content.as_ref().is_empty(), "empty message not allowed");
 
 		self.0.content = Some(content.as_ref().to_owned());
@@ -95,8 +93,7 @@ impl Response {
 		self
 	}
 
-	#[must_use]
-	pub fn embeds(mut self, embeds: Vec<Embed>) -> Self {
+	pub fn embeds(&mut self, embeds: Vec<Embed>) -> &mut Self {
 		assert!(!embeds.is_empty(), "empty embeds not allowed");
 
 		self.0.embeds.extend(embeds);
@@ -104,13 +101,11 @@ impl Response {
 		self
 	}
 
-	#[must_use]
-	pub fn embed(self, embed: Embed) -> Self {
+	pub fn embed(&mut self, embed: Embed) -> &mut Self {
 		self.embeds(vec![embed])
 	}
 
-	#[must_use]
-	pub fn flags(mut self, flags: MessageFlags) -> Self {
+	pub fn flags(&mut self, flags: MessageFlags) -> &mut Self {
 		self.0.flags = self
 			.0
 			.flags
@@ -119,8 +114,7 @@ impl Response {
 		self
 	}
 
-	#[must_use]
-	pub fn ephemeral(self) -> Self {
+	pub fn ephemeral(&mut self) -> &mut Self {
 		self.flags(MessageFlags::EPHEMERAL)
 	}
 
@@ -133,6 +127,17 @@ impl Response {
 	#[must_use]
 	pub fn exec(self) -> InteractionResponse {
 		InteractionResponse::ChannelMessageWithSource(self.0)
+	}
+
+	pub fn take(&mut self) -> Self {
+		Self(CallbackData {
+			allowed_mentions: self.0.allowed_mentions.take(),
+			components: self.0.components.take(),
+			content: self.0.content.take(),
+			embeds: self.0.embeds.clone(),
+			flags: self.0.flags.take(),
+			tts: self.0.tts.take(),
+		})
 	}
 
 	fn check_component(component: Component) -> Component {
@@ -153,25 +158,25 @@ impl Response {
 
 impl From<&str> for Response {
 	fn from(message: &str) -> Self {
-		Self::new().message(message)
+		Self::new().message(message).take()
 	}
 }
 
 impl From<String> for Response {
 	fn from(message: String) -> Self {
-		Self::new().message(message.as_str())
+		Self::new().message(message.as_str()).take()
 	}
 }
 
 impl From<Embed> for Response {
 	fn from(embed: Embed) -> Self {
-		Self::new().embed(embed)
+		Self::new().embed(embed).take()
 	}
 }
 
 impl From<Vec<Embed>> for Response {
 	fn from(embeds: Vec<Embed>) -> Self {
-		Self::new().embeds(embeds)
+		Self::new().embeds(embeds).take()
 	}
 }
 
@@ -181,9 +186,21 @@ impl From<Response> for InteractionResponse {
 	}
 }
 
+impl From<&mut Response> for InteractionResponse {
+	fn from(response: &mut Response) -> Self {
+		response.take().exec()
+	}
+}
+
 impl From<Response> for CallbackData {
 	fn from(response: Response) -> Self {
 		response.0
+	}
+}
+
+impl From<&mut Response> for CallbackData {
+	fn from(response: &mut Response) -> Self {
+		response.take().0
 	}
 }
 
@@ -197,7 +214,15 @@ pub async fn act(state: State, command: ApplicationCommand) {
 				error = &*e.root_cause(),
 				"error running command"
 			);
-			interaction.response(Response::error(SlashiesErrorMessages::InteractionError)).await.expect("unknown failure");
+			let mut error_response =
+				Response::from(SlashiesErrorMessages::InteractionError.to_string());
+			let embed_builder = EmbedBuilder::new().color(Color::new(255, 0, 0).to_decimal()).title("Error")
+			.description(format!("```\n{}\t\n```", e.root_cause()));
+			error_response.embed(unsafe { embed_builder.build().unwrap_unchecked() });
+			interaction
+				.response(error_response)
+				.await
+				.expect("unknown failure");
 		}
 	} else {
 		event!(Level::WARN, "received unregistered command");

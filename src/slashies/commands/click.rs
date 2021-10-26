@@ -46,7 +46,8 @@ impl SlashCommand for Click {
 
 		let response = Response::new()
 			.message("Click this")
-			.add_components(Self::components().into_diagnostic()?);
+			.add_components(Self::components().into_diagnostic()?)
+			.take();
 
 		interaction.response(response).await.into_diagnostic()?;
 
@@ -55,7 +56,7 @@ impl SlashCommand for Click {
 		{
 			res
 		} else {
-			let response = Response::from("Uh oh! button timed out".to_owned()).clear_components();
+			let response = Response::from("Uh oh! button timed out".to_owned()).clear_components().take();
 
 			return interaction.update(response).await;
 		};
@@ -64,7 +65,8 @@ impl SlashCommand for Click {
 			"Success! You clicked {}",
 			Self::parse(interaction, &click_data.data.custom_id).into_diagnostic()?
 		))
-		.clear_components();
+		.clear_components()
+		.take();
 
 		interaction.update(response).await?;
 

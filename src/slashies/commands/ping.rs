@@ -43,15 +43,15 @@ impl SlashCommand for Ping {
 				.try_into()
 				.into_diagnostic()?;
 
-		let response = match ping.as_millis() {
+		let mut response = match ping.as_millis() {
 			0 => Response::from("Pong! Couldn't quite get average latency"),
 			ping => {
-				Response::new().message(format!("Pong! Average latency is {} milliseconds", ping))
+				Response::from(format!("Pong! Average latency is {} milliseconds", ping))
 			}
 		};
 
 		interaction
-			.response(response.ephemeral())
+			.response(response.ephemeral().take())
 			.await
 			.into_diagnostic()?;
 
