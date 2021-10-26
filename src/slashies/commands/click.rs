@@ -2,7 +2,6 @@ use crate::{
 	slashies::{
 		interaction::Interaction, ClickCommand, ParseCommand, ParseError, Response, SlashCommand,
 	},
-	state::State,
 	utils::interaction_author,
 };
 use async_trait::async_trait;
@@ -40,9 +39,7 @@ impl SlashCommand for Click {
 		}
 	}
 
-	async fn run(&self, state: State) -> Result<()> {
-		let interaction = state.interaction(&self.0);
-
+	async fn run(&self, interaction: Interaction<'_>) -> Result<()> {
 		dbg!(Self::define_buttons().into_diagnostic()?);
 
 		dbg!(Self::components().into_diagnostic()?);

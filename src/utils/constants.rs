@@ -5,6 +5,7 @@ pub enum SlashiesErrorMessages {
 	Unknown,
 	GuildOnly,
 	CantGetUser,
+	InteractionError
 }
 
 impl Default for SlashiesErrorMessages {
@@ -19,6 +20,7 @@ impl Display for SlashiesErrorMessages {
 			Self::Unknown => f.write_str("An unknown error has occurred"),
 			Self::GuildOnly => f.write_str("This command can only be used in a guild"),
 			Self::CantGetUser => f.write_str("An error occurred getting the user"),
+			Self::InteractionError => f.write_str("An error occurred during the interaction")
 		}
 	}
 }

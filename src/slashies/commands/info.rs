@@ -1,7 +1,6 @@
 use crate::{
 	helpers::CacheHelper,
-	slashies::{Response, SlashCommand},
-	state::State,
+	slashies::{interaction::Interaction, Response, SlashCommand},
 	utils::{constants::SlashiesErrorMessages, CacheReliant},
 };
 use async_trait::async_trait;
@@ -61,9 +60,7 @@ impl SlashCommand for Info {
 	}
 
 	#[allow(clippy::too_many_lines, clippy::cast_sign_loss)]
-	async fn run(&self, state: State) -> Result<()> {
-		let interaction = state.interaction(&self.0);
-
+	async fn run(&self, interaction: Interaction<'_>) -> Result<()> {
 		let guild_id = if let Some(id) = interaction.command.guild_id {
 			id
 		} else {

@@ -1,5 +1,5 @@
-use super::SlashCommand;
-use crate::{state::State, utils::CacheReliant};
+use super::{interaction::Interaction, SlashCommand};
+use crate::utils::CacheReliant;
 use click::Click;
 use info::Info;
 use miette::Result;
@@ -33,22 +33,22 @@ pub enum Commands {
 
 impl Commands {
 	#[must_use]
-	pub fn r#match(command: ApplicationCommand) -> Option<Self> {
+	pub fn r#match(command: &ApplicationCommand) -> Option<Self> {
 		match command.data.name.as_str() {
-			Ping::NAME => Some(Self::Ping(Ping(command))),
-			Click::NAME => Some(Self::Click(Click(command))),
-			Info::NAME => Some(Self::Info(Info(command))),
-			Stats::NAME => Some(Self::Stats(Stats(command))),
+			Ping::NAME => Some(Self::Ping(Ping(command.clone()))),
+			Click::NAME => Some(Self::Click(Click(command.clone()))),
+			Info::NAME => Some(Self::Info(Info(command.clone()))),
+			Stats::NAME => Some(Self::Stats(Stats(command.clone()))),
 			_ => None,
 		}
 	}
 
-	pub async fn run(&self, state: State) -> Result<()> {
+	pub async fn run(&self, interaction: Interaction<'_>) -> Result<()> {
 		match self {
-			Self::Ping(c) => c.run(state).await,
-			Self::Click(c) => c.run(state).await,
-			Self::Info(c) => c.run(state).await,
-			Self::Stats(c) => c.run(state).await,
+			Self::Ping(c) => c.run(interaction).await,
+			Self::Click(c) => c.run(interaction).await,
+			Self::Info(c) => c.run(interaction).await,
+			Self::Stats(c) => c.run(interaction).await,
 		}
 	}
 }

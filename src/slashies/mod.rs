@@ -189,13 +189,15 @@ impl From<Response> for CallbackData {
 
 #[instrument(skip(state, command), fields(command.name = %command.data.name, command.guild_id))]
 pub async fn act(state: State, command: ApplicationCommand) {
-	if let Some(cmd) = Commands::r#match(command) {
-		if let Err(e) = cmd.run(state).await {
+	if let Some(cmd) = Commands::r#match(&command) {
+		let interaction = state.interaction(&command);
+		if let Err(e) = cmd.run(interaction).await {
 			event!(
 				Level::ERROR,
 				error = &*e.root_cause(),
 				"error running command"
 			);
+			interaction.response(Response::error(SlashiesErrorMessages::InteractionError)).await.expect("unknown failure");
 		}
 	} else {
 		event!(Level::WARN, "received unregistered command");

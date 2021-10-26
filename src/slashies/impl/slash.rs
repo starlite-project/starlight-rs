@@ -1,4 +1,4 @@
-use crate::state::State;
+use crate::slashies::interaction::Interaction;
 use async_trait::async_trait;
 use miette::Result;
 use twilight_model::application::command::Command;
@@ -9,5 +9,5 @@ pub trait SlashCommand {
 
 	fn define() -> Command;
 
-	async fn run(&self, state: State) -> Result<()>;
+	async fn run(&self, interaction: Interaction<'_>) -> Result<()>;
 }

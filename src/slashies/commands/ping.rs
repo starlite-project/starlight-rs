@@ -1,7 +1,4 @@
-use crate::{
-	slashies::{Response, SlashCommand},
-	state::State,
-};
+use crate::slashies::{interaction::Interaction, Response, SlashCommand};
 use async_trait::async_trait;
 use miette::{IntoDiagnostic, Result};
 use std::{convert::TryInto, time::Duration};
@@ -30,8 +27,8 @@ impl SlashCommand for Ping {
 		}
 	}
 
-	async fn run(&self, state: State) -> Result<()> {
-		let interaction = state.interaction(&self.0);
+	async fn run(&self, interaction: Interaction<'_>) -> Result<()> {
+		let state = interaction.state;
 
 		let ping = state
 			.cluster()

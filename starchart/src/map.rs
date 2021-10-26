@@ -8,17 +8,17 @@ use std::fmt::{Debug, Formatter, Result as FmtResult};
 /// An individual Map, wrapping around a [`Database`].
 ///
 /// [`Database`]: heed::Database
-pub struct StarMap<'a, S> where S: Value {
+pub struct StarMap<'a, S>
+where
+	S: Value,
+{
 	inner: Database<SerdeJson<S::Key>, SerdeBincode<S>>,
 	env: &'a Env,
 }
 
 impl<'a, S: Value> StarMap<'a, S> {
 	pub(crate) fn new(db: Database<SerdeJson<S::Key>, SerdeBincode<S>>, env: &'a Env) -> Self {
-		Self {
-			inner: db,
-			env
-		}
+		Self { inner: db, env }
 	}
 
 	/// Get a value by the [`Key`].

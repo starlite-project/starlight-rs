@@ -1,6 +1,5 @@
 use crate::{
 	slashies::{interaction::Interaction, Response, SlashCommand},
-	state::State,
 	utils::CacheReliant,
 };
 use async_trait::async_trait;
@@ -262,9 +261,7 @@ impl SlashCommand for Stats {
 		}
 	}
 
-	async fn run(&self, state: State) -> Result<()> {
-		let interaction = state.interaction(&self.0);
-
+	async fn run(&self, interaction: Interaction<'_>) -> Result<()> {
 		let embed = EmbedBuilder::new()
 			.color(crate::helpers::STARLIGHT_PRIMARY_COLOR.to_decimal())
 			.field(EmbedFieldBuilder::new(
