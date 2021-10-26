@@ -216,8 +216,10 @@ pub async fn act(state: State, command: ApplicationCommand) {
 			);
 			let mut error_response =
 				Response::from(SlashiesErrorMessages::InteractionError.to_string());
-			let embed_builder = EmbedBuilder::new().color(Color::new(255, 0, 0).to_decimal()).title("Error")
-			.description(format!("```\n{}\t\n```", e.root_cause()));
+			let embed_builder = EmbedBuilder::new()
+				.color(Color::new(255, 0, 0).to_decimal())
+				.title("Error")
+				.description(format!("```\n{}\t\n```", e.root_cause()));
 			error_response.embed(unsafe { embed_builder.build().unwrap_unchecked() });
 			interaction
 				.response(error_response)

@@ -45,9 +45,7 @@ impl SlashCommand for Ping {
 
 		let mut response = match ping.as_millis() {
 			0 => Response::from("Pong! Couldn't quite get average latency"),
-			ping => {
-				Response::from(format!("Pong! Average latency is {} milliseconds", ping))
-			}
+			ping => Response::from(format!("Pong! Average latency is {} milliseconds", ping)),
 		};
 
 		interaction

@@ -56,7 +56,9 @@ impl SlashCommand for Click {
 		{
 			res
 		} else {
-			let response = Response::from("Uh oh! button timed out".to_owned()).clear_components().take();
+			let response = Response::from("Uh oh! button timed out".to_owned())
+				.clear_components()
+				.take();
 
 			return interaction.update(response).await;
 		};
