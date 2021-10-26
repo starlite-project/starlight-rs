@@ -40,10 +40,6 @@ impl SlashCommand for Click {
 	}
 
 	async fn run(&self, interaction: Interaction<'_>) -> Result<()> {
-		dbg!(Self::define_buttons().into_diagnostic()?);
-
-		dbg!(Self::components().into_diagnostic()?);
-
 		let response = Response::new()
 			.message("Click this")
 			.add_components(Self::components().into_diagnostic()?)
