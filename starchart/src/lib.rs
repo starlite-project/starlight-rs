@@ -1,3 +1,4 @@
+#![feature(once_cell)]
 #![deny(clippy::all, missing_docs)]
 #![warn(clippy::pedantic, clippy::nursery, clippy::suspicious)]
 #![allow(clippy::module_name_repetitions, clippy::unsafe_derive_deserialize)]

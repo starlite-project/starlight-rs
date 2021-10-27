@@ -169,7 +169,7 @@ mod internal {
 		let database: StarMap<GuildSettings> =
 			state.database().acquire(Some("guilds")).into_diagnostic()?;
 
-		if !database.contains(&guild_create.id.into()) {
+		if !database.contains(guild_create.id.into()) {
 			database
 				.update(&GuildSettings {
 					id: guild_create.id.into(),

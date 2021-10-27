@@ -13,4 +13,8 @@ impl Value for GuildSettings {
 	fn key(&self) -> Self::Key {
 		self.id
 	}
+
+	fn new(key: Id) -> Self {
+		Self { id: key }
+	}
 }
