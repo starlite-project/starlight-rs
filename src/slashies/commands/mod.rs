@@ -7,6 +7,7 @@ use ping::Ping;
 use stats::Stats;
 use twilight_cache_inmemory::ResourceType;
 use twilight_model::application::{command::Command, interaction::ApplicationCommand};
+use twilight_util::builder::command::CommandBuilder;
 
 mod click;
 mod info;
@@ -21,6 +22,7 @@ pub fn get_slashies() -> [Command; 4] {
 		Info::define(),
 		Stats::define(),
 	]
+	.map(CommandBuilder::build)
 }
 
 #[derive(Debug, Clone)]

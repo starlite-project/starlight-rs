@@ -65,43 +65,43 @@ version = "0.2.20"
 
 [dependencies.twilight-cache-inmemory]
 default-features = false
-git = "https://github.com/PyroTechniac/twilight.git"
-rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
 
 [dependencies.twilight-embed-builder]
-git = "https://github.com/PyroTechniac/twilight.git"
-rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
 
 [dependencies.twilight-gateway]
 default-features = false
 features = ["zlib-simd", "metrics", "rustls", "tracing"]
-git = "https://github.com/PyroTechniac/twilight.git"
-rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
 
 [dependencies.twilight-http]
 default-features = false
 features = ["tracing", "simd-json", "rustls"]
-git = "https://github.com/PyroTechniac/twilight.git"
-rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
 
 [dependencies.twilight-mention]
-git = "https://github.com/PyroTechniac/twilight.git"
-rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
 
 [dependencies.twilight-model]
-git = "https://github.com/PyroTechniac/twilight.git"
-rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
 
 [dependencies.twilight-standby]
 features = ["tracing"]
-git = "https://github.com/PyroTechniac/twilight.git"
-rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
 
 [dependencies.twilight-util]
 default-features = false
-features = ["snowflake"]
-git = "https://github.com/PyroTechniac/twilight.git"
-rev = "31aeb9f2bc79b129384322d42c6cf045e601a547"
+features = ["builder", "snowflake"]
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
 
 [dev-dependencies]
 static_assertions = "1.1.0"

@@ -7,9 +7,10 @@ use crate::{
 use async_trait::async_trait;
 use miette::{IntoDiagnostic, Result};
 use twilight_model::application::{
-	command::{Command, CommandType},
+	command::CommandType,
 	interaction::{ApplicationCommand, MessageComponentInteraction},
 };
+use twilight_util::builder::command::CommandBuilder;
 
 #[derive(Debug, Clone, ClickCommand)]
 #[buttons(
@@ -26,17 +27,12 @@ pub struct Click(pub(super) ApplicationCommand);
 impl SlashCommand for Click {
 	const NAME: &'static str = "click";
 
-	fn define() -> Command {
-		Command {
-			application_id: None,
-			default_permission: None,
-			description: String::from("Sends a clickyboi"),
-			guild_id: None,
-			id: None,
-			name: String::from(Self::NAME),
-			options: vec![],
-			kind: CommandType::ChatInput,
-		}
+	fn define() -> CommandBuilder {
+		CommandBuilder::new(
+			Self::NAME.to_owned(),
+			"Sends a clicyboi".to_owned(),
+			CommandType::ChatInput,
+		)
 	}
 
 	async fn run(&self, interaction: Interaction<'_>) -> Result<()> {

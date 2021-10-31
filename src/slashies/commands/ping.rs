@@ -2,10 +2,8 @@ use crate::slashies::{interaction::Interaction, Response, SlashCommand};
 use async_trait::async_trait;
 use miette::{IntoDiagnostic, Result};
 use std::{convert::TryInto, time::Duration};
-use twilight_model::application::{
-	command::{Command, CommandType},
-	interaction::ApplicationCommand,
-};
+use twilight_model::application::{command::CommandType, interaction::ApplicationCommand};
+use twilight_util::builder::command::CommandBuilder;
 
 #[derive(Debug, Clone)]
 pub struct Ping(pub(super) ApplicationCommand);
@@ -14,17 +12,12 @@ pub struct Ping(pub(super) ApplicationCommand);
 impl SlashCommand for Ping {
 	const NAME: &'static str = "ping";
 
-	fn define() -> Command {
-		Command {
-			application_id: None,
-			default_permission: None,
-			description: String::from("Pings the bot"),
-			guild_id: None,
-			id: None,
-			name: String::from(Self::NAME),
-			options: vec![],
-			kind: CommandType::ChatInput,
-		}
+	fn define() -> CommandBuilder {
+		CommandBuilder::new(
+			Self::NAME.to_owned(),
+			"Pings the bot".to_owned(),
+			CommandType::ChatInput,
+		)
 	}
 
 	async fn run(&self, interaction: Interaction<'_>) -> Result<()> {

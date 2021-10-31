@@ -18,12 +18,10 @@ use thiserror::Error;
 use twilight_cache_inmemory::ResourceType;
 use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder};
 use twilight_model::{
-	application::{
-		command::{Command, CommandType},
-		interaction::ApplicationCommand,
-	},
+	application::{command::CommandType, interaction::ApplicationCommand},
 	id::GuildId,
 };
+use twilight_util::builder::command::CommandBuilder;
 
 const DOT: &str = "\u{2022}";
 
@@ -248,17 +246,12 @@ impl CacheReliant for Stats {
 impl SlashCommand for Stats {
 	const NAME: &'static str = "stats";
 
-	fn define() -> Command {
-		Command {
-			application_id: None,
-			guild_id: None,
-			name: String::from(Self::NAME),
-			default_permission: None,
-			description: String::from("Get the stats for the bot"),
-			id: None,
-			options: vec![],
-			kind: CommandType::ChatInput,
-		}
+	fn define() -> CommandBuilder {
+		CommandBuilder::new(
+			Self::NAME.to_owned(),
+			"Get the stats for the bot".to_owned(),
+			CommandType::ChatInput,
+		)
 	}
 
 	async fn run(&self, interaction: Interaction<'_>) -> Result<()> {

@@ -10,16 +10,16 @@ use twilight_cache_inmemory::ResourceType;
 use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder, EmbedFooterBuilder, ImageSource};
 use twilight_mention::Mention;
 use twilight_model::{
-	application::{
-		command::{BaseCommandOptionData, Command, CommandOption, CommandType},
-		interaction::ApplicationCommand,
-	},
+	application::{command::CommandType, interaction::ApplicationCommand},
 	datetime::Timestamp,
 	guild::Role,
 	id::UserId,
 	user::{CurrentUser, User},
 };
-use twilight_util::snowflake::Snowflake;
+use twilight_util::{
+	builder::command::{CommandBuilder, UserBuilder},
+	snowflake::Snowflake,
+};
 
 #[derive(Debug, Clone)]
 pub struct Info(pub(super) ApplicationCommand);
@@ -40,23 +40,19 @@ impl CacheReliant for Info {
 impl SlashCommand for Info {
 	const NAME: &'static str = "info";
 
-	fn define() -> Command {
-		Command {
-			application_id: None,
-			guild_id: None,
-			name: String::from(Self::NAME),
-			default_permission: None,
-			description: String::from("Get info about a user"),
-			id: None,
-			options: vec![CommandOption::User(BaseCommandOptionData {
-				name: String::from("user"),
-				description: String::from(
-					"The user to get information about, defaulting to the author",
-				),
-				required: false,
-			})],
-			kind: CommandType::ChatInput,
-		}
+	fn define() -> CommandBuilder {
+		CommandBuilder::new(
+			Self::NAME.to_owned(),
+			"Get info about a user".to_owned(),
+			CommandType::ChatInput,
+		)
+		.option(
+			UserBuilder::new(
+				"user".to_owned(),
+				"The user to get information about, defaulting to the author".to_owned(),
+			)
+			.build(),
+		)
 	}
 
 	#[allow(clippy::too_many_lines, clippy::cast_sign_loss)]
