@@ -5,12 +5,58 @@ authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
 edition = "2021"
 license = "MIT"
 name = "starlight"
+rust-version = "1.56"
 version = "0.1.0"
 resolver = "2"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+base64 = "0.13.0"
+futures-util = "0.3.18"
+thiserror = "1.0.30"
+tracing = "0.1"
+
+[dependencies.clap]
+git = "https://github.com/clap-rs/clap.git"
+
+[dependencies.miette]
+features = ["fancy"]
+version = "3.0.1"
+
+[dependencies.serde]
+features = ["derive"]
+version = "1"
+
+[dependencies.starlight-macros]
+path = "./starlight-macros"
+
+[dependencies.tokio]
+features = ["macros", "rt-multi-thread", "signal", "fs"]
+version = "1.11.0"
+
+[dependencies.tracing-subscriber]
+features = ["fmt", "ansi"]
+version = "0.2.20"
+
+[dependencies.twilight-cache-inmemory]
+default-features = false
+git = "https://github.com/twilight-rs/twilight.git"
+
+[dependencies.twilight-gateway]
+default-features = false
+features = ["zlib-simd", "metrics", "rustls", "tracing"]
+git = "https://github.com/twilight-rs/twilight.git"
+
+[dependencies.twilight-http]
+default-features = false
+features = ["tracing", "simd-json", "rustls"]
+git = "https://github.com/twilight-rs/twilight.git"
+
+[dependencies.twilight-model]
+git = "https://github.com/twilight-rs/twilight.git"
+
+[dependencies.twilight-standby]
+features = ["tracing"]
+git = "https://github.com/twilight-rs/twilight.git"
 
 [profile.release]
 codegen-units = 1
@@ -25,6 +71,7 @@ strip = "symbols"
 lto = "fat"
 
 [workspace]
+members = ["./starlight-macros"]
 
 [features]
 default = []

@@ -1,0 +1,17 @@
+[package]
+name = "starlight-macros"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+miette = "3.0.1"
+serde = "1"
+thiserror = "1.0.30"
+
+[dependencies.twilight-http]
+git = "https://github.com/twilight-rs/twilight.git"
+
+[dependencies.twilight-model]
+git = "https://github.com/twilight-rs/twilight.git"
