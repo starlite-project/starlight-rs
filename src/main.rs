@@ -1,17 +1,18 @@
-use std::{
-	path::Path,
-	sync::atomic::{AtomicUsize, Ordering},
-};
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use clap::Parser;
 use starlight::{
 	prelude::*,
-	state::{Config, ContextBuilder},
+	state::{Config, ContextBuilder, State},
 };
 use tokio::runtime::Builder;
+#[cfg(unix)]
+use tokio::signal::unix::{signal, SignalKind};
+#[cfg(windows)]
+use tokio::signal::windows::{ctrl_break, ctrl_c};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 use twilight_cache_inmemory::{InMemoryCacheBuilder, ResourceType};
-use twilight_gateway::{cluster::ShardScheme, Intents};
+use twilight_gateway::Intents;
 
 static ATOMIC_ID: AtomicUsize = AtomicUsize::new(1);
 
@@ -41,9 +42,7 @@ async fn run() -> MietteResult<()> {
 		.with_thread_names(true);
 
 	log_filter_layer = if cfg!(debug_assertions) {
-		log_filter_layer
-			// .add_directive("starlight[act]=debug".parse().into_diagnostic()?)
-			.add_directive("starlight=trace".parse().into_diagnostic()?)
+		log_filter_layer.add_directive("starlight=debug".parse().into_diagnostic()?)
 	} else {
 		log_filter_layer.add_directive("starlight=info".parse().into_diagnostic()?)
 	};
@@ -56,6 +55,39 @@ async fn run() -> MietteResult<()> {
 
 	let config = Config::parse();
 	let (client, events) = get_builder(config)?.build().await?;
+
+	client.connect().await?;
+
+	#[cfg(windows)]
+	{
+		let mut sig_c = ctrl_c().into_diagnostic()?;
+		let mut sig_break = ctrl_break().into_diagnostic()?;
+		tokio::select! {
+			_ = sig_c.recv() => event!(Level::INFO, "received CTRLC"),
+			_ = sig_break.recv() => event!(Level::INFO, "received CTRLBREAK"),
+			_ = client.process(events) => (),
+		};
+	}
+
+	#[cfg(unix)]
+	{
+		let mut sigint = signal(SignalKind::interrupt()).into_diagnostic()?;
+		let mut sigterm = signal(SignalKind::terminate()).into_diagnostic()?;
+
+		tokio::select! {
+			_ = sigint.recv() => event!(Level::INFO, "received SIGINT"),
+			_ = sigterm.recv() => event!(Level::INFO, "received SIGTERM"),
+			_ = client.process(events) => (),
+		};
+	}
+
+	event!(Level::INFO, "shutting down");
+
+	client.shutdown();
+
+	let client_ptr = unsafe { Box::from_raw(client.0 as *const State as *mut State) };
+
+	drop(client_ptr);
 
 	Ok(())
 }

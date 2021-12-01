@@ -15,7 +15,7 @@ pub(super) async fn handle(context: Context, event: Event) -> MietteResult<()> {
 }
 
 #[allow(clippy::unused_async)]
-async fn ready(context: Context, ready: Ready) -> Result<(), Infallible> {
+async fn ready(_: Context, ready: Ready) -> Result<(), Infallible> {
 	event!(Level::INFO, user_name = %ready.user.name);
 	event!(Level::INFO, guilds = %ready.guilds.len());
 	Ok(())

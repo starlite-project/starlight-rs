@@ -16,7 +16,7 @@ mod config;
 mod events;
 
 #[derive(Debug, Clone, Copy)]
-pub struct Context(&'static State);
+pub struct Context(pub &'static State);
 
 impl Context {
 	pub async fn connect(self) -> MietteResult<()> {

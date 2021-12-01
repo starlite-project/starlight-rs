@@ -16,8 +16,6 @@ use super::{Config, Context, State};
 pub enum ContextBuildError {
 	#[error("intents not set")]
 	Intents,
-	#[error("config not set")]
-	Config,
 	#[error("shard builder not set")]
 	Shard,
 }
