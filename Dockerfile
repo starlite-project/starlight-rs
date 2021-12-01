@@ -9,12 +9,6 @@ WORKDIR /starlight
 RUN apt-get update && apt-get install -y cmake
 
 # Copy everything because we have subcrates within the main crate
-COPY ./.cargo ./.cargo
-COPY ./nebula ./nebula
-COPY ./star-derive ./star-derive
-COPY ./starchart ./starchart
-COPY ./supernova ./supernova
-COPY ./build.rs ./build.rs
 COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
 COPY ./rust-toolchain.toml ./rust-toolchain.toml

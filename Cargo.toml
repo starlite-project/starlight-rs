@@ -11,103 +11,6 @@ resolver = "2"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async-trait = "0.1.51"
-base64 = "0.13.0"
-dotenv = "0.15.0"
-futures = "0.3.17"
-num_cpus = "1.13.0"
-once_cell = "1.8"
-serde_json = "1"
-sysinfo = "0.20.3"
-thiserror = "1.0.29"
-tracing = "0.1.26"
-tracing-log = "0.1.2"
-
-[dependencies.chrono]
-default-features = false
-features = ["std", "clock", "serde"]
-version = "0.4.19"
-
-[dependencies.clap]
-git = "https://github.com/clap-rs/clap.git"
-
-[dependencies.star-derive]
-path = "./star-derive"
-
-[dependencies.miette]
-features = ["fancy"]
-version = "3.0.1"
-
-[dependencies.nebula]
-path = "./nebula"
-
-[dependencies.serde]
-default-features = false
-features = ["derive"]
-version = "1.0.130"
-
-[dependencies.starchart]
-path = "./starchart"
-
-[dependencies.star-utils]
-git = "https://github.com/PyroTechniac/starlight-rs-utils.git"
-
-[dependencies.supernova]
-path = "./supernova"
-
-[dependencies.tokio]
-features = ["macros", "rt-multi-thread", "signal", "fs"]
-version = "1.11.0"
-
-[dependencies.tracing-subscriber]
-features = ["fmt", "ansi"]
-version = "0.2.20"
-
-[dependencies.twilight-cache-inmemory]
-default-features = false
-git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
-
-[dependencies.twilight-embed-builder]
-git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
-
-[dependencies.twilight-gateway]
-default-features = false
-features = ["zlib-simd", "metrics", "rustls", "tracing"]
-git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
-
-[dependencies.twilight-http]
-default-features = false
-features = ["tracing", "simd-json", "rustls"]
-git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
-
-[dependencies.twilight-mention]
-git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
-
-[dependencies.twilight-model]
-git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
-
-[dependencies.twilight-standby]
-features = ["tracing"]
-git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
-
-[dependencies.twilight-util]
-default-features = false
-features = ["builder", "snowflake"]
-git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
-
-[dev-dependencies]
-static_assertions = "1.1.0"
-
-[build-dependencies]
-built = "0.5.1"
 
 [profile.release]
 codegen-units = 1
@@ -122,7 +25,6 @@ strip = "symbols"
 lto = "fat"
 
 [workspace]
-members = ["./star-derive", "./starchart", "./nebula", "./supernova"]
 
 [features]
 default = []
