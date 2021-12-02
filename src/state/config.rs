@@ -5,7 +5,7 @@ use std::{
 
 use clap::{
 	crate_authors, crate_description, crate_name, crate_version, App, Arg, ArgMatches,
-	Error as ClapError, FromArgMatches, IntoApp, Parser
+	Error as ClapError, FromArgMatches, IntoApp, Parser,
 };
 use miette::{IntoDiagnostic, Result as MietteResult};
 use tracing::instrument;

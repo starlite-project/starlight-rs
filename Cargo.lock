@@ -1229,7 +1229,8 @@ dependencies = [
  "twilight-cache-inmemory",
  "twilight-gateway",
  "twilight-http",
- "twilight-model",
+ "twilight-interactions",
+ "twilight-model 0.7.2 (git+https://github.com/twilight-rs/twilight.git)",
  "twilight-standby",
 ]
 
@@ -1241,7 +1242,7 @@ dependencies = [
  "serde",
  "thiserror",
  "twilight-http",
- "twilight-model",
+ "twilight-model 0.7.2 (git+https://github.com/twilight-rs/twilight.git)",
 ]
 
 [[package]]
@@ -1553,7 +1554,7 @@ dependencies = [
  "bitflags",
  "dashmap",
  "serde",
- "twilight-model",
+ "twilight-model 0.7.2 (git+https://github.com/twilight-rs/twilight.git)",
 ]
 
 [[package]]
@@ -1573,7 +1574,7 @@ dependencies = [
  "tracing",
  "twilight-gateway-queue",
  "twilight-http",
- "twilight-model",
+ "twilight-model 0.7.2 (git+https://github.com/twilight-rs/twilight.git)",
  "url",
 ]
 
@@ -1602,7 +1603,41 @@ dependencies = [
  "simd-json",
  "tokio",
  "tracing",
- "twilight-model",
+ "twilight-model 0.7.2 (git+https://github.com/twilight-rs/twilight.git)",
+]
+
+[[package]]
+name = "twilight-interactions"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1b0383722f9276929345676902920307a332874a82ecec87ea1978a5f978c334"
+dependencies = [
+ "twilight-interactions-derive",
+ "twilight-model 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "twilight-interactions-derive"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5481ea28cda58d3f248405009c056ca20f5599b05f7b39d3fa0d0ffbb489d08"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "twilight-model"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "33ee8e82b9eb361c7049390750155443bc61084e54068831f521118f01f6f493"
+dependencies = [
+ "bitflags",
+ "serde",
+ "serde-value",
+ "serde_repr",
+ "tracing",
 ]
 
 [[package]]
@@ -1626,7 +1661,7 @@ dependencies = [
  "futures-util",
  "tokio",
  "tracing",
- "twilight-model",
+ "twilight-model 0.7.2 (git+https://github.com/twilight-rs/twilight.git)",
 ]
 
 [[package]]

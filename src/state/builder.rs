@@ -1,6 +1,5 @@
 use std::{env::VarError, sync::Arc};
 
-use crate::prelude::*;
 use starlight_macros::cloned;
 use thiserror::Error;
 use twilight_cache_inmemory::InMemoryCacheBuilder;
@@ -11,6 +10,7 @@ use twilight_gateway::{
 use twilight_http::client::ClientBuilder;
 
 use super::{Config, Context, State};
+use crate::prelude::*;
 
 #[derive(Debug, Error)]
 pub enum ContextBuildError {

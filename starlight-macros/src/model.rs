@@ -39,7 +39,7 @@ macro_rules! model {
 }
 
 pub async fn __unravel<T: ModelInput + Unpin + Send>(
-	future: ResponseFuture<T>
+	future: ResponseFuture<T>,
 ) -> Result<T, ModelError> {
 	Ok(future.await?.model().await?)
 }

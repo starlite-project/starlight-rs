@@ -17,6 +17,8 @@
 	clippy::no_effect_underscore_binding
 )]
 
-pub mod state;
+pub mod helpers;
 pub mod prelude;
+pub mod slashies;
+pub mod state;
 pub mod utils;

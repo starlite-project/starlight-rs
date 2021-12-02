@@ -9,7 +9,7 @@ use twilight_standby::Standby;
 
 use self::events::handle;
 pub use self::{builder::ContextBuilder, config::Config};
-use crate::prelude::*;
+use crate::{helpers::Helpers, prelude::*};
 
 mod builder;
 mod config;
@@ -58,6 +58,10 @@ impl Context {
 			tokio::spawn(handle(self, val));
 		}
 		event!(Level::ERROR, "event stream exhausted (shouldn't happen)");
+	}
+
+	pub const fn helpers(self) -> Helpers {
+		Helpers::new(self)
 	}
 
 	pub fn shutdown(self) {

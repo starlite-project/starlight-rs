@@ -51,6 +51,10 @@ default-features = false
 features = ["tracing", "simd-json", "rustls"]
 git = "https://github.com/twilight-rs/twilight.git"
 
+[dependencies.twilight-interactions]
+version = "0.7"
+features = ["derive"]
+
 [dependencies.twilight-model]
 git = "https://github.com/twilight-rs/twilight.git"
 
