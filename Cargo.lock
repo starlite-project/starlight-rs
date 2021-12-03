@@ -1221,6 +1221,7 @@ dependencies = [
  "futures-util",
  "miette",
  "serde",
+ "serde_json",
  "starlight-macros",
  "thiserror",
  "tokio",

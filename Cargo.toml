@@ -12,6 +12,7 @@ resolver = "2"
 [dependencies]
 base64 = "0.13.0"
 futures-util = "0.3.18"
+serde_json = "1"
 thiserror = "1.0.30"
 tracing = "0.1"
 

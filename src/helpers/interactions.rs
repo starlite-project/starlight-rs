@@ -38,4 +38,37 @@ impl InteractionsHelper {
 
 		Ok(())
 	}
+
+	pub async fn respond(self, data: &SlashData) -> Result<(), HttpError> {
+		self.context()
+			.http()
+			.interaction_callback(
+				data.command.id,
+				&data.command.token,
+				&InteractionResponse::ChannelMessageWithSource(data.callback.clone()),
+			)
+			.exec()
+			.await?;
+
+		Ok(())
+	}
+
+	pub async fn update(self, data: &SlashData) -> MietteResult<()> {
+		let callback_data = data.callback.clone();
+		let context = self.context();
+		let update_interaction = context
+			.http()
+			.update_interaction_original(&data.command.token)
+			.into_diagnostic()?;
+
+		let bytes = serde_json::to_vec(&callback_data).into_diagnostic()?;
+
+		update_interaction
+			.payload_json(&bytes[..])
+			.exec()
+			.await
+			.into_diagnostic()?;
+
+		Ok(())
+	}
 }
