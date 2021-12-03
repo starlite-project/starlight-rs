@@ -1,12 +1,8 @@
 use std::pin::Pin;
 
 use futures_util::Future;
-use twilight_http::Error as HttpError;
 use twilight_model::{
-	application::{
-		callback::{CallbackData, InteractionResponse},
-		interaction::ApplicationCommand,
-	},
+	application::{callback::CallbackData, interaction::ApplicationCommand},
 	channel::{
 		embed::Embed,
 		message::{allowed_mentions::AllowedMentionsBuilder, MessageFlags},
@@ -15,12 +11,12 @@ use twilight_model::{
 
 use crate::{helpers::InteractionsHelper, prelude::*};
 
-pub trait SlashCommand {
+pub trait SlashCommand: Send + Sync {
 	fn run(
 		&self,
 		helper: InteractionsHelper,
 		responder: SlashData,
-	) -> Pin<Box<dyn Future<Output = MietteResult<()>>>>;
+	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send>>;
 }
 
 #[derive(Debug, Clone)]

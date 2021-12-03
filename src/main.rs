@@ -54,7 +54,13 @@ async fn run() -> MietteResult<()> {
 		.into_diagnostic()?;
 
 	let config = Config::parse();
-	let (client, events) = get_builder(config)?.build().await?;
+	let (client, events) = ContextBuilder::new()
+		.config(config)
+		.intents(Intents::empty())
+		.shard_builder(|b| b)?
+		.cache(InMemoryCacheBuilder::new().resource_types(ResourceType::all()))
+		.build()
+		.await?;
 
 	client.connect().await?;
 
@@ -90,25 +96,4 @@ async fn run() -> MietteResult<()> {
 	drop(client_ptr);
 
 	Ok(())
-}
-
-#[cfg(feature = "docker")]
-fn get_builder(config: Config) -> MietteResult<ContextBuilder> {
-	let host = starlight::utils::get_host("twilight_proxy", 3000).into_diagnostic()?;
-	shared(config)?
-		.http_builder(|builder| builder.proxy(host, true).ratelimiter(None))
-		.into_diagnostic()
-}
-
-#[cfg(not(feature = "docker"))]
-fn get_builder(config: Config) -> MietteResult<ContextBuilder> {
-	shared(config)
-}
-
-fn shared(config: Config) -> MietteResult<ContextBuilder> {
-	Ok(ContextBuilder::new()
-		.config(config)
-		.intents(Intents::empty())
-		.shard_builder(|builder| builder)?
-		.cache(InMemoryCacheBuilder::new().resource_types(ResourceType::all())))
 }

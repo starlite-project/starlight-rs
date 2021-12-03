@@ -5,7 +5,6 @@ authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
 edition = "2021"
 license = "MIT"
 name = "starlight"
-rust-version = "1.56"
 version = "0.1.0"
 resolver = "2"
 
@@ -40,33 +39,32 @@ version = "0.2.20"
 
 [dependencies.twilight-cache-inmemory]
 default-features = false
-git = "https://github.com/twilight-rs/twilight.git"
+version = "0.7"
 
 [dependencies.twilight-gateway]
 default-features = false
 features = ["zlib-simd", "metrics", "rustls", "tracing"]
-git = "https://github.com/twilight-rs/twilight.git"
+version = "0.7"
 
 [dependencies.twilight-http]
 default-features = false
 features = ["tracing", "simd-json", "rustls"]
-git = "https://github.com/twilight-rs/twilight.git"
+version = "0.7"
 
 [dependencies.twilight-interactions]
 version = "0.7"
 features = ["derive"]
 
 [dependencies.twilight-model]
-git = "https://github.com/twilight-rs/twilight.git"
+version = "0.7"
 
 [dependencies.twilight-standby]
 features = ["tracing"]
-git = "https://github.com/twilight-rs/twilight.git"
+version = "0.7"
 
 [profile.release]
 codegen-units = 1
 debug = true
-lto = "fat"
 opt-level = 3
 overflow-checks = false
 panic = "abort"

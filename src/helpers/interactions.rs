@@ -1,4 +1,8 @@
-use twilight_model::application::{callback::InteractionResponse, interaction::ApplicationCommand};
+use tracing::instrument;
+use twilight_interactions::command::CreateCommand;
+use twilight_model::application::{
+	callback::InteractionResponse, command::Command, interaction::ApplicationCommand,
+};
 
 use super::Helpers;
 use crate::{
@@ -21,8 +25,42 @@ impl InteractionsHelper {
 		self.0.context()
 	}
 
-	pub async fn handle(self, command: ApplicationCommand) -> MietteResult<()> {
+	pub async fn init(self) -> MietteResult<()> {
+		let context = self.context();
+
+		if let Some(guild_id) = context.config().guild_id {
+			context
+				.http()
+				.set_guild_commands(guild_id, &Self::get_slashies())
+				.into_diagnostic()?
+				.exec()
+				.await
+		} else {
+			context
+				.http()
+				.set_global_commands(&Self::get_slashies())
+				.into_diagnostic()?
+				.exec()
+				.await
+		}
+		.into_diagnostic()?;
 		Ok(())
+	}
+
+	#[instrument(skip(self, command), fields(command.name = %command.data.name, command.guild_id))]
+	pub async fn handle(self, command: ApplicationCommand) {
+		if let Some(slashie) = Self::match_command(command.data.name.as_str()) {
+			let data = SlashData::new(command);
+			if let Err(e) = slashie.run(self, data).await {
+				event!(
+					Level::ERROR,
+					error = &*e.root_cause(),
+					"error running command"
+				);
+			} else {
+				event!(Level::WARN, "received unregistered command");
+			}
+		}
 	}
 
 	pub async fn ack(self, data: &SlashData) -> Result<(), HttpError> {
@@ -70,5 +108,16 @@ impl InteractionsHelper {
 			.into_diagnostic()?;
 
 		Ok(())
+	}
+
+	fn match_command(name: &str) -> Option<Box<dyn SlashCommand>> {
+		match name {
+			"ping" => Some(Box::new(Ping {})),
+			_ => None,
+		}
+	}
+
+	fn get_slashies() -> [Command; 1] {
+		[Ping::create_command()].map(Command::from)
 	}
 }

@@ -17,10 +17,14 @@ impl SlashCommand for Ping {
 	fn run(
 		&self,
 		helper: InteractionsHelper,
-		responder: SlashData,
-	) -> Pin<Box<dyn Future<Output = MietteResult<()>>>> {
+		mut data: SlashData,
+	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send>> {
 		Box::pin(async move {
-			panic!("todo");
+			data.message("Pong!");
+
+			helper.respond(&data).await.into_diagnostic()?;
+
+			Ok(())
 		})
 	}
 }

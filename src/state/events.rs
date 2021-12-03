@@ -28,7 +28,7 @@ async fn ready(_: Context, ready: Ready) -> Result<(), Infallible> {
 async fn interaction_create(context: Context, interaction: InteractionCreate) -> MietteResult<()> {
 	match interaction.0 {
 		Interaction::ApplicationCommand(cmd) => {
-			context.helpers().interactions().handle(*cmd).await?;
+			context.helpers().interactions().handle(*cmd).await;
 		}
 		Interaction::MessageComponent(_) => {}
 		i => event!(Level::WARN, ?i, "unhandled interaction"),
