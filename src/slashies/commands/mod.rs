@@ -1,3 +1,5 @@
+#[path = "crate.rs"]
+mod krate;
 mod ping;
 
-pub use self::ping::Ping;
+pub use self::{krate::Crate, ping::Ping};

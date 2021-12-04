@@ -12,11 +12,17 @@ use twilight_model::{
 use crate::{helpers::InteractionsHelper, prelude::*};
 
 pub trait SlashCommand: Send + Sync {
-	fn run(
-		&self,
+	fn run<'a>(
+		&'a self,
 		helper: InteractionsHelper,
 		responder: SlashData,
-	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send>>;
+	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + 'a>>;
+
+	fn autocomplete<'a>(&'a self, helper: InteractionsHelper, responder: SlashData) ->  Pin<Box<dyn Future<Output = MietteResult<()>> + Send + 'a>> {
+		Box::pin(async {
+			Ok(())
+		})
+	}
 }
 
 #[derive(Debug, Clone)]

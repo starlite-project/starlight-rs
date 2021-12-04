@@ -1,15 +1,16 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use tracing::instrument;
-use twilight_interactions::command::CreateCommand;
-use twilight_model::application::{
-	callback::InteractionResponse, command::Command, interaction::ApplicationCommand,
-};
+use twilight_interactions::command::{CommandModel, CreateCommand};
+use twilight_model::application::{callback::InteractionResponse, command::Command, interaction::{ApplicationCommand, InteractionType, application_command::CommandData}};
 
 use super::Helpers;
 use crate::{
 	prelude::*,
-	slashies::{commands::Ping, SlashCommand, SlashData},
+	slashies::{
+		commands::{Crate, Ping},
+		SlashCommand, SlashData,
+	},
 	state::Context,
 };
 
@@ -31,7 +32,7 @@ impl InteractionsHelper {
 
 	pub async fn init(self) -> MietteResult<()> {
 		if INITIALIZED.load(Ordering::SeqCst) {
-			return Ok(())
+			return Ok(());
 		}
 		let context = self.context();
 
@@ -58,14 +59,21 @@ impl InteractionsHelper {
 
 	#[instrument(skip(self, command), fields(command.name = %command.data.name, command.guild_id))]
 	pub async fn handle(self, command: ApplicationCommand) {
-		if let Some(slashie) = Self::match_command(command.data.name.as_str()) {
-			let data = SlashData::new(command);
-			if let Err(e) = slashie.run(self, data).await {
-				event!(
-					Level::ERROR,
-					error = &*e.root_cause(),
-					"error running command"
-				);
+		if let Some(slashie) = Self::match_command(command.data.name.as_str(), command.data.clone())
+		{
+			let data = SlashData::new(command.clone());
+			match command.kind {
+				InteractionType::ApplicationCommand => {
+					if let Err(e) = slashie.run(self, data).await {
+						event!(Level::ERROR, error = &*e.root_cause(), "error running command");
+					}
+				},
+				InteractionType::ApplicationCommandAutocomplete => {
+					if let Err(e) = slashie.autocomplete(self, data).await {
+						event!(Level::ERROR, error = &*e.root_cause(), "error running autocomplete");
+					}
+				}
+				_ => {}
 			}
 		} else {
 			event!(Level::WARN, "received unregistered command");
@@ -119,14 +127,15 @@ impl InteractionsHelper {
 		Ok(())
 	}
 
-	fn match_command(name: &str) -> Option<Box<dyn SlashCommand>> {
+	fn match_command(name: &str, data: CommandData) -> Option<Box<dyn SlashCommand>> {
 		match name {
 			"ping" => Some(Box::new(Ping {})),
+			"crate" => Some(Box::new(Crate::from_interaction(data).unwrap())),
 			_ => None,
 		}
 	}
 
-	fn get_slashies() -> [Command; 1] {
-		[Ping::create_command()].map(Command::from)
+	fn get_slashies() -> [Command; 2] {
+		[Ping::create_command(), Crate::create_command()].map(Command::from)
 	}
 }

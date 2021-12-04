@@ -27,7 +27,7 @@ async fn ready(_: Context, ready: Ready) -> Result<(), Infallible> {
 
 async fn interaction_create(context: Context, interaction: InteractionCreate) -> MietteResult<()> {
 	match interaction.0 {
-		Interaction::ApplicationCommand(cmd) => {
+		Interaction::ApplicationCommand(cmd) | Interaction::ApplicationCommandAutocomplete(cmd) => {
 			context.helpers().interactions().handle(*cmd).await;
 		}
 		Interaction::MessageComponent(_) => {}

@@ -1,8 +1,15 @@
 use crate::state::Context;
 
 mod interactions;
+mod color;
 
-pub use self::interactions::InteractionsHelper;
+pub use self::{interactions::InteractionsHelper, color::Color};
+
+pub const STARLIGHT_COLORS: [Color; 3] = [
+	Color::new(132, 61, 164),
+	Color::new(218, 0, 78),
+	Color::new(183, 47, 0)
+];
 
 #[derive(Debug, Clone, Copy)]
 #[must_use = "Helpers do nothing if not used"]
