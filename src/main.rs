@@ -64,6 +64,8 @@ async fn run() -> MietteResult<()> {
 
 	client.connect().await?;
 
+	client.helpers().interactions().init().await?;
+
 	#[cfg(windows)]
 	{
 		let mut sig_c = ctrl_c().into_diagnostic()?;

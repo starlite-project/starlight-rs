@@ -1,3 +1,5 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+
 use tracing::instrument;
 use twilight_interactions::command::CreateCommand;
 use twilight_model::application::{
@@ -10,6 +12,8 @@ use crate::{
 	slashies::{commands::Ping, SlashCommand, SlashData},
 	state::Context,
 };
+
+static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
 #[derive(Debug, Clone, Copy)]
 #[must_use = "an InteractionsHelper does nothing if not used"]
@@ -26,6 +30,9 @@ impl InteractionsHelper {
 	}
 
 	pub async fn init(self) -> MietteResult<()> {
+		if INITIALIZED.load(Ordering::SeqCst) {
+			return Ok(())
+		}
 		let context = self.context();
 
 		if let Some(guild_id) = context.config().guild_id {
@@ -44,6 +51,8 @@ impl InteractionsHelper {
 				.await
 		}
 		.into_diagnostic()?;
+
+		INITIALIZED.store(true, Ordering::SeqCst);
 		Ok(())
 	}
 
@@ -57,9 +66,9 @@ impl InteractionsHelper {
 					error = &*e.root_cause(),
 					"error running command"
 				);
-			} else {
-				event!(Level::WARN, "received unregistered command");
 			}
+		} else {
+			event!(Level::WARN, "received unregistered command");
 		}
 	}
 

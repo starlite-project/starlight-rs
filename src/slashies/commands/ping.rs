@@ -20,7 +20,23 @@ impl SlashCommand for Ping {
 		mut data: SlashData,
 	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send>> {
 		Box::pin(async move {
-			data.message("Pong!");
+			data.ephemeral();
+			let context = helper.context();
+
+			if let Some(pong) = context
+				.shard()
+				.info()
+				.into_diagnostic()?
+				.latency()
+				.average()
+			{
+				data.message(format!(
+					"Pong! Average latency is {} milliseconds",
+					pong.as_millis()
+				));
+			} else {
+				data.message("Pong! Couldn't quite get average latency");
+			}
 
 			helper.respond(&data).await.into_diagnostic()?;
 
