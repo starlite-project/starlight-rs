@@ -14,7 +14,7 @@ futures-util = "0.3.18"
 serde_json = "1"
 thiserror = "1.0.30"
 tracing = "0.1"
-twilight-embed-builder = "0.7"
+twilight-embed-builder = "0.8"
 
 [dependencies.clap]
 git = "https://github.com/clap-rs/clap.git"
@@ -44,28 +44,28 @@ version = "0.2.20"
 
 [dependencies.twilight-cache-inmemory]
 default-features = false
-version = "0.7"
+version = "0.8"
 
 [dependencies.twilight-gateway]
 default-features = false
 features = ["zlib-simd", "metrics", "rustls", "tracing"]
-version = "0.7"
+version = "0.8"
 
 [dependencies.twilight-http]
 default-features = false
 features = ["tracing", "simd-json", "rustls"]
-version = "0.7"
-
-[dependencies.twilight-interactions]
-version = "0.7"
-features = ["derive"]
+version = "0.8"
 
 [dependencies.twilight-model]
-version = "0.7"
+version = "0.8"
 
 [dependencies.twilight-standby]
 features = ["tracing"]
-version = "0.7"
+version = "0.8"
+
+[dependencies.twilight-util]
+features = ["builder"]
+version = "0.8"
 
 [profile.release]
 codegen-units = 1

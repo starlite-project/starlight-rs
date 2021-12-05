@@ -1,17 +1,19 @@
 use std::pin::Pin;
 
 use futures_util::Future;
-use twilight_interactions::command::CreateCommand;
+use twilight_model::application::{
+	command::CommandType, interaction::application_command::CommandData,
+};
+use twilight_util::builder::command::CommandBuilder;
 
 use crate::{
 	helpers::InteractionsHelper,
 	prelude::*,
-	slashies::{SlashCommand, SlashData},
+	slashies::{DefineCommand, SlashCommand, SlashData},
 };
 
-#[derive(Debug, Clone, Copy, CreateCommand)]
-#[command(name = "ping", desc = "Pings the bot")]
-pub struct Ping {}
+#[derive(Debug, Clone, Copy)]
+pub struct Ping;
 
 impl SlashCommand for Ping {
 	fn run(
@@ -42,5 +44,20 @@ impl SlashCommand for Ping {
 
 			Ok(())
 		})
+	}
+}
+
+impl DefineCommand for Ping {
+	fn define() -> CommandBuilder {
+		CommandBuilder::new(
+			"ping".to_owned(),
+			"Pings the bot.".to_owned(),
+			CommandType::ChatInput,
+		)
+		.default_permission(true)
+	}
+
+	fn parse(_: CommandData) -> MietteResult<Self> {
+		Ok(Self)
 	}
 }

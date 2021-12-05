@@ -1,15 +1,19 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use tracing::instrument;
-use twilight_interactions::command::{CommandModel, CreateCommand};
-use twilight_model::application::{callback::InteractionResponse, command::Command, interaction::{ApplicationCommand, InteractionType, application_command::CommandData}};
+use twilight_model::application::{
+	callback::InteractionResponse,
+	command::Command,
+	interaction::{application_command::CommandData, ApplicationCommand, InteractionType},
+};
+use twilight_util::builder::command::CommandBuilder;
 
 use super::Helpers;
 use crate::{
 	prelude::*,
 	slashies::{
 		commands::{Crate, Ping},
-		SlashCommand, SlashData,
+		DefineCommand, SlashCommand, SlashData,
 	},
 	state::Context,
 };
@@ -65,12 +69,20 @@ impl InteractionsHelper {
 			match command.kind {
 				InteractionType::ApplicationCommand => {
 					if let Err(e) = slashie.run(self, data).await {
-						event!(Level::ERROR, error = &*e.root_cause(), "error running command");
+						event!(
+							Level::ERROR,
+							error = &*e.root_cause(),
+							"error running command"
+						);
 					}
-				},
+				}
 				InteractionType::ApplicationCommandAutocomplete => {
 					if let Err(e) = slashie.autocomplete(self, data).await {
-						event!(Level::ERROR, error = &*e.root_cause(), "error running autocomplete");
+						event!(
+							Level::ERROR,
+							error = &*e.root_cause(),
+							"error running autocomplete"
+						);
 					}
 				}
 				_ => {}
@@ -127,15 +139,31 @@ impl InteractionsHelper {
 		Ok(())
 	}
 
+	pub async fn autocomplete(self, data: &SlashData) -> Result<(), HttpError> {
+		let autocomplete_data = data.autocomplete.clone();
+		let context = self.context();
+		context
+			.http()
+			.interaction_callback(
+				data.command.id,
+				&data.command.token,
+				&InteractionResponse::Autocomplete(autocomplete_data),
+			)
+			.exec()
+			.await?;
+
+		Ok(())
+	}
+
 	fn match_command(name: &str, data: CommandData) -> Option<Box<dyn SlashCommand>> {
 		match name {
 			"ping" => Some(Box::new(Ping {})),
-			"crate" => Some(Box::new(Crate::from_interaction(data).unwrap())),
+			"crate" => Some(Box::new(Crate::parse(data).unwrap())),
 			_ => None,
 		}
 	}
 
 	fn get_slashies() -> [Command; 2] {
-		[Ping::create_command(), Crate::create_command()].map(Command::from)
+		[Ping::define(), Crate::define()].map(CommandBuilder::build)
 	}
 }

@@ -4,13 +4,19 @@ use futures_util::Future;
 use reqwest::{header, Client};
 use serde::Deserialize;
 use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder};
-use twilight_interactions::command::{CommandModel, CreateCommand};
-use twilight_model::datetime::Timestamp;
+use twilight_model::{
+	application::{
+		command::{ CommandOptionChoice, CommandType},
+		interaction::application_command::{CommandData, CommandOptionValue},
+	},
+	datetime::Timestamp,
+};
+use twilight_util::builder::command::{CommandBuilder, StringBuilder};
 
 use crate::{
 	helpers::{InteractionsHelper, STARLIGHT_COLORS},
 	prelude::*,
-	slashies::{SlashCommand, SlashData},
+	slashies::{DefineCommand, SlashCommand, SlashData},
 };
 
 const USER_AGENT: &str = "pyrotechniac/starlight";
@@ -39,6 +45,7 @@ struct CrateList {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct CrateInfo {
 	id: String,
 	name: String,
@@ -50,10 +57,8 @@ struct CrateInfo {
 	exact_match: bool,
 }
 
-#[derive(Debug, Clone, CreateCommand, CommandModel)]
-#[command(name = "crate", desc = "Lookup crates on crates.io")]
+#[derive(Debug, Clone)]
 pub struct Crate {
-	#[command(desc = "The name of the crate to search for")]
 	crate_name: String,
 }
 
@@ -132,6 +137,7 @@ impl SlashCommand for Crate {
 		mut responder: SlashData,
 	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + '_>> {
 		Box::pin(async move {
+			dbg!(&responder.command.data);
 			if let Some(stdlib_url) = self.rustc_crate_link() {
 				responder.message(stdlib_url);
 
@@ -157,7 +163,13 @@ impl SlashCommand for Crate {
 								.unwrap_or_else(|| "_<no description available>_".to_owned()),
 						)
 						.field(EmbedFieldBuilder::new("Version", &info.newest_version).inline())
-						.field(EmbedFieldBuilder::new("Downloads", Self::format_number(info.downloads)).inline())
+						.field(
+							EmbedFieldBuilder::new(
+								"Downloads",
+								Self::format_number(info.downloads),
+							)
+							.inline(),
+						)
 						.timestamp(Timestamp::parse(info.updated_at.as_str()).into_diagnostic()?);
 
 					responder.embed(embed_builder.build().into_diagnostic()?);
@@ -168,5 +180,80 @@ impl SlashCommand for Crate {
 
 			Ok(())
 		})
+	}
+
+	fn autocomplete<'a>(
+		&'a self,
+		helper: InteractionsHelper,
+		mut responder: SlashData,
+	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + 'a>> {
+		Box::pin(async move {
+			let client = Client::builder().build().into_diagnostic()?;
+
+			let response = client
+				.get("https://crates.io/api/v1/crates")
+				.header(header::USER_AGENT, USER_AGENT)
+				.query(&[
+					("q", self.crate_name.as_str()),
+					("per_page", "25"),
+					("sort", "downloads"),
+				])
+				.send()
+				.await;
+
+			let crate_list = match response {
+				Ok(response) => response.json::<CrateList>().await.ok(),
+				Err(_) => None,
+			};
+
+			let to_send = crate_list
+				.map_or(Vec::new(), |list| list.crates)
+				.into_iter()
+				.map(|krate| CommandOptionChoice::String {
+					name: krate.name.clone(),
+					value: krate.name,
+				})
+				.collect();
+
+			responder.autocomplete(to_send);
+
+			helper.autocomplete(&responder).await.into_diagnostic()?;
+
+			Ok(())
+		})
+	}
+}
+
+impl DefineCommand for Crate {
+	fn define() -> CommandBuilder {
+		CommandBuilder::new(
+			"crate".to_owned(),
+			"Lookup crates on crates.io".to_owned(),
+			CommandType::ChatInput,
+		)
+		.default_permission(true)
+		.option(
+			StringBuilder::new(
+				"crate_name".to_owned(),
+				"The name of the crate to search for".to_owned(),
+			)
+			.autocomplete(true)
+			.required(true),
+		)
+	}
+
+	fn parse(data: CommandData) -> MietteResult<Self> {
+		let name = data
+			.options
+			.into_iter()
+			.find(|value| value.name == "crate_name")
+			.ok_or_else(|| error!("Failed to find option"))?;
+
+		let crate_name = match name.value {
+			CommandOptionValue::String(val) => Ok(val),
+			_ => Err(error!("Value is not a string")),
+		}?;
+
+		Ok(Self { crate_name })
 	}
 }

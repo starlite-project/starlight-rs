@@ -2,12 +2,17 @@ use std::pin::Pin;
 
 use futures_util::Future;
 use twilight_model::{
-	application::{callback::CallbackData, interaction::ApplicationCommand},
+	application::{
+		callback::{Autocomplete, CallbackData},
+		command::CommandOptionChoice,
+		interaction::{application_command::CommandData, ApplicationCommand},
+	},
 	channel::{
 		embed::Embed,
 		message::{allowed_mentions::AllowedMentionsBuilder, MessageFlags},
 	},
 };
+use twilight_util::builder::command::CommandBuilder;
 
 use crate::{helpers::InteractionsHelper, prelude::*};
 
@@ -18,11 +23,20 @@ pub trait SlashCommand: Send + Sync {
 		responder: SlashData,
 	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + 'a>>;
 
-	fn autocomplete<'a>(&'a self, helper: InteractionsHelper, responder: SlashData) ->  Pin<Box<dyn Future<Output = MietteResult<()>> + Send + 'a>> {
-		Box::pin(async {
-			Ok(())
-		})
+	#[allow(unused_variables)]
+	fn autocomplete<'a>(
+		&'a self,
+		helper: InteractionsHelper,
+		responder: SlashData,
+	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + 'a>> {
+		Box::pin(async { Ok(()) })
 	}
+}
+
+pub trait DefineCommand: SlashCommand + Sized {
+	fn define() -> CommandBuilder;
+
+	fn parse(data: CommandData) -> MietteResult<Self>;
 }
 
 #[derive(Debug, Clone)]
@@ -30,6 +44,7 @@ pub trait SlashCommand: Send + Sync {
 pub struct SlashData {
 	pub callback: CallbackData,
 	pub command: ApplicationCommand,
+	pub autocomplete: Autocomplete,
 }
 
 impl SlashData {
@@ -46,13 +61,14 @@ impl SlashData {
 		Self {
 			callback: Self::BASE,
 			command,
+			autocomplete: Autocomplete { choices: vec![] },
 		}
 	}
 
 	pub fn allowed_mentions<F: FnOnce(AllowedMentionsBuilder) -> AllowedMentionsBuilder>(
-		mut self,
+		&mut self,
 		builder: F,
-	) -> Self {
+	) -> &mut Self {
 		self.callback.allowed_mentions = Some(builder(AllowedMentionsBuilder::new()).build());
 
 		self
@@ -62,6 +78,12 @@ impl SlashData {
 		assert!(!content.as_ref().is_empty(), "empty message not allowed");
 
 		self.callback.content = Some(content.as_ref().to_owned());
+
+		self
+	}
+
+	pub fn autocomplete(&mut self, choices: Vec<CommandOptionChoice>) -> &mut Self {
+		self.autocomplete = Autocomplete { choices };
 
 		self
 	}
@@ -102,6 +124,7 @@ impl SlashData {
 				tts: self.callback.tts.take(),
 			},
 			command: self.command.clone(),
+			autocomplete: self.autocomplete.clone(),
 		}
 	}
 }
