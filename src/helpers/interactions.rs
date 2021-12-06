@@ -12,7 +12,7 @@ use super::Helpers;
 use crate::{
 	prelude::*,
 	slashies::{
-		commands::{Crate, Ping},
+		commands::{Crate, Ping, Play},
 		DefineCommand, SlashCommand, SlashData,
 	},
 	state::Context,
@@ -159,11 +159,12 @@ impl InteractionsHelper {
 		match name {
 			"ping" => Some(Box::new(Ping {})),
 			"crate" => Some(Box::new(Crate::parse(data).unwrap())),
+			"play" => Some(Box::new(Play::parse(data).unwrap())),
 			_ => None,
 		}
 	}
 
-	fn get_slashies() -> [Command; 2] {
-		[Ping::define(), Crate::define()].map(CommandBuilder::build)
+	fn get_slashies() -> [Command; 3] {
+		[Ping::define(), Crate::define(), Play::define()].map(CommandBuilder::build)
 	}
 }

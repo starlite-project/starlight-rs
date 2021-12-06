@@ -16,6 +16,7 @@
 	clippy::suspicious_else_formatting,
 	clippy::no_effect_underscore_binding
 )]
+#![cfg_attr(test, allow(clippy::panic_in_result_fn))]
 
 pub mod helpers;
 pub mod prelude;

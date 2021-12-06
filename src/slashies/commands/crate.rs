@@ -6,7 +6,7 @@ use serde::Deserialize;
 use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder};
 use twilight_model::{
 	application::{
-		command::{ CommandOptionChoice, CommandType},
+		command::{CommandOptionChoice, CommandType},
 		interaction::application_command::{CommandData, CommandOptionValue},
 	},
 	datetime::Timestamp,

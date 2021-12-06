@@ -1,6 +1,9 @@
 use std::fmt::{Formatter, Result as FmtResult};
 
-use serde::{Deserialize, Deserializer, Serialize, Serializer, de::{Error as DeError, Visitor}};
+use serde::{
+	de::{Error as DeError, Visitor},
+	Deserialize, Deserializer, Serialize, Serializer,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[must_use = "Color has no side effects"]
@@ -100,7 +103,8 @@ impl<'de> Visitor<'de> for ColorVisitor {
 impl<'de> Deserialize<'de> for Color {
 	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
 	where
-			D: Deserializer<'de> {
+		D: Deserializer<'de>,
+	{
 		deserializer.deserialize_u32(ColorVisitor)
 	}
 }

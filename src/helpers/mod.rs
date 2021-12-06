@@ -1,14 +1,16 @@
 use crate::state::Context;
 
-mod interactions;
 mod color;
+mod interactions;
+pub mod parsing;
+pub mod playground;
 
-pub use self::{interactions::InteractionsHelper, color::Color};
+pub use self::{color::Color, interactions::InteractionsHelper};
 
 pub const STARLIGHT_COLORS: [Color; 3] = [
 	Color::new(132, 61, 164),
 	Color::new(218, 0, 78),
-	Color::new(183, 47, 0)
+	Color::new(183, 47, 0),
 ];
 
 #[derive(Debug, Clone, Copy)]
