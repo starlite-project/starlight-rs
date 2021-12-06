@@ -27,6 +27,7 @@ pub struct ContextBuilder {
 	cache: Option<InMemoryCacheBuilder>,
 	http: Option<ClientBuilder>,
 	intents: Option<Intents>,
+	cdn: Option<reqwest::ClientBuilder>,
 	config: Option<Config>,
 }
 
@@ -38,6 +39,7 @@ impl ContextBuilder {
 			http: None,
 			intents: None,
 			config: None,
+			cdn: None,
 		}
 	}
 
@@ -77,6 +79,15 @@ impl ContextBuilder {
 		self
 	}
 
+	pub fn cdn_builder<F>(mut self, cdn_builder: F) -> Result<Self, reqwest::Error>
+	where
+		F: FnOnce(reqwest::ClientBuilder) -> reqwest::ClientBuilder,
+	{
+		self.cdn = Some(cdn_builder(reqwest::ClientBuilder::new()));
+
+		Ok(self)
+	}
+
 	pub fn http_builder<F>(mut self, http_builder_fn: F) -> Result<Self, VarError>
 	where
 		F: FnOnce(ClientBuilder) -> ClientBuilder,
@@ -105,12 +116,14 @@ impl ContextBuilder {
 			.ok_or(ContextBuildError::Shard)
 			.into_diagnostic()
 			.context("need cluster to build state")?;
+		let cdn_builder = self.cdn.unwrap_or_default();
 
 		let cache_builder = self.cache.unwrap_or_default();
 
 		let http = Arc::new(http_builder.token(token).build());
 		let cache = Arc::new(cache_builder.build());
 		let (shard, events) = shard_builder.http_client(Arc::clone(&http)).build();
+		let cdn = cdn_builder.build().into_diagnostic()?;
 		let standby = Arc::default();
 
 		let components = Box::leak(Box::new(State {
@@ -118,6 +131,7 @@ impl ContextBuilder {
 			shard: Arc::new(shard),
 			standby,
 			http,
+			cdn,
 			config,
 		}));
 

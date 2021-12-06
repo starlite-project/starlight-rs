@@ -95,10 +95,8 @@ impl Crate {
 		output
 	}
 
-	async fn get_crate(&self) -> MietteResult<CrateResult> {
+	async fn get_crate(&self, reqwest_client: &Client) -> MietteResult<CrateResult> {
 		event!(Level::INFO, "searching for crate `{}`", &self.crate_name);
-
-		let reqwest_client = Client::builder().build().into_diagnostic()?;
 
 		let crate_list = reqwest_client
 			.get("https://crates.io/api/v1/crates")
@@ -137,16 +135,17 @@ impl SlashCommand for Crate {
 		mut responder: SlashData,
 	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + '_>> {
 		Box::pin(async move {
-			dbg!(&responder.command.data);
 			if let Some(stdlib_url) = self.rustc_crate_link() {
 				responder.message(stdlib_url);
 
-				helper.respond(&responder).await.into_diagnostic()?;
+				helper.respond(&mut responder).await.into_diagnostic()?;
 
 				return Ok(());
 			}
 
-			let krate = self.get_crate().await?;
+			let cdn = helper.cdn();
+
+			let krate = self.get_crate(cdn).await?;
 
 			match krate {
 				CrateResult::NotFound(msg) => {
@@ -176,7 +175,7 @@ impl SlashCommand for Crate {
 				}
 			}
 
-			helper.respond(&responder).await.into_diagnostic()?;
+			helper.respond(&mut responder).await.into_diagnostic()?;
 
 			Ok(())
 		})
@@ -188,7 +187,7 @@ impl SlashCommand for Crate {
 		mut responder: SlashData,
 	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + 'a>> {
 		Box::pin(async move {
-			let client = Client::builder().build().into_diagnostic()?;
+			let client = helper.cdn();
 
 			let response = client
 				.get("https://crates.io/api/v1/crates")
@@ -217,7 +216,10 @@ impl SlashCommand for Crate {
 
 			responder.autocomplete(to_send);
 
-			helper.autocomplete(&responder).await.into_diagnostic()?;
+			helper
+				.autocomplete(&mut responder)
+				.await
+				.into_diagnostic()?;
 
 			Ok(())
 		})

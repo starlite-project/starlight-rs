@@ -1,4 +1,4 @@
-use crate::state::Context;
+use crate::state::{Context, QuickAccess};
 
 mod color;
 mod interactions;
@@ -27,9 +27,10 @@ impl Helpers {
 	pub const fn interactions(self) -> InteractionsHelper {
 		InteractionsHelper::new(self)
 	}
+}
 
-	#[must_use = "getting the current Context has no side effects"]
-	pub const fn context(self) -> Context {
+impl QuickAccess for Helpers {
+	fn context(&self) -> Context {
 		self.context
 	}
 }

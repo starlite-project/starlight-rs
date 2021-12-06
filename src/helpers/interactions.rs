@@ -1,8 +1,11 @@
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::{
+	mem,
+	sync::atomic::{AtomicBool, Ordering},
+};
 
 use tracing::instrument;
 use twilight_model::application::{
-	callback::InteractionResponse,
+	callback::{Autocomplete, InteractionResponse},
 	command::Command,
 	interaction::{application_command::CommandData, ApplicationCommand, InteractionType},
 };
@@ -15,7 +18,7 @@ use crate::{
 		commands::{Crate, Ping, Play},
 		DefineCommand, SlashCommand, SlashData,
 	},
-	state::Context,
+	state::{Context, QuickAccess},
 };
 
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
@@ -27,11 +30,6 @@ pub struct InteractionsHelper(Helpers);
 impl InteractionsHelper {
 	pub(super) const fn new(helpers: Helpers) -> Self {
 		Self(helpers)
-	}
-
-	#[must_use]
-	pub const fn context(self) -> Context {
-		self.0.context()
 	}
 
 	pub async fn init(self) -> MietteResult<()> {
@@ -106,13 +104,16 @@ impl InteractionsHelper {
 		Ok(())
 	}
 
-	pub async fn respond(self, data: &SlashData) -> Result<(), HttpError> {
+	pub async fn respond(self, data: &mut SlashData) -> Result<(), HttpError> {
 		self.context()
 			.http()
 			.interaction_callback(
 				data.command.id,
 				&data.command.token,
-				&InteractionResponse::ChannelMessageWithSource(data.callback.clone()),
+				&InteractionResponse::ChannelMessageWithSource(mem::replace(
+					&mut data.callback,
+					SlashData::BASE,
+				)),
 			)
 			.exec()
 			.await?;
@@ -120,8 +121,8 @@ impl InteractionsHelper {
 		Ok(())
 	}
 
-	pub async fn update(self, data: &SlashData) -> MietteResult<()> {
-		let callback_data = data.callback.clone();
+	pub async fn update(self, data: &mut SlashData) -> MietteResult<()> {
+		let callback_data = mem::replace(&mut data.callback, SlashData::BASE);
 		let context = self.context();
 		let update_interaction = context
 			.http()
@@ -139,8 +140,9 @@ impl InteractionsHelper {
 		Ok(())
 	}
 
-	pub async fn autocomplete(self, data: &SlashData) -> Result<(), HttpError> {
-		let autocomplete_data = data.autocomplete.clone();
+	pub async fn autocomplete(self, data: &mut SlashData) -> Result<(), HttpError> {
+		let autocomplete_data =
+			mem::replace(&mut data.autocomplete, Autocomplete { choices: vec![] });
 		let context = self.context();
 		context
 			.http()
@@ -166,5 +168,11 @@ impl InteractionsHelper {
 
 	fn get_slashies() -> [Command; 3] {
 		[Ping::define(), Crate::define(), Play::define()].map(CommandBuilder::build)
+	}
+}
+
+impl QuickAccess for InteractionsHelper {
+	fn context(&self) -> Context {
+		self.0.context()
 	}
 }

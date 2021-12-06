@@ -7,8 +7,9 @@ use crate::prelude::*;
 
 mod request;
 mod response;
+mod util;
 
-pub use self::{request::*, response::*};
+pub use self::{request::*, response::*, util::*};
 
 #[derive(Debug, Default, Error, Clone, Copy)]
 #[error("an invalid type was given")]

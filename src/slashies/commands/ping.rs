@@ -40,7 +40,7 @@ impl SlashCommand for Ping {
 				data.message("Pong! Couldn't quite get average latency");
 			}
 
-			helper.respond(&data).await.into_diagnostic()?;
+			helper.respond(&mut data).await.into_diagnostic()?;
 
 			Ok(())
 		})

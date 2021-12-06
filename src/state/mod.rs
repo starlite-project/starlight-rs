@@ -85,6 +85,7 @@ impl Deref for Context {
 #[derive(Debug, Clone)]
 pub struct State {
 	cache: Arc<Cache>,
+	cdn: reqwest::Client,
 	shard: Arc<Shard>,
 	http: Arc<HttpClient>,
 	standby: Arc<Standby>,
@@ -108,6 +109,11 @@ impl State {
 	}
 
 	#[must_use]
+	pub const fn cdn(&self) -> &reqwest::Client {
+		&self.cdn
+	}
+
+	#[must_use]
 	pub fn standby(&self) -> &Standby {
 		&*self.standby
 	}
@@ -115,5 +121,33 @@ impl State {
 	#[must_use]
 	pub const fn config(&self) -> Config {
 		self.config
+	}
+}
+
+pub trait QuickAccess {
+	fn context(&self) -> Context;
+
+	fn cache(&self) -> &Cache {
+		self.context().0.cache()
+	}
+
+	fn shard(&self) -> &Shard {
+		self.context().0.shard()
+	}
+
+	fn http(&self) -> &HttpClient {
+		self.context().0.http()
+	}
+
+	fn cdn(&self) -> &reqwest::Client {
+		self.context().0.cdn()
+	}
+
+	fn standby(&self) -> &Standby {
+		self.context().0.standby()
+	}
+
+	fn config(&self) -> Config {
+		self.context().0.config()
 	}
 }

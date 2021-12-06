@@ -11,7 +11,9 @@ use twilight_util::builder::command::{BooleanBuilder, CommandBuilder, StringBuil
 use crate::{
 	helpers::{
 		parsing::CodeBlock,
-		playground::{BuildMode, Edition, RustChannel},
+		playground::{
+			BuildMode, CrateType, Edition, PlaygroundRequest, PlaygroundResponse, RustChannel,
+		},
 		InteractionsHelper,
 	},
 	prelude::*,
@@ -38,9 +40,40 @@ impl SlashCommand for Play {
 		mut responder: SlashData,
 	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + 'a>> {
 		Box::pin(async move {
-			responder.ephemeral().message(format!("{:?}", self));
+			let cdn = helper.cdn();
 
-			helper.respond(&responder).await.into_diagnostic()?;
+			let mut result = cdn
+				.post("https://play.rust-lang.org/execute")
+				.json(&PlaygroundRequest {
+					code: &self.code.code,
+					channel: self.channel,
+					crate_type: if self.code.code.contains("fn main") {
+						CrateType::Binary
+					} else {
+						CrateType::Library
+					},
+					edition: self.edition,
+					mode: self.mode,
+					tests: false,
+				})
+				.send()
+				.await
+				.into_diagnostic()?
+				.json::<PlaygroundResponse>()
+				.await
+				.into_diagnostic()?;
+
+			result.format(self.warn);
+
+			let output = if result.stderr.is_empty() {
+				result.stdout
+			} else if result.stdout.is_empty() {
+				result.stderr
+			} else {
+				format!("{}\n{}", result.stderr, result.stdout);
+			}
+
+			helper.respond(&mut responder).await.into_diagnostic()?;
 			Ok(())
 		})
 	}
