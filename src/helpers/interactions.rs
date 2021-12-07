@@ -3,11 +3,19 @@ use std::{
 	sync::atomic::{AtomicBool, Ordering},
 };
 
+use starlight_macros::model;
 use tracing::instrument;
-use twilight_model::application::{
-	callback::{Autocomplete, InteractionResponse},
-	command::Command,
-	interaction::{application_command::CommandData, ApplicationCommand, InteractionType},
+use twilight_http::request::application::{
+	interaction::{CreateFollowupMessage, UpdateFollowupMessage},
+	InteractionError,
+};
+use twilight_model::{
+	application::{
+		callback::{Autocomplete, InteractionResponse},
+		command::Command,
+		interaction::{application_command::CommandData, ApplicationCommand, InteractionType},
+	},
+	channel::Message,
 };
 use twilight_util::builder::command::CommandBuilder;
 
@@ -72,6 +80,18 @@ impl InteractionsHelper {
 							error = &*e.root_cause(),
 							"error running command"
 						);
+
+						let mut err_data = SlashData::new(command);
+
+						err_data
+							.message("an error occurred running the interaction")
+							.ephemeral();
+
+						if self.raw_get(&err_data).await.is_err() {
+							self.respond(&mut err_data).await.unwrap();
+						} else {
+							self.update(&mut err_data).await.unwrap();
+						}
 					}
 				}
 				InteractionType::ApplicationCommandAutocomplete => {
@@ -155,6 +175,33 @@ impl InteractionsHelper {
 			.await?;
 
 		Ok(())
+	}
+
+	pub fn raw_create<'a>(
+		&'a self,
+		data: &'a SlashData,
+	) -> Result<CreateFollowupMessage<'a>, InteractionError> {
+		self.http().create_followup_message(&data.command.token)
+	}
+
+	pub async fn raw_update<'a>(
+		&'a self,
+		data: &'a SlashData,
+	) -> MietteResult<UpdateFollowupMessage<'a>> {
+		let http = self.http();
+		let original_message_id = self.raw_get(data).await?.id;
+
+		http.update_followup_message(&data.command.token, original_message_id)
+			.into_diagnostic()
+	}
+
+	pub async fn raw_get(self, data: &SlashData) -> MietteResult<Message> {
+		let http = self.http();
+		let get_original = http
+			.get_interaction_original(&data.command.token)
+			.into_diagnostic()?;
+
+		model!(get_original).await.into_diagnostic()
 	}
 
 	fn match_command(name: &str, data: CommandData) -> Option<Box<dyn SlashCommand>> {

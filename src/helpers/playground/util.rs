@@ -1,4 +1,6 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, collections::HashMap};
+
+use crate::{prelude::*, state::Context};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ResultHandling {
@@ -15,10 +17,10 @@ impl ResultHandling {
 		}
 
 		let after_crate_attrs = match self {
-			Self::None => "fn main() -> Result<(), Box<std::error::Error>> {\n",
-			Self::Discard => "fn main() -> Result<(), Box<std::error::Error>> { let _ = {\n",
+			Self::None => "fn main() -> Result<(), Box<dyn std::error::Error>> {\n",
+			Self::Discard => "fn main() -> Result<(), Box<dyn std::error::Error>> { let _ = {\n",
 			Self::Print => {
-				"fn main() -> Result<(), Box<std::error::Error>> { println!(\"{:?}\", {\n"
+				"fn main() -> Result<(), Box<dyn std::error::Error>> { println!(\"{:?}\", {\n"
 			}
 		};
 
@@ -96,4 +98,24 @@ pub(super) fn extract_relevant_lines<'a>(
 	}
 
 	stderr
+}
+
+pub async fn get_gist(context: Context, code: &str) -> MietteResult<String> {
+	let cdn = context.cdn();
+
+	let mut payload = HashMap::new();
+	payload.insert("code", code);
+
+	let resp = cdn
+		.post("https://play.rust-lang.org/meta/gist")
+		.json(&payload)
+		.send()
+		.await
+		.into_diagnostic()?;
+
+	let mut resp: HashMap<String, String> = resp.json().await.into_diagnostic()?;
+
+	event!(Level::INFO, "gist response: {:?}", resp);
+
+	resp.remove("id").ok_or_else(|| error!("no gist found"))
 }

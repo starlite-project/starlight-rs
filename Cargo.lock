@@ -250,15 +250,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ct-logs"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c1a816186fa68d9e426e3cb4ae4dff1fcd8e4a2c34b781bf7a822574a0d0aac8"
-dependencies = [
- "sct 0.6.1",
-]
-
-[[package]]
 name = "dashmap"
 version = "4.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -535,33 +526,16 @@ dependencies = [
 
 [[package]]
 name = "hyper-rustls"
-version = "0.22.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f9f7a97316d44c0af9b0301e65010573a853a9fc97046d7331d7f6bc0fd5a64"
-dependencies = [
- "ct-logs",
- "futures-util",
- "hyper",
- "log",
- "rustls 0.19.1",
- "rustls-native-certs 0.5.0",
- "tokio",
- "tokio-rustls 0.22.0",
- "webpki 0.21.4",
-]
-
-[[package]]
-name = "hyper-rustls"
 version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d87c48c02e0dc5e3b849a2041db3029fd066650f8f717c07bf8ed78ccb895cac"
 dependencies = [
  "http",
  "hyper",
- "rustls 0.20.2",
- "rustls-native-certs 0.6.1",
+ "rustls",
+ "rustls-native-certs",
  "tokio",
- "tokio-rustls 0.23.1",
+ "tokio-rustls",
 ]
 
 [[package]]
@@ -1136,39 +1110,14 @@ checksum = "7ef03e0a2b150c7a90d01faf6254c9c48a41e95fb2a8c2ac1c6f0d2b9aefc342"
 
 [[package]]
 name = "rustls"
-version = "0.19.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35edb675feee39aec9c99fa5ff985081995a06d594114ae14cbe797ad7b7a6d7"
-dependencies = [
- "base64",
- "log",
- "ring",
- "sct 0.6.1",
- "webpki 0.21.4",
-]
-
-[[package]]
-name = "rustls"
 version = "0.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d37e5e2290f3e040b594b1a9e04377c2c671f1a1cfd9bfdef82106ac1c113f84"
 dependencies = [
  "log",
  "ring",
- "sct 0.7.0",
- "webpki 0.22.0",
-]
-
-[[package]]
-name = "rustls-native-certs"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a07b7c1885bd8ed3831c289b7870b13ef46fe0e856d288c30d9cc17d75a2092"
-dependencies = [
- "openssl-probe",
- "rustls 0.19.1",
- "schannel",
- "security-framework",
+ "sct",
+ "webpki",
 ]
 
 [[package]]
@@ -1206,16 +1155,6 @@ checksum = "8f05ba609c234e60bee0d547fe94a4c7e9da733d1c962cf6e59efa4cd9c8bc75"
 dependencies = [
  "lazy_static",
  "winapi",
-]
-
-[[package]]
-name = "sct"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b362b83898e0e69f38515b82ee15aa80636befe47c3b6d3d89a911e78fc228ce"
-dependencies = [
- "ring",
- "untrusted",
 ]
 
 [[package]]
@@ -1418,8 +1357,8 @@ dependencies = [
  "twilight-cache-inmemory",
  "twilight-embed-builder",
  "twilight-gateway",
- "twilight-http 0.8.0",
- "twilight-model 0.8.0",
+ "twilight-http",
+ "twilight-model",
  "twilight-standby",
  "twilight-util",
 ]
@@ -1431,8 +1370,8 @@ dependencies = [
  "miette",
  "serde",
  "thiserror",
- "twilight-http 0.7.2",
- "twilight-model 0.7.2",
+ "twilight-http",
+ "twilight-model",
 ]
 
 [[package]]
@@ -1619,24 +1558,13 @@ dependencies = [
 
 [[package]]
 name = "tokio-rustls"
-version = "0.22.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc6844de72e57df1980054b38be3a9f4702aba4858be64dd700181a8a6d0e1b6"
-dependencies = [
- "rustls 0.19.1",
- "tokio",
- "webpki 0.21.4",
-]
-
-[[package]]
-name = "tokio-rustls"
 version = "0.23.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4baa378e417d780beff82bf54ceb0d195193ea6a00c14e22359e7f39456b5689"
 dependencies = [
- "rustls 0.20.2",
+ "rustls",
  "tokio",
- "webpki 0.22.0",
+ "webpki",
 ]
 
 [[package]]
@@ -1647,12 +1575,12 @@ checksum = "e057364a4dd37870b33bf8dc1885d29187d90770f488d599d3ee8d9e4916fbd3"
 dependencies = [
  "futures-util",
  "log",
- "rustls 0.20.2",
- "rustls-native-certs 0.6.1",
+ "rustls",
+ "rustls-native-certs",
  "tokio",
- "tokio-rustls 0.23.1",
+ "tokio-rustls",
  "tungstenite",
- "webpki 0.22.0",
+ "webpki",
 ]
 
 [[package]]
@@ -1769,12 +1697,12 @@ dependencies = [
  "httparse",
  "log",
  "rand",
- "rustls 0.20.2",
+ "rustls",
  "sha-1",
  "thiserror",
  "url",
  "utf-8",
- "webpki 0.22.0",
+ "webpki",
 ]
 
 [[package]]
@@ -1786,7 +1714,7 @@ dependencies = [
  "bitflags",
  "dashmap",
  "serde",
- "twilight-model 0.8.0",
+ "twilight-model",
 ]
 
 [[package]]
@@ -1795,7 +1723,7 @@ version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b932276afa348926de3054a99eba3a134bc938113b1c93a21d01dd706555a95f"
 dependencies = [
- "twilight-model 0.8.0",
+ "twilight-model",
 ]
 
 [[package]]
@@ -1815,8 +1743,8 @@ dependencies = [
  "tokio-tungstenite",
  "tracing",
  "twilight-gateway-queue",
- "twilight-http 0.8.0",
- "twilight-model 0.8.0",
+ "twilight-http",
+ "twilight-model",
  "url",
 ]
 
@@ -1827,23 +1755,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7cd8b10f21852eea54c33b899bf0b7c2cb0811447e3d14782a93322bd5545705"
 dependencies = [
  "tokio",
- "twilight-http 0.8.0",
-]
-
-[[package]]
-name = "twilight-http"
-version = "0.7.2"
-source = "git+https://github.com/twilight-rs/twilight.git#fe16d64706ecfeeb9212ec7872fe73100ce66216"
-dependencies = [
- "brotli",
- "hyper",
- "hyper-rustls 0.22.1",
- "percent-encoding",
- "rand",
- "serde",
- "serde_json",
- "tokio",
- "twilight-model 0.7.2",
+ "twilight-http",
 ]
 
 [[package]]
@@ -1852,8 +1764,9 @@ version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9bf5b89606ec28c09950ccfe13f659d189c5e7a1e3c232bdb15b766bc1b00663"
 dependencies = [
+ "brotli",
  "hyper",
- "hyper-rustls 0.23.0",
+ "hyper-rustls",
  "percent-encoding",
  "rand",
  "serde",
@@ -1862,7 +1775,7 @@ dependencies = [
  "tokio",
  "tracing",
  "twilight-http-ratelimiting",
- "twilight-model 0.8.0",
+ "twilight-model",
 ]
 
 [[package]]
@@ -1874,18 +1787,6 @@ dependencies = [
  "futures-util",
  "http",
  "tokio",
-]
-
-[[package]]
-name = "twilight-model"
-version = "0.7.2"
-source = "git+https://github.com/twilight-rs/twilight.git#fe16d64706ecfeeb9212ec7872fe73100ce66216"
-dependencies = [
- "bitflags",
- "serde",
- "serde-value",
- "serde_repr",
- "tracing",
 ]
 
 [[package]]
@@ -1912,7 +1813,7 @@ dependencies = [
  "futures-util",
  "tokio",
  "tracing",
- "twilight-model 0.8.0",
+ "twilight-model",
 ]
 
 [[package]]
@@ -1921,7 +1822,7 @@ version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c9773d543e67b16d641a15ae4e2e0a6f4c2562a90dab9a3e46a3e4ac52b1b6f2"
 dependencies = [
- "twilight-model 0.8.0",
+ "twilight-model",
 ]
 
 [[package]]
@@ -2119,16 +2020,6 @@ checksum = "38eb105f1c59d9eaa6b5cdc92b859d85b926e82cb2e0945cd0c9259faa6fe9fb"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "webpki"
-version = "0.21.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8e38c0608262c46d4a56202ebabdeb094cef7e560ca7a226c6bf055188aa4ea"
-dependencies = [
- "ring",
- "untrusted",
 ]
 
 [[package]]

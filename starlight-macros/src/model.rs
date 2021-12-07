@@ -28,13 +28,13 @@ macro_rules! model {
 	}};
 	($input:ident as $ty:ty) => {{
 		let response_future: ::twilight_http::response::ResponseFuture<$ty> = $input.exec();
-		$crate::model::unravel::<$ty>(response_future)
+		$crate::model::__unravel::<$ty>(response_future)
 	}};
 	($input:ident as list of $ty:ty) => {{
 		let response_future: ::twilight_http::response::ResponseFuture<
 			twilight_http::response::marker::ListBody<$ty>,
 		> = $input.exec();
-		$crate::model::unravel_many::<$ty>(response_future)
+		$crate::model::__unravel_many::<$ty>(response_future)
 	}};
 }
 

@@ -59,6 +59,7 @@ impl<'de> Deserialize<'de> for PlaygroundResponse {
 		D: Deserializer<'de>,
 	{
 		#[derive(Deserialize)]
+		#[serde(untagged)]
 		pub enum RawPlayResponse {
 			Err {
 				error: String,

@@ -1,7 +1,7 @@
 use std::pin::Pin;
 
 use futures_util::Future;
-use serde::Serialize;
+use twilight_http::request::AttachmentFile;
 use twilight_model::application::{
 	command::CommandType,
 	interaction::application_command::{CommandData, CommandOptionValue},
@@ -12,7 +12,8 @@ use crate::{
 	helpers::{
 		parsing::CodeBlock,
 		playground::{
-			BuildMode, CrateType, Edition, PlaygroundRequest, PlaygroundResponse, RustChannel,
+			get_gist, BuildMode, CrateType, Edition, PlaygroundRequest, PlaygroundResponse,
+			ResultHandling, RustChannel,
 		},
 		InteractionsHelper,
 	},
@@ -33,6 +34,15 @@ pub struct Play {
 	warn: bool,
 }
 
+impl Play {
+	fn url_from_gist(&self, gist_id: &str) -> String {
+		format!(
+			"https://play.rust-lang.org/?version={}&mode={}&edition={}&gist={}",
+			self.channel, self.mode, self.edition, gist_id
+		)
+	}
+}
+
 impl SlashCommand for Play {
 	fn run<'a>(
 		&'a self,
@@ -40,22 +50,18 @@ impl SlashCommand for Play {
 		mut responder: SlashData,
 	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + 'a>> {
 		Box::pin(async move {
+			helper.ack(&responder).await.into_diagnostic()?;
+
+			let code = ResultHandling::None.apply(&self.code.code);
+
 			let cdn = helper.cdn();
+
+			let request =
+				PlaygroundRequest::new(&code, self.channel, self.edition, self.mode, false);
 
 			let mut result = cdn
 				.post("https://play.rust-lang.org/execute")
-				.json(&PlaygroundRequest {
-					code: &self.code.code,
-					channel: self.channel,
-					crate_type: if self.code.code.contains("fn main") {
-						CrateType::Binary
-					} else {
-						CrateType::Library
-					},
-					edition: self.edition,
-					mode: self.mode,
-					tests: false,
-				})
+				.json(&request)
 				.send()
 				.await
 				.into_diagnostic()?
@@ -70,10 +76,32 @@ impl SlashCommand for Play {
 			} else if result.stdout.is_empty() {
 				result.stderr
 			} else {
-				format!("{}\n{}", result.stderr, result.stdout);
+				format!("{}\n{}", result.stderr, result.stdout)
+			};
+
+			if output.len() > 2000 {
+				let gist_id = get_gist(helper.context(), &self.code.code).await?;
+				// message content too long, make it a file.
+				responder.message(&format!(
+					"output is too large, playground url: <{}>",
+					self.url_from_gist(&gist_id)
+				));
+				let file = vec![AttachmentFile::from_bytes("output.txt", output.as_bytes())];
+				let raw_data = serde_json::to_vec(&responder.callback).into_diagnostic()?;
+				let update_message = helper
+					.raw_update(&responder)
+					.await?
+					.attach(&file)
+					.payload_json(&raw_data);
+
+				update_message.exec().await.into_diagnostic()?;
+
+				return Ok(());
 			}
 
-			helper.respond(&mut responder).await.into_diagnostic()?;
+			responder.message(format!("```\n{}\n```", output));
+
+			helper.update(&mut responder).await?;
 			Ok(())
 		})
 	}
