@@ -12,7 +12,7 @@ use twilight_model::{
 		message::{allowed_mentions::AllowedMentionsBuilder, MessageFlags},
 	},
 };
-use twilight_util::builder::command::CommandBuilder;
+use twilight_util::builder::command::{CommandBuilder, SubCommandGroupBuilder};
 
 use crate::{helpers::InteractionsHelper, prelude::*};
 
@@ -37,6 +37,10 @@ pub trait DefineCommand: SlashCommand + Sized {
 	fn define() -> CommandBuilder;
 
 	fn parse(data: CommandData) -> MietteResult<Self>;
+}
+
+pub trait SubCommandCommand {
+	fn define_groups() -> SubCommandGroupBuilder;
 }
 
 #[derive(Debug, Clone)]

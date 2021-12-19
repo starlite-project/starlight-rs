@@ -24,14 +24,16 @@ impl Context {
 		self.http.set_application_id(id);
 
 		if self.0.config.remove_slash_commands {
-			event!(Level::INFO, "removing all slash commands");
+			// event!(Level::INFO, "removing all slash commands");
 			if let Some(guild_id) = self.0.config.guild_id {
+				event!(Level::INFO, %guild_id, "removing all slash commands in guild");
 				self.http
 					.set_guild_commands(guild_id, &[])
 					.into_diagnostic()?
 					.exec()
 					.await
 			} else {
+				event!(Level::INFO, "removing all global slash commands");
 				self.http
 					.set_global_commands(&[])
 					.into_diagnostic()?

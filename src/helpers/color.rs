@@ -38,6 +38,7 @@ impl Color {
 		(r << 16) + (g << 8) + b
 	}
 
+	#[allow(clippy::cast_possible_truncation)]
 	pub const fn from_decimal(decimal: u32) -> Self {
 		let r = ((decimal & 0x00ff_0000) >> 16) as u8;
 		let g = ((decimal & 0x0000_ff00) >> 8) as u8;

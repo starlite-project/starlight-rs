@@ -12,7 +12,7 @@ use crate::{
 	helpers::{
 		parsing::CodeBlock,
 		playground::{
-			get_gist, BuildMode, CrateType, Edition, PlaygroundRequest, PlaygroundResponse,
+			get_gist, BuildMode, Edition, PlaygroundRequest, PlaygroundResponse,
 			ResultHandling, RustChannel,
 		},
 		InteractionsHelper,

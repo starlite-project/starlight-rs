@@ -63,6 +63,7 @@ pub struct Crate {
 }
 
 impl Crate {
+	#[allow(clippy::match_str_case_mismatch)]
 	fn rustc_crate_link(&self) -> Option<&'static str> {
 		match self.crate_name.to_ascii_lowercase().as_str() {
 			"std" => Some("https://doc.rust-lang.org/stable/std"),
