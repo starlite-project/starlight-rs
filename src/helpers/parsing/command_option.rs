@@ -24,3 +24,13 @@ impl CommandParse<i64> for CommandOptionValue {
 		}
 	}
 }
+
+impl CommandParse<bool> for CommandOptionValue {
+	fn parse_option(self) -> Option<bool> {
+		if let Self::Boolean(b) = self {
+			Some(b)
+		} else {
+			None
+		}
+	}
+}

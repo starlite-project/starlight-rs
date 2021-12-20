@@ -48,8 +48,21 @@ impl Tag {
 		Ok(Self::Add { name, content })
 	}
 
-	fn parse_delete(data: Vec<CommandDataOption>) -> MietteResult<Self> {
-		Err(error!("todo"))
+	fn parse_delete(mut data: Vec<CommandDataOption>) -> MietteResult<Self> {
+		if data.len() != 1 {
+			return Err(error!("only expected 1 argument (this shouldn't happen)"));
+		}
+
+		let name = {
+			let raw = unsafe { data.pop().unwrap_unchecked() };
+			let option = raw.value;
+
+			option
+				.parse_option()
+				.ok_or_else(|| Err(error!("failed to parse string (this shouldn't happen)")))
+		}?;
+
+		Ok(Self::Delete { name })
 	}
 }
 

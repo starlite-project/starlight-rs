@@ -10,7 +10,7 @@ use twilight_util::builder::command::{BooleanBuilder, CommandBuilder, StringBuil
 
 use crate::{
 	helpers::{
-		parsing::CodeBlock,
+		parsing::{CodeBlock, CommandParse},
 		playground::{
 			get_gist, BuildMode, Edition, PlaygroundRequest, PlaygroundResponse, ResultHandling,
 			RustChannel,
@@ -226,10 +226,7 @@ impl DefineCommand for Play {
 		};
 
 		let warn = if let Some(value) = warn_raw {
-			match value.value {
-				CommandOptionValue::Boolean(v) => v,
-				_ => false,
-			}
+			value.value.parse_option().unwrap_or_default()
 		} else {
 			false
 		};
