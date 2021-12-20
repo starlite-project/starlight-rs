@@ -5,7 +5,8 @@
 	clippy::str_to_string,
 	clippy::string_to_string,
 	clippy::panic_in_result_fn,
-	missing_copy_implementations
+	missing_copy_implementations,
+	missing_debug_implementations
 )]
 #![deny(clippy::all)]
 #![allow(
