@@ -1,7 +1,17 @@
 pub mod commands;
 mod r#impl;
 
-use twilight_model::{application::{callback::{Autocomplete, CallbackData}, command::CommandOptionChoice, interaction::ApplicationCommand}, channel::{embed::Embed, message::{MessageFlags, allowed_mentions::AllowedMentionsBuilder}}};
+use twilight_model::{
+	application::{
+		callback::{Autocomplete, CallbackData},
+		command::CommandOptionChoice,
+		interaction::ApplicationCommand,
+	},
+	channel::{
+		embed::Embed,
+		message::{allowed_mentions::AllowedMentionsBuilder, MessageFlags},
+	},
+};
 
 pub use self::r#impl::{DefineCommand, SlashCommand};
 

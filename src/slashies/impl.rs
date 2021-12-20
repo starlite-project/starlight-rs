@@ -2,7 +2,7 @@ use std::pin::Pin;
 
 use futures_util::Future;
 use twilight_model::application::interaction::application_command::CommandData;
-use twilight_util::builder::command::{CommandBuilder, SubCommandBuilder, SubCommandGroupBuilder};
+use twilight_util::builder::command::CommandBuilder;
 
 use super::SlashData;
 use crate::{helpers::InteractionsHelper, prelude::*};

@@ -15,7 +15,8 @@
 	clippy::module_name_repetitions,
 	clippy::struct_excessive_bools,
 	clippy::suspicious_else_formatting,
-	clippy::no_effect_underscore_binding
+	clippy::no_effect_underscore_binding,
+	clippy::return_self_not_must_use
 )]
 #![cfg_attr(test, allow(clippy::panic_in_result_fn))]
 

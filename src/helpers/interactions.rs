@@ -23,7 +23,7 @@ use super::Helpers;
 use crate::{
 	prelude::*,
 	slashies::{
-		commands::{Crate, Ping, Play},
+		commands::{Crate, Ping, Play, Tag},
 		DefineCommand, SlashCommand, SlashData,
 	},
 	state::{Context, QuickAccess},
@@ -209,12 +209,19 @@ impl InteractionsHelper {
 			"ping" => Some(Box::new(Ping {})),
 			"crate" => Some(Box::new(Crate::parse(data).unwrap())),
 			"play" => Some(Box::new(Play::parse(data).unwrap())),
+			"tag" => Some(Box::new(Tag::parse(data).unwrap())),
 			_ => None,
 		}
 	}
 
-	fn get_slashies() -> [Command; 3] {
-		[Ping::define(), Crate::define(), Play::define()].map(CommandBuilder::build)
+	fn get_slashies() -> [Command; 4] {
+		[
+			Ping::define(),
+			Crate::define(),
+			Play::define(),
+			Tag::define(),
+		]
+		.map(CommandBuilder::build)
 	}
 }
 
