@@ -1,5 +1,5 @@
 use std::{
-	mem::{self, MaybeUninit},
+	mem,
 	pin::Pin,
 };
 
@@ -59,10 +59,18 @@ impl Tag {
 
 			option
 				.parse_option()
-				.ok_or_else(|| Err(error!("failed to parse string (this shouldn't happen)")))
+				.ok_or_else(|| error!("failed to parse string (this shouldn't happen)"))
 		}?;
 
 		Ok(Self::Delete { name })
+	}
+
+	async fn run_add(&self, helper: InteractionsHelper, responder: SlashData) -> MietteResult<()> {
+		Ok(())
+	}
+
+	async fn run_delete(&self, helper: InteractionsHelper, responder: SlashData) -> MietteResult<()> {
+		Ok(())
 	}
 }
 
@@ -72,7 +80,12 @@ impl SlashCommand for Tag {
 		helper: InteractionsHelper,
 		responder: SlashData,
 	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + 'a>> {
-		Box::pin(async { Ok(()) })
+		Box::pin(async move {
+			match self {
+				Self::Add { .. } => self.run_add(helper, responder).await,
+				Self::Delete { .. } => self.run_delete(helper, responder).await,
+			}
+		})
 	}
 }
 

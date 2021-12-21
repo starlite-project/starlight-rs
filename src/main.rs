@@ -59,6 +59,7 @@ async fn run() -> MietteResult<()> {
 		.intents(Intents::empty())
 		.shard_builder(|b| b)?
 		.cache(InMemoryCacheBuilder::new().resource_types(ResourceType::all()))
+		.database_path("./target/db")
 		.build()
 		.await?;
 

@@ -1,5 +1,10 @@
-use std::{env::VarError, sync::Arc};
+use std::{
+	env::VarError,
+	path::{Path, PathBuf},
+	sync::Arc,
+};
 
+use starchart::{backend::RonBackend, Starchart};
 use starlight_macros::cloned;
 use thiserror::Error;
 use twilight_cache_inmemory::InMemoryCacheBuilder;
@@ -18,6 +23,8 @@ pub enum ContextBuildError {
 	Intents,
 	#[error("shard builder not set")]
 	Shard,
+	#[error("database path not set")]
+	Database,
 }
 
 #[derive(Debug, Default)]
@@ -29,6 +36,7 @@ pub struct ContextBuilder {
 	intents: Option<Intents>,
 	cdn: Option<reqwest::ClientBuilder>,
 	config: Option<Config>,
+	database_path: Option<PathBuf>,
 }
 
 impl ContextBuilder {
@@ -40,6 +48,7 @@ impl ContextBuilder {
 			intents: None,
 			config: None,
 			cdn: None,
+			database_path: None,
 		}
 	}
 
@@ -75,6 +84,14 @@ impl ContextBuilder {
 
 	pub const fn cache(mut self, cache_builder: InMemoryCacheBuilder) -> Self {
 		self.cache = Some(cache_builder);
+
+		self
+	}
+
+	pub fn database_path<T: AsRef<Path>>(mut self, p: T) -> Self {
+		let path = p.as_ref().to_path_buf();
+
+		self.database_path = Some(path);
 
 		self
 	}
@@ -117,6 +134,11 @@ impl ContextBuilder {
 			.into_diagnostic()
 			.context("need cluster to build state")?;
 		let cdn_builder = self.cdn.unwrap_or_default();
+		let db_path = self
+			.database_path
+			.ok_or(ContextBuildError::Database)
+			.into_diagnostic()
+			.context("need database path to build state")?;
 
 		let cache_builder = self.cache.unwrap_or_default();
 
@@ -125,6 +147,9 @@ impl ContextBuilder {
 		let (shard, events) = shard_builder.http_client(Arc::clone(&http)).build();
 		let cdn = cdn_builder.build().into_diagnostic()?;
 		let standby = Arc::default();
+		let backend = RonBackend::new(db_path).into_diagnostic()?;
+
+		let database = Starchart::new(backend).await.into_diagnostic()?;
 
 		let components = Box::leak(Box::new(State {
 			cache,
@@ -133,6 +158,7 @@ impl ContextBuilder {
 			http,
 			cdn,
 			config,
+			database
 		}));
 
 		Ok((Context(components), events))

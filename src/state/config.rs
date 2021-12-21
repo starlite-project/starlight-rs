@@ -62,13 +62,13 @@ impl IntoApp for Config {
 			.author(crate_authors!())
 			.args(&[
 				Arg::new(GUILD_ID)
-					.about("Guild ID to use for testing")
+					.help("Guild ID to use for testing")
 					.env("GUILD_ID")
 					.long("guild-id")
 					.short('g')
 					.takes_value(true),
 				Arg::new(REMOVE_SLASH_COMMANDS)
-					.about("Removes the global slash commands and exits")
+					.help("Removes the global slash commands and exits")
 					.env("DELETE_SLASH_COMMANDS")
 					.long("delete-slash-commands"),
 			])

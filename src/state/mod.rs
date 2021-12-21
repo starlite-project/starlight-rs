@@ -1,6 +1,7 @@
 use std::{ops::Deref, sync::Arc};
 
 use futures_util::StreamExt;
+use starchart::{Starchart, backend::RonBackend};
 use tracing::{event, Level};
 use twilight_cache_inmemory::InMemoryCache as Cache;
 use twilight_gateway::{shard::Events, Event, Shard};
@@ -92,6 +93,7 @@ pub struct State {
 	http: Arc<HttpClient>,
 	standby: Arc<Standby>,
 	config: Config,
+	database: Starchart<RonBackend>
 }
 
 impl State {
@@ -124,6 +126,11 @@ impl State {
 	pub const fn config(&self) -> Config {
 		self.config
 	}
+
+	#[must_use]
+	pub const fn database(&self) -> &Starchart<RonBackend> {
+		&self.database
+	}
 }
 
 pub trait QuickAccess {
@@ -151,5 +158,9 @@ pub trait QuickAccess {
 
 	fn config(&self) -> Config {
 		self.context().0.config()
+	}
+
+	fn database(&self) -> &Starchart<RonBackend> {
+		self.context().0.database()
 	}
 }
