@@ -22,6 +22,7 @@
 
 pub mod helpers;
 pub mod prelude;
+pub mod settings;
 pub mod slashies;
 pub mod state;
 pub mod utils;

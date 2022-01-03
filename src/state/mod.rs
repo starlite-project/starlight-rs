@@ -1,16 +1,16 @@
 use std::{ops::Deref, sync::Arc};
 
 use futures_util::StreamExt;
-use starchart::{Starchart, backend::RonBackend};
+use starchart::{backend::RonBackend, Starchart};
 use tracing::{event, Level};
 use twilight_cache_inmemory::InMemoryCache as Cache;
 use twilight_gateway::{shard::Events, Event, Shard};
-use twilight_http::Client as HttpClient;
+use twilight_http::{client::InteractionClient, Client as HttpClient};
 use twilight_standby::Standby;
 
 use self::events::handle;
 pub use self::{builder::ContextBuilder, config::Config};
-use crate::{helpers::Helpers, prelude::*};
+use crate::{helpers::Helpers, prelude::*, settings::init_tables};
 
 mod builder;
 mod config;
@@ -22,24 +22,18 @@ pub struct Context(pub &'static State);
 impl Context {
 	pub async fn connect(self) -> MietteResult<()> {
 		let id = Config::application_id()?;
-		self.http.set_application_id(id);
+		let interaction_client = self.http.interaction(id);
 
 		if self.0.config.remove_slash_commands {
-			// event!(Level::INFO, "removing all slash commands");
 			if let Some(guild_id) = self.0.config.guild_id {
 				event!(Level::INFO, %guild_id, "removing all slash commands in guild");
-				self.http
+				interaction_client
 					.set_guild_commands(guild_id, &[])
-					.into_diagnostic()?
 					.exec()
 					.await
 			} else {
 				event!(Level::INFO, "removing all global slash commands");
-				self.http
-					.set_global_commands(&[])
-					.into_diagnostic()?
-					.exec()
-					.await
+				interaction_client.set_global_commands(&[]).exec().await
 			}
 			.into_diagnostic()?;
 
@@ -47,6 +41,12 @@ impl Context {
 		}
 
 		event!(Level::INFO, "setting slash commands");
+
+		self.helpers().interactions().init().await?;
+
+		event!(Level::INFO, "creating tables");
+
+		init_tables(self).await?;
 
 		self.0.shard.start().await.into_diagnostic()?;
 		event!(Level::INFO, "shard connected");
@@ -93,7 +93,7 @@ pub struct State {
 	http: Arc<HttpClient>,
 	standby: Arc<Standby>,
 	config: Config,
-	database: Starchart<RonBackend>
+	database: Starchart<RonBackend>,
 }
 
 impl State {
@@ -131,6 +131,11 @@ impl State {
 	pub const fn database(&self) -> &Starchart<RonBackend> {
 		&self.database
 	}
+
+	#[must_use]
+	pub fn interaction_client(&self) -> InteractionClient<'_> {
+		self.http.interaction(Config::application_id().unwrap())
+	}
 }
 
 pub trait QuickAccess {
@@ -162,5 +167,9 @@ pub trait QuickAccess {
 
 	fn database(&self) -> &Starchart<RonBackend> {
 		self.context().0.database()
+	}
+
+	fn interaction_client(&self) -> InteractionClient<'_> {
+		self.context().0.interaction_client()
 	}
 }

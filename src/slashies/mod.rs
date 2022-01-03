@@ -27,7 +27,7 @@ impl SlashData {
 	pub const BASE: CallbackData = CallbackData {
 		allowed_mentions: None,
 		content: None,
-		embeds: vec![],
+		embeds: None,
 		flags: None,
 		components: None,
 		tts: None,
@@ -67,7 +67,13 @@ impl SlashData {
 	pub fn embeds(&mut self, embeds: Vec<Embed>) -> &mut Self {
 		assert!(!embeds.is_empty(), "empty embeds not allowed");
 
-		self.callback.embeds.extend(embeds);
+		// self.callback.embeds.extend(embeds);
+
+		if let Some( current_embeds) = &mut self.callback.embeds {
+			current_embeds.extend(embeds);
+		} else {
+			self.callback.embeds = Some(embeds);
+		}
 
 		self
 	}

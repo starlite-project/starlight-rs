@@ -14,8 +14,6 @@ futures-util = "0.3.19"
 serde_json = "1.0.73"
 thiserror = "1.0.30"
 tracing = "0.1.29"
-twilight-embed-builder = "0.8.0"
-twilight-model = "0.8.1"
 
 [dependencies.clap]
 features = ["cargo", "env"]
@@ -35,10 +33,14 @@ version = "1.0.132"
 
 [dependencies.starchart]
 features = ["derive", "metadata", "ron"]
-version = "0.10"
+version = "0.10.1"
 
 [dependencies.starlight-macros]
 path = "./starlight-macros"
+
+[dependencies.time]
+version = "0.3.5"
+features = ["serde"]
 
 [dependencies.tokio]
 features = ["macros", "rt-multi-thread", "signal", "fs"]
@@ -51,25 +53,41 @@ version = "0.3.3"
 
 [dependencies.twilight-cache-inmemory]
 default-features = false
-version = "0.8.1"
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
+
+[dependencies.twilight-embed-builder]
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
 
 [dependencies.twilight-gateway]
 default-features = false
-features = ["zlib-simd", "metrics", "rustls", "tracing"]
-version = "0.8.0"
+features = ["zlib-simd", "metrics", "rustls-tls", "tracing", "rustls-native-roots"]
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
 
 [dependencies.twilight-http]
-default-features = false
-features = ["tracing", "simd-json", "rustls"]
-version = "0.8.1"
+features = ["tracing", "simd-json", "brotli"]
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
+
+[dependencies.twilight-model]
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
 
 [dependencies.twilight-standby]
 features = ["tracing"]
-version = "0.8.0"
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
 
 [dependencies.twilight-util]
 features = ["builder"]
-version = "0.8.1"
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
+
+[dependencies.twilight-validate]
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
 
 [profile.release]
 codegen-units = 1

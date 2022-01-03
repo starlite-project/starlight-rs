@@ -5,10 +5,6 @@ use std::{
 
 use starlight_macros::model;
 use tracing::instrument;
-use twilight_http::request::application::{
-	interaction::{CreateFollowupMessage, UpdateFollowupMessage},
-	InteractionError,
-};
 use twilight_model::{
 	application::{
 		callback::{Autocomplete, InteractionResponse},
@@ -23,7 +19,7 @@ use super::Helpers;
 use crate::{
 	prelude::*,
 	slashies::{
-		commands::{Crate, Ping, Play, Tag},
+		commands::{Crate, Ping, Tag},
 		DefineCommand, SlashCommand, SlashData,
 	},
 	state::{Context, QuickAccess},
@@ -48,16 +44,14 @@ impl InteractionsHelper {
 
 		if let Some(guild_id) = context.config().guild_id {
 			context
-				.http()
+				.interaction_client()
 				.set_guild_commands(guild_id, &Self::get_slashies())
-				.into_diagnostic()?
 				.exec()
 				.await
 		} else {
 			context
-				.http()
+				.interaction_client()
 				.set_global_commands(&Self::get_slashies())
-				.into_diagnostic()?
 				.exec()
 				.await
 		}
@@ -112,7 +106,7 @@ impl InteractionsHelper {
 
 	pub async fn ack(self, data: &SlashData) -> Result<(), HttpError> {
 		self.context()
-			.http()
+			.interaction_client()
 			.interaction_callback(
 				data.command.id,
 				&data.command.token,
@@ -126,7 +120,7 @@ impl InteractionsHelper {
 
 	pub async fn respond(self, data: &mut SlashData) -> Result<(), HttpError> {
 		self.context()
-			.http()
+			.interaction_client()
 			.interaction_callback(
 				data.command.id,
 				&data.command.token,
@@ -143,11 +137,9 @@ impl InteractionsHelper {
 
 	pub async fn update(self, data: &mut SlashData) -> MietteResult<()> {
 		let callback_data = mem::replace(&mut data.callback, SlashData::BASE);
-		let context = self.context();
+		let context = self.interaction_client();
 		let update_interaction = context
-			.http()
-			.update_interaction_original(&data.command.token)
-			.into_diagnostic()?;
+			.update_interaction_original(&data.command.token);
 
 		let bytes = serde_json::to_vec(&callback_data).into_diagnostic()?;
 
@@ -165,7 +157,7 @@ impl InteractionsHelper {
 			mem::replace(&mut data.autocomplete, Autocomplete { choices: vec![] });
 		let context = self.context();
 		context
-			.http()
+			.interaction_client()
 			.interaction_callback(
 				data.command.id,
 				&data.command.token,
@@ -177,29 +169,9 @@ impl InteractionsHelper {
 		Ok(())
 	}
 
-	pub fn raw_create<'a>(
-		&'a self,
-		data: &'a SlashData,
-	) -> Result<CreateFollowupMessage<'a>, InteractionError> {
-		self.http().create_followup_message(&data.command.token)
-	}
-
-	pub async fn raw_update<'a>(
-		&'a self,
-		data: &'a SlashData,
-	) -> MietteResult<UpdateFollowupMessage<'a>> {
-		let http = self.http();
-		let original_message_id = self.raw_get(data).await?.id;
-
-		http.update_followup_message(&data.command.token, original_message_id)
-			.into_diagnostic()
-	}
-
 	pub async fn raw_get(self, data: &SlashData) -> MietteResult<Message> {
-		let http = self.http();
-		let get_original = http
-			.get_interaction_original(&data.command.token)
-			.into_diagnostic()?;
+		let http = self.interaction_client();
+		let get_original = http.get_interaction_original(&data.command.token);
 
 		model!(get_original).await.into_diagnostic()
 	}
@@ -208,17 +180,15 @@ impl InteractionsHelper {
 		match name {
 			"ping" => Some(Box::new(Ping {})),
 			"crate" => Some(Box::new(Crate::parse(data).unwrap())),
-			"play" => Some(Box::new(Play::parse(data).unwrap())),
 			"tag" => Some(Box::new(Tag::parse(data).unwrap())),
 			_ => None,
 		}
 	}
 
-	fn get_slashies() -> [Command; 4] {
+	fn get_slashies() -> [Command; 3] {
 		[
 			Ping::define(),
 			Crate::define(),
-			Play::define(),
 			Tag::define(),
 		]
 		.map(CommandBuilder::build)

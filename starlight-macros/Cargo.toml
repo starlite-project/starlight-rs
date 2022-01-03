@@ -9,5 +9,11 @@ edition = "2021"
 miette = "3.0.1"
 serde = "1"
 thiserror = "1.0.30"
-twilight-http = "0.8"
-twilight-model = "0.8"
+
+[dependencies.twilight-http]
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
+
+[dependencies.twilight-model]
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "41778c27bd61ea29804ab0404f6e24539fef3199"

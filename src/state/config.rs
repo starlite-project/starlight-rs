@@ -1,7 +1,4 @@
-use std::{
-	env::{self, VarError},
-	num::NonZeroU64,
-};
+use std::env::{self, VarError};
 
 use clap::{
 	crate_authors, crate_description, crate_name, crate_version, App, Arg, ArgMatches,
@@ -9,21 +6,32 @@ use clap::{
 };
 use miette::{IntoDiagnostic, Result as MietteResult};
 use tracing::instrument;
-use twilight_model::id::{ApplicationId, GuildId};
+use twilight_model::id::{
+	marker::{ApplicationMarker, GuildMarker},
+	Id,
+};
 
 const REMOVE_SLASH_COMMANDS: &str = "remove-slash-commands";
 const GUILD_ID: &str = "guild-id";
 
 static mut TOKEN: Option<&str> = None;
 
+static mut APPLICATION_ID: Option<Id<ApplicationMarker>> = None;
+
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Config {
-	pub guild_id: Option<GuildId>,
+	pub guild_id: Option<Id<GuildMarker>>,
 	pub remove_slash_commands: bool,
 }
 
 impl Config {
-	pub fn application_id() -> MietteResult<ApplicationId> {
+	pub fn application_id() -> MietteResult<Id<ApplicationMarker>> {
+		unsafe {
+			if let Some(id) = APPLICATION_ID {
+				return Ok(id);
+			}
+		}
+
 		let first_part = Self::token()
 			.into_diagnostic()?
 			.split('.')
@@ -36,7 +44,9 @@ impl Config {
 			.parse()
 			.into_diagnostic()?;
 
-		Ok(ApplicationId(value))
+		unsafe { APPLICATION_ID = Id::new_checked(value) };
+
+		Ok(unsafe { Id::new_unchecked(value) })
 	}
 
 	#[instrument]
@@ -82,8 +92,8 @@ impl IntoApp for Config {
 impl FromArgMatches for Config {
 	fn from_arg_matches(matches: &ArgMatches) -> Result<Self, ClapError> {
 		let guild_id = if cfg!(debug_assertions) {
-			match matches.value_of_t::<NonZeroU64>(GUILD_ID) {
-				Ok(g) => Some(GuildId(g)),
+			match matches.value_of_t::<u64>(GUILD_ID) {
+				Ok(g) => Id::new_checked(g),
 				Err(e) if e.kind == clap::ErrorKind::ArgumentNotFound => None,
 				Err(e) => return Err(e),
 			}
@@ -99,8 +109,8 @@ impl FromArgMatches for Config {
 
 	fn update_from_arg_matches(&mut self, matches: &ArgMatches) -> Result<(), ClapError> {
 		let guild_id = if cfg!(debug_assertions) {
-			match matches.value_of_t::<NonZeroU64>(GUILD_ID) {
-				Ok(g) => Some(GuildId(g)),
+			match matches.value_of_t::<u64>(GUILD_ID) {
+				Ok(g) => Id::new_checked(g),
 				Err(e) if e.kind == clap::ErrorKind::ArgumentNotFound => None,
 				Err(e) => return Err(e),
 			}
