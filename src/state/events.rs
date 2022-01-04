@@ -16,11 +16,16 @@ use twilight_model::{
 use super::Context;
 use crate::{prelude::*, settings::GuildSettings};
 
+// these should all be the same caller context, taking a `Context` as the first parameter, and whatever the event content is in the second.
+// however, they should return as strict of an error type as possible, using `Infallible` whevever possible (for more optimizations).
 pub(super) async fn handle(context: Context, event: Event) -> MietteResult<()> {
 	match event {
 		Event::Ready(e) => ready(context, *e).await.into_diagnostic(),
 		Event::GuildCreate(e) => guild_create(context, (*e).0).await.into_diagnostic(),
-		Event::InteractionCreate(e) => interaction_create(context, *e).await,
+		Event::InteractionCreate(e) => {
+			interaction_create(context, *e).await;
+			Ok(())
+		}
 		_ => Ok(()),
 	}
 }
@@ -47,7 +52,7 @@ async fn guild_create(context: Context, guild: Guild) -> ChartResult<(), TomlBac
 	Ok(())
 }
 
-async fn interaction_create(context: Context, interaction: InteractionCreate) -> MietteResult<()> {
+async fn interaction_create(context: Context, interaction: InteractionCreate) {
 	match interaction.0 {
 		Interaction::ApplicationCommand(cmd) | Interaction::ApplicationCommandAutocomplete(cmd) => {
 			context.helpers().interactions().handle(*cmd).await;
@@ -55,6 +60,4 @@ async fn interaction_create(context: Context, interaction: InteractionCreate) ->
 		Interaction::MessageComponent(_) => {}
 		i => event!(Level::WARN, ?i, "unhandled interaction"),
 	}
-
-	Ok(())
 }
