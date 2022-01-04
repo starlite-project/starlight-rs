@@ -12,6 +12,7 @@
 #![allow(
 	clippy::missing_errors_doc,
 	clippy::missing_panics_doc,
+	clippy::missing_safety_doc,
 	clippy::module_name_repetitions,
 	clippy::struct_excessive_bools,
 	clippy::suspicious_else_formatting,
