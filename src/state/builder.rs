@@ -4,7 +4,11 @@ use std::{
 	sync::Arc,
 };
 
-use starchart::{backend::RonBackend, Starchart};
+#[cfg(not(debug_assertions))]
+use starchart::backend::TomlBackend;
+#[cfg(debug_assertions)]
+use starchart::backend::TomlPrettyBackend as TomlBackend;
+use starchart::Starchart;
 use starlight_macros::cloned;
 use thiserror::Error;
 use twilight_cache_inmemory::InMemoryCacheBuilder;
@@ -147,7 +151,7 @@ impl ContextBuilder {
 		let (shard, events) = shard_builder.http_client(Arc::clone(&http)).build();
 		let cdn = cdn_builder.build().into_diagnostic()?;
 		let standby = Arc::default();
-		let backend = RonBackend::new(db_path).into_diagnostic()?;
+		let backend = TomlBackend::new(db_path).into_diagnostic()?;
 
 		let database = Starchart::new(backend).await.into_diagnostic()?;
 
@@ -158,7 +162,7 @@ impl ContextBuilder {
 			http,
 			cdn,
 			config,
-			database
+			database,
 		}));
 
 		Ok((Context(components), events))

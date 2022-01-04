@@ -1,7 +1,11 @@
 use std::{ops::Deref, sync::Arc};
 
 use futures_util::StreamExt;
-use starchart::{backend::RonBackend, Starchart};
+#[cfg(not(debug_assertions))]
+use starchart::backend::TomlBackend;
+#[cfg(debug_assertions)]
+use starchart::backend::TomlPrettyBackend as TomlBackend;
+use starchart::Starchart;
 use tracing::{event, Level};
 use twilight_cache_inmemory::InMemoryCache as Cache;
 use twilight_gateway::{shard::Events, Event, Shard};
@@ -93,7 +97,7 @@ pub struct State {
 	http: Arc<HttpClient>,
 	standby: Arc<Standby>,
 	config: Config,
-	database: Starchart<RonBackend>,
+	database: Starchart<TomlBackend>,
 }
 
 impl State {
@@ -128,7 +132,7 @@ impl State {
 	}
 
 	#[must_use]
-	pub const fn database(&self) -> &Starchart<RonBackend> {
+	pub const fn database(&self) -> &Starchart<TomlBackend> {
 		&self.database
 	}
 
@@ -165,7 +169,7 @@ pub trait QuickAccess {
 		self.context().0.config()
 	}
 
-	fn database(&self) -> &Starchart<RonBackend> {
+	fn database(&self) -> &Starchart<TomlBackend> {
 		self.context().0.database()
 	}
 

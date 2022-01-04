@@ -56,7 +56,7 @@ async fn run() -> MietteResult<()> {
 	let config = Config::parse();
 	let (client, events) = ContextBuilder::new()
 		.config(config)
-		.intents(Intents::empty())
+		.intents(Intents::from_bits(1).unwrap_or_else(Intents::all))
 		.shard_builder(|b| b)?
 		.cache(InMemoryCacheBuilder::new().resource_types(ResourceType::all()))
 		.database_path("./target/db")

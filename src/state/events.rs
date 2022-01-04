@@ -1,18 +1,25 @@
 use std::convert::Infallible;
 
+#[cfg(not(debug_assertions))]
+use starchart::backend::TomlBackend;
+#[cfg(debug_assertions)]
+use starchart::backend::TomlPrettyBackend as TomlBackend;
+use starchart::{action::CreateEntryAction, Action, ChartResult};
 use tracing::{event, Level};
 use twilight_gateway::Event;
 use twilight_model::{
 	application::interaction::Interaction,
 	gateway::payload::incoming::{InteractionCreate, Ready},
+	guild::Guild,
 };
 
 use super::Context;
-use crate::prelude::*;
+use crate::{prelude::*, settings::GuildSettings};
 
 pub(super) async fn handle(context: Context, event: Event) -> MietteResult<()> {
 	match event {
 		Event::Ready(e) => ready(context, *e).await.into_diagnostic(),
+		Event::GuildCreate(e) => guild_create(context, (*e).0).await.into_diagnostic(),
 		Event::InteractionCreate(e) => interaction_create(context, *e).await,
 		_ => Ok(()),
 	}
@@ -22,6 +29,21 @@ pub(super) async fn handle(context: Context, event: Event) -> MietteResult<()> {
 async fn ready(_: Context, ready: Ready) -> Result<(), Infallible> {
 	event!(Level::INFO, user_name = %ready.user.name);
 	event!(Level::INFO, guilds = %ready.guilds.len());
+	Ok(())
+}
+
+async fn guild_create(context: Context, guild: Guild) -> ChartResult<(), TomlBackend> {
+	let id = guild.id;
+	let database = context.database();
+
+	let mut action: CreateEntryAction<GuildSettings> = Action::new();
+
+	action
+		.set_entry(&GuildSettings::new(id))
+		.set_table("guilds");
+
+	database.run(action).await??;
+
 	Ok(())
 }
 

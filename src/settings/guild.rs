@@ -1,4 +1,4 @@
-use std::{borrow::Borrow, collections::HashMap, hash::Hash, iter::Extend};
+use std::{collections::HashMap, iter::Extend};
 
 use serde::{Deserialize, Serialize};
 use starchart::IndexEntry;
@@ -27,8 +27,7 @@ impl GuildSettings {
 		self.tags.insert(tag.name.clone(), tag)
 	}
 
-	pub fn get_tag<Q: AsRef<str>>(&self, tag: &Q) -> Option<&GuildTag>
-	{
+	pub fn get_tag<Q: AsRef<str>>(&self, tag: &Q) -> Option<&GuildTag> {
 		let tag = tag.as_ref();
 		self.tags
 			.get(tag)
@@ -38,7 +37,7 @@ impl GuildSettings {
 
 impl Default for GuildSettings {
 	fn default() -> Self {
-		let default_map = HashMap::from([("".to_owned(), GuildTag::default())]);
+		let default_map = HashMap::from([("default".to_owned(), GuildTag::default())]);
 
 		Self {
 			id: unsafe { Id::new_unchecked(1) },
