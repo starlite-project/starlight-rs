@@ -5,9 +5,9 @@ use std::{
 };
 
 #[cfg(not(debug_assertions))]
-use starchart::backend::TomlBackend;
+use starchart::backend::RonBackend;
 #[cfg(debug_assertions)]
-use starchart::backend::TomlPrettyBackend as TomlBackend;
+use starchart::backend::RonPrettyBackend as RonBackend;
 use starchart::Starchart;
 use starlight_macros::cloned;
 use thiserror::Error;
@@ -151,7 +151,7 @@ impl ContextBuilder {
 		let (shard, events) = shard_builder.http_client(Arc::clone(&http)).build();
 		let cdn = cdn_builder.build().into_diagnostic()?;
 		let standby = Arc::default();
-		let backend = TomlBackend::new(db_path).into_diagnostic()?;
+		let backend = RonBackend::new(db_path).into_diagnostic()?;
 
 		let database = Starchart::new(backend).await.into_diagnostic()?;
 

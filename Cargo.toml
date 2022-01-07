@@ -32,7 +32,7 @@ features = ["derive"]
 version = "1.0.132"
 
 [dependencies.starchart]
-features = ["derive", "metadata", "toml", "pretty"]
+features = ["derive", "metadata", "ron", "pretty"]
 git = "https://github.com/starlite-project/starchart"
 
 [dependencies.starlight-macros]
