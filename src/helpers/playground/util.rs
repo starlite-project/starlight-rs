@@ -100,7 +100,7 @@ pub(super) fn extract_relevant_lines<'a>(
 	stderr
 }
 
-pub async fn get_gist(context: Context, code: &str) -> MietteResult<String> {
+pub async fn get_gist(context: Context, code: &str) -> Result<String> {
 	let cdn = context.cdn();
 
 	let mut payload = HashMap::new();

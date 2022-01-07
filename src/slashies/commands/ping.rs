@@ -20,7 +20,7 @@ impl SlashCommand for Ping {
 		&self,
 		helper: InteractionsHelper,
 		mut data: SlashData,
-	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send>> {
+	) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> {
 		Box::pin(async move {
 			data.ephemeral();
 			let context = helper.context();
@@ -57,7 +57,7 @@ impl DefineCommand for Ping {
 		.default_permission(true)
 	}
 
-	fn parse(_: CommandData) -> MietteResult<Self> {
+	fn parse(_: CommandData) -> Result<Self> {
 		Ok(Self)
 	}
 }

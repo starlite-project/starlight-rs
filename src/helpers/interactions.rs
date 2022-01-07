@@ -36,7 +36,7 @@ impl InteractionsHelper {
 		Self(helpers)
 	}
 
-	pub async fn init(self) -> MietteResult<()> {
+	pub async fn init(self) -> Result<()> {
 		if INITIALIZED.load(Ordering::SeqCst) {
 			return Ok(());
 		}
@@ -135,7 +135,7 @@ impl InteractionsHelper {
 		Ok(())
 	}
 
-	pub async fn update(self, data: &mut SlashData) -> MietteResult<()> {
+	pub async fn update(self, data: &mut SlashData) -> Result<()> {
 		let callback_data = mem::replace(&mut data.callback, SlashData::BASE);
 		let context = self.interaction_client();
 		let update_interaction = context
@@ -169,7 +169,7 @@ impl InteractionsHelper {
 		Ok(())
 	}
 
-	pub async fn raw_get(self, data: &SlashData) -> MietteResult<Message> {
+	pub async fn raw_get(self, data: &SlashData) -> Result<Message> {
 		let http = self.interaction_client();
 		let get_original = http.get_interaction_original(&data.command.token);
 

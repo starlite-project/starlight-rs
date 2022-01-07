@@ -96,7 +96,7 @@ impl Crate {
 		output
 	}
 
-	async fn get_crate(&self, reqwest_client: &Client) -> MietteResult<CrateResult> {
+	async fn get_crate(&self, reqwest_client: &Client) -> Result<CrateResult> {
 		event!(Level::INFO, "searching for crate `{}`", &self.crate_name);
 
 		let crate_list = reqwest_client
@@ -134,7 +134,7 @@ impl SlashCommand for Crate {
 		&self,
 		helper: InteractionsHelper,
 		mut responder: SlashData,
-	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + '_>> {
+	) -> Pin<Box<dyn Future<Output = Result<()>> + Send + '_>> {
 		Box::pin(async move {
 			if let Some(stdlib_url) = self.rustc_crate_link() {
 				responder.message(stdlib_url);
@@ -186,7 +186,7 @@ impl SlashCommand for Crate {
 		&'a self,
 		helper: InteractionsHelper,
 		mut responder: SlashData,
-	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + 'a>> {
+	) -> Pin<Box<dyn Future<Output = Result<()>> + Send + 'a>> {
 		Box::pin(async move {
 			let client = helper.cdn();
 
@@ -245,7 +245,7 @@ impl DefineCommand for Crate {
 		)
 	}
 
-	fn parse(data: CommandData) -> MietteResult<Self> {
+	fn parse(data: CommandData) -> Result<Self> {
 		let name = data
 			.options
 			.into_iter()

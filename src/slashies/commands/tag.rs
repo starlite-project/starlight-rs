@@ -23,7 +23,7 @@ pub enum Tag {
 }
 
 impl Tag {
-	fn parse_add(mut data: Vec<CommandDataOption>) -> MietteResult<Self> {
+	fn parse_add(mut data: Vec<CommandDataOption>) -> Result<Self> {
 		if data.len() != 2 {
 			return Err(error!("only expected 2 arguments (this shouldn't happen)"));
 		}
@@ -48,7 +48,7 @@ impl Tag {
 		Ok(Self::Add { name, content })
 	}
 
-	fn parse_delete(mut data: Vec<CommandDataOption>) -> MietteResult<Self> {
+	fn parse_delete(mut data: Vec<CommandDataOption>) -> Result<Self> {
 		if data.len() != 1 {
 			return Err(error!("only expected 1 argument (this shouldn't happen)"));
 		}
@@ -65,11 +65,11 @@ impl Tag {
 		Ok(Self::Delete { name })
 	}
 
-	async fn run_add(&self, helper: InteractionsHelper, responder: SlashData) -> MietteResult<()> {
+	async fn run_add(&self, helper: InteractionsHelper, responder: SlashData) -> Result<()> {
 		Ok(())
 	}
 
-	async fn run_delete(&self, helper: InteractionsHelper, responder: SlashData) -> MietteResult<()> {
+	async fn run_delete(&self, helper: InteractionsHelper, responder: SlashData) -> Result<()> {
 		Ok(())
 	}
 }
@@ -79,7 +79,7 @@ impl SlashCommand for Tag {
 		&'a self,
 		helper: InteractionsHelper,
 		responder: SlashData,
-	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + 'a>> {
+	) -> Pin<Box<dyn Future<Output = Result<()>> + Send + 'a>> {
 		Box::pin(async move {
 			match self {
 				Self::Add { .. } => self.run_add(helper, responder).await,
@@ -115,7 +115,7 @@ impl DefineCommand for Tag {
 		)
 	}
 
-	fn parse(mut data: CommandData) -> MietteResult<Self> {
+	fn parse(mut data: CommandData) -> Result<Self> {
 		if data.options.len() != 1 {
 			return Err(error!(
 				"more than one subcommand was received (this shouldn't happen)"

@@ -2,9 +2,9 @@ use std::{ops::Deref, sync::Arc};
 
 use futures_util::StreamExt;
 #[cfg(not(debug_assertions))]
-use starchart::backend::RonBackend;
+use starchart::backend::TomlBackend;
 #[cfg(debug_assertions)]
-use starchart::backend::RonPrettyBackend as RonBackend;
+use starchart::backend::TomlPrettyBackend as TomlBackend;
 use starchart::Starchart;
 use tracing::{event, Level};
 use twilight_cache_inmemory::InMemoryCache as Cache;
@@ -24,7 +24,7 @@ mod events;
 pub struct Context(pub &'static State);
 
 impl Context {
-	pub async fn connect(self) -> MietteResult<()> {
+	pub async fn connect(self) -> Result<()> {
 		let id = Config::application_id()?;
 		let interaction_client = self.http.interaction(id);
 
@@ -50,7 +50,7 @@ impl Context {
 
 		event!(Level::INFO, "creating tables");
 
-		init_tables(self).await?;
+		init_tables(self).await.into_diagnostic()?;
 
 		self.0.shard.start().await.into_diagnostic()?;
 		event!(Level::INFO, "shard connected");
@@ -97,7 +97,7 @@ pub struct State {
 	http: Arc<HttpClient>,
 	standby: Arc<Standby>,
 	config: Config,
-	database: Starchart<RonBackend>,
+	database: Starchart<TomlBackend>,
 }
 
 impl State {
@@ -132,7 +132,7 @@ impl State {
 	}
 
 	#[must_use]
-	pub const fn database(&self) -> &Starchart<RonBackend> {
+	pub const fn database(&self) -> &Starchart<TomlBackend> {
 		&self.database
 	}
 
@@ -169,7 +169,7 @@ pub trait QuickAccess {
 		self.context().0.config()
 	}
 
-	fn database(&self) -> &Starchart<RonBackend> {
+	fn database(&self) -> &Starchart<TomlBackend> {
 		self.context().0.database()
 	}
 

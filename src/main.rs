@@ -16,7 +16,7 @@ use twilight_gateway::Intents;
 
 static ATOMIC_ID: AtomicUsize = AtomicUsize::new(1);
 
-fn main() -> MietteResult<()> {
+fn main() -> Result<()> {
 	Builder::new_multi_thread()
 		.enable_all()
 		.thread_name_fn(|| {
@@ -32,7 +32,7 @@ fn main() -> MietteResult<()> {
 		.block_on(run())
 }
 
-async fn run() -> MietteResult<()> {
+async fn run() -> Result<()> {
 	let mut log_filter_layer = EnvFilter::try_from_default_env()
 		.or_else(|_| EnvFilter::try_new("info"))
 		.into_diagnostic()?;

@@ -12,14 +12,14 @@ pub trait SlashCommand: Send + Sync {
 		&'a self,
 		helper: InteractionsHelper,
 		responder: SlashData,
-	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + 'a>>;
+	) -> Pin<Box<dyn Future<Output = Result<()>> + Send + 'a>>;
 
 	#[allow(unused_variables)]
 	fn autocomplete<'a>(
 		&'a self,
 		helper: InteractionsHelper,
 		responder: SlashData,
-	) -> Pin<Box<dyn Future<Output = MietteResult<()>> + Send + 'a>> {
+	) -> Pin<Box<dyn Future<Output = Result<()>> + Send + 'a>> {
 		Box::pin(async { Ok(()) })
 	}
 }
@@ -27,5 +27,5 @@ pub trait SlashCommand: Send + Sync {
 pub trait DefineCommand: SlashCommand + Sized {
 	fn define() -> CommandBuilder;
 
-	fn parse(data: CommandData) -> MietteResult<Self>;
+	fn parse(data: CommandData) -> Result<Self>;
 }

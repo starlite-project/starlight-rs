@@ -4,7 +4,7 @@ use clap::{
 	crate_authors, crate_description, crate_name, crate_version, App, Arg, ArgMatches,
 	Error as ClapError, FromArgMatches, IntoApp, Parser,
 };
-use miette::{IntoDiagnostic, Result as MietteResult};
+use miette::{IntoDiagnostic, Result as Result};
 use tracing::instrument;
 use twilight_model::id::{
 	marker::{ApplicationMarker, GuildMarker},
@@ -25,7 +25,7 @@ pub struct Config {
 }
 
 impl Config {
-	pub fn application_id() -> MietteResult<Id<ApplicationMarker>> {
+	pub fn application_id() -> Result<Id<ApplicationMarker>> {
 		unsafe {
 			if let Some(id) = APPLICATION_ID {
 				return Ok(id);

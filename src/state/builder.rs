@@ -5,9 +5,9 @@ use std::{
 };
 
 #[cfg(not(debug_assertions))]
-use starchart::backend::RonBackend;
+use starchart::backend::TomlBackend;
 #[cfg(debug_assertions)]
-use starchart::backend::RonPrettyBackend as RonBackend;
+use starchart::backend::TomlPrettyBackend as TomlBackend;
 use starchart::Starchart;
 use starlight_macros::cloned;
 use thiserror::Error;
@@ -68,7 +68,7 @@ impl ContextBuilder {
 		self
 	}
 
-	pub fn shard_builder<F>(mut self, shard_builder: F) -> MietteResult<Self>
+	pub fn shard_builder<F>(mut self, shard_builder: F) -> Result<Self>
 	where
 		F: FnOnce(ShardBuilder) -> ShardBuilder,
 	{
@@ -126,7 +126,7 @@ impl ContextBuilder {
 		Ok(self)
 	}
 
-	pub async fn build(self) -> MietteResult<(Context, Events)> {
+	pub async fn build(self) -> Result<(Context, Events)> {
 		let config = self.config.unwrap_or_default();
 		let token = Config::token().into_diagnostic()?.to_owned();
 		let http_builder = self
@@ -151,7 +151,7 @@ impl ContextBuilder {
 		let (shard, events) = shard_builder.http_client(Arc::clone(&http)).build();
 		let cdn = cdn_builder.build().into_diagnostic()?;
 		let standby = Arc::default();
-		let backend = RonBackend::new(db_path).into_diagnostic()?;
+		let backend = TomlBackend::new(db_path).into_diagnostic()?;
 
 		let database = Starchart::new(backend).await.into_diagnostic()?;
 
