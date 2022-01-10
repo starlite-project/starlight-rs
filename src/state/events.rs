@@ -1,10 +1,6 @@
 use std::convert::Infallible;
 
-#[cfg(not(debug_assertions))]
-use starchart::backend::TomlBackend;
-#[cfg(debug_assertions)]
-use starchart::backend::TomlPrettyBackend as TomlBackend;
-use starchart::{action::CreateEntryAction, Action, ChartResult};
+use starchart::{action::{CreateEntryAction}, Action, ChartResult};
 use tracing::{event, Level};
 use twilight_gateway::Event;
 use twilight_model::{
@@ -18,8 +14,8 @@ use crate::{prelude::*, settings::GuildSettings};
 
 // these should all be the same caller context, taking a `Context` as the first parameter, and whatever the event content is in the second.
 // however, they should return as strict of an error type as possible, using `Infallible` whevever possible (for more optimizations).
-pub(super) async fn handle(context: Context, event: Event) -> Result<()> {
-	match event {
+pub(super) async fn handle(context: Context, event: Event) {
+	if let Err(e) = match event {
 		Event::Ready(e) => ready(context, *e).await.into_diagnostic(),
 		Event::GuildCreate(e) => guild_create(context, (*e).0).await.into_diagnostic(),
 		Event::InteractionCreate(e) => {
@@ -27,6 +23,8 @@ pub(super) async fn handle(context: Context, event: Event) -> Result<()> {
 			Ok(())
 		}
 		_ => Ok(()),
+	} {
+		event!(Level::ERROR, "error occurred: {:?}", e);
 	}
 }
 
@@ -47,7 +45,6 @@ async fn guild_create(context: Context, guild: Guild) -> ChartResult<(), TomlBac
 		.set_entry(&GuildSettings::new(id))
 		.set_table("guilds");
 
-	// database.run(action).await??;
 	action.run_create_entry(database).await?;
 
 	Ok(())

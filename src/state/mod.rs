@@ -1,10 +1,6 @@
 use std::{ops::Deref, sync::Arc};
 
 use futures_util::StreamExt;
-#[cfg(not(debug_assertions))]
-use starchart::backend::TomlBackend;
-#[cfg(debug_assertions)]
-use starchart::backend::TomlPrettyBackend as TomlBackend;
 use starchart::Starchart;
 use tracing::{event, Level};
 use twilight_cache_inmemory::InMemoryCache as Cache;

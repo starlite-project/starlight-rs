@@ -18,12 +18,6 @@ pub async fn init_tables(context: Context) -> Result<(), ActionError<FsError>> {
 
 	let chart = context.database();
 
-	// chart
-	// 	.run(action)
-	// 	.await
-	// 	.into_diagnostic()?
-	// 	.into_diagnostic()?;
-
 	action.run_create_table(chart).await?;
 
 	Ok(())

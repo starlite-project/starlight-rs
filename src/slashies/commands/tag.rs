@@ -78,9 +78,14 @@ impl SlashCommand for Tag {
 	fn run<'a>(
 		&'a self,
 		helper: InteractionsHelper,
-		responder: SlashData,
+		mut responder: SlashData,
 	) -> Pin<Box<dyn Future<Output = Result<()>> + Send + 'a>> {
 		Box::pin(async move {
+			if responder.is_dm() {
+				responder.message("this command can only be used in a guild");
+				helper.respond(&mut responder).await.into_diagnostic()?;
+				return Ok(())
+			}
 			match self {
 				Self::Add { .. } => self.run_add(helper, responder).await,
 				Self::Delete { .. } => self.run_delete(helper, responder).await,

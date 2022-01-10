@@ -4,10 +4,6 @@ use std::{
 	sync::Arc,
 };
 
-#[cfg(not(debug_assertions))]
-use starchart::backend::TomlBackend;
-#[cfg(debug_assertions)]
-use starchart::backend::TomlPrettyBackend as TomlBackend;
 use starchart::Starchart;
 use starlight_macros::cloned;
 use thiserror::Error;

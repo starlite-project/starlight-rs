@@ -1,6 +1,8 @@
 pub mod commands;
 mod r#impl;
 
+use std::ops::Deref;
+
 use twilight_model::{
 	application::{
 		callback::{Autocomplete, CallbackData},
@@ -39,6 +41,16 @@ impl SlashData {
 			command,
 			autocomplete: Autocomplete { choices: vec![] },
 		}
+	}
+
+	#[must_use]
+	pub const fn is_guild(&self) -> bool {
+		self.command.guild_id.is_some()
+	}
+
+	#[must_use]
+	pub const fn is_dm(&self) -> bool {
+		!self.is_guild()
 	}
 
 	pub fn allowed_mentions<F: FnOnce(AllowedMentionsBuilder) -> AllowedMentionsBuilder>(
@@ -108,5 +120,13 @@ impl SlashData {
 			command: self.command.clone(),
 			autocomplete: self.autocomplete.clone(),
 		}
+	}
+}
+
+impl Deref for SlashData {
+	type Target = ApplicationCommand;
+
+	fn deref(&self) -> &Self::Target {
+		&self.command
 	}
 }
