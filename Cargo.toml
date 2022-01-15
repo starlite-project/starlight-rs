@@ -1,5 +1,3 @@
-cargo-features = ["strip"]
-
 [package]
 authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
 edition = "2021"

@@ -13,11 +13,7 @@ use twilight_model::{
 };
 use twilight_util::builder::command::{CommandBuilder, StringBuilder};
 
-use crate::{
-	helpers::{InteractionsHelper, STARLIGHT_COLORS},
-	prelude::*,
-	slashies::{DefineCommand, SlashCommand, SlashData},
-};
+use crate::{helpers::{InteractionsHelper, STARLIGHT_COLORS, parsing::CommandParse}, prelude::*, slashies::{DefineCommand, SlashCommand, SlashData}};
 
 const USER_AGENT: &str = "pyrotechniac/starlight";
 
@@ -252,10 +248,7 @@ impl DefineCommand for Crate {
 			.find(|value| value.name == "crate_name")
 			.ok_or_else(|| error!("Failed to find option"))?;
 
-		let crate_name = match name.value {
-			CommandOptionValue::String(val) => Ok(val),
-			_ => Err(error!("Value is not a string")),
-		}?;
+		let crate_name = name.value.parse_option().ok_or_else(|| error!("value is not a string (this shouldn't happen)"))?;
 
 		Ok(Self { crate_name })
 	}

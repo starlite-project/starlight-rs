@@ -1,9 +1,7 @@
-use std::{
-	mem,
-	pin::Pin,
-};
+use std::{hint::unreachable_unchecked, mem, pin::Pin};
 
 use futures_util::Future;
+use starchart::{action::ReadEntryAction, Action};
 use twilight_model::application::{
 	command::CommandType,
 	interaction::application_command::{CommandData, CommandDataOption, CommandOptionValue},
@@ -13,6 +11,7 @@ use twilight_util::builder::command::{CommandBuilder, StringBuilder, SubCommandB
 use crate::{
 	helpers::{parsing::CommandParse, InteractionsHelper},
 	prelude::*,
+	settings::{GuildSettings, GuildTag},
 	slashies::{DefineCommand, SlashCommand, SlashData},
 };
 
@@ -65,7 +64,33 @@ impl Tag {
 		Ok(Self::Delete { name })
 	}
 
-	async fn run_add(&self, helper: InteractionsHelper, responder: SlashData) -> Result<()> {
+	async fn run_add(&self, helper: InteractionsHelper, mut responder: SlashData) -> Result<()> {
+		if let Self::Add { name, content } = self {
+			let guild_settings = {
+				let mut action: ReadEntryAction<GuildSettings> = Action::new();
+
+				action
+					.set_table("guilds")
+					.set_key(unsafe { &responder.guild_id.unwrap_unchecked() });
+
+				action
+					.run_read_entry(helper.database())
+					.await
+					.map_err(|e| error!(e.to_string()))
+			}?
+			.ok_or_else(|| error!("failed to get GuildSettings"))?;
+
+			if guild_settings.get_tag(name).is_some() {
+				responder.message("that guild tag already exists, try editing or deleting it first.");
+				helper.respond(&mut responder).await.into_diagnostic()?;
+				return Ok(())
+			}
+
+			let guild_tag = GuildTag::new(name.clone(), content.clone(), responder.user_id());
+		} else {
+			unsafe { unreachable_unchecked() }
+		}
+
 		Ok(())
 	}
 
@@ -84,7 +109,7 @@ impl SlashCommand for Tag {
 			if responder.is_dm() {
 				responder.message("this command can only be used in a guild");
 				helper.respond(&mut responder).await.into_diagnostic()?;
-				return Ok(())
+				return Ok(());
 			}
 			match self {
 				Self::Add { .. } => self.run_add(helper, responder).await,

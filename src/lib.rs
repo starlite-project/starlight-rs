@@ -19,6 +19,7 @@
 	clippy::no_effect_underscore_binding,
 )]
 #![cfg_attr(test, allow(clippy::panic_in_result_fn))]
+#![feature(type_ascription)]
 
 pub mod helpers;
 pub mod prelude;

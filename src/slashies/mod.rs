@@ -3,17 +3,14 @@ mod r#impl;
 
 use std::ops::Deref;
 
-use twilight_model::{
-	application::{
+use twilight_model::{application::{
 		callback::{Autocomplete, CallbackData},
 		command::CommandOptionChoice,
 		interaction::ApplicationCommand,
-	},
-	channel::{
+	}, channel::{
 		embed::Embed,
 		message::{allowed_mentions::AllowedMentionsBuilder, MessageFlags},
-	},
-};
+	}, id::{Id, marker::UserMarker}};
 
 pub use self::r#impl::{DefineCommand, SlashCommand};
 
@@ -40,6 +37,20 @@ impl SlashData {
 			callback: Self::BASE,
 			command,
 			autocomplete: Autocomplete { choices: vec![] },
+		}
+	}
+
+	pub fn user_id(&self) -> Id<UserMarker> {
+		if let Some(member) = self.command.member {
+			if let Some(user) = member.user {
+				user.id
+			} else {
+				panic!("failed to get user_id")
+			}
+		} else if let Some(user) = self.command.user {
+			user.id
+		} else {
+			panic!("failed to get user_id")
 		}
 	}
 
