@@ -7,7 +7,7 @@ use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder};
 use twilight_model::{
 	application::{
 		command::{CommandOptionChoice, CommandType},
-		interaction::application_command::{CommandData, CommandOptionValue},
+		interaction::application_command::{CommandData},
 	},
 	datetime::Timestamp,
 };

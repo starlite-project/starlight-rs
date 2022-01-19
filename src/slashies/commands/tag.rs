@@ -70,7 +70,7 @@ impl Tag {
 				let mut action: ReadEntryAction<GuildSettings> = Action::new();
 
 				action
-					.set_table("guilds")
+					.set_table("guilds".to_owned())
 					.set_key(unsafe { &responder.guild_id.unwrap_unchecked() });
 
 				action
@@ -86,7 +86,7 @@ impl Tag {
 				return Ok(())
 			}
 
-			let guild_tag = GuildTag::new(name.clone(), content.clone(), responder.user_id());
+			let _guild_tag = GuildTag::new(name.clone(), content.clone(), responder.user_id());
 		} else {
 			unsafe { unreachable_unchecked() }
 		}
@@ -94,7 +94,7 @@ impl Tag {
 		Ok(())
 	}
 
-	async fn run_delete(&self, helper: InteractionsHelper, responder: SlashData) -> Result<()> {
+	async fn run_delete(&self, _helper: InteractionsHelper, _responder: SlashData) -> Result<()> {
 		Ok(())
 	}
 }

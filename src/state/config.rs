@@ -4,7 +4,7 @@ use clap::{
 	crate_authors, crate_description, crate_name, crate_version, App, Arg, ArgMatches,
 	Error as ClapError, FromArgMatches, IntoApp, Parser,
 };
-use miette::{IntoDiagnostic, Result as Result};
+use miette::{IntoDiagnostic, Result};
 use tracing::instrument;
 use twilight_model::id::{
 	marker::{ApplicationMarker, GuildMarker},
@@ -14,7 +14,8 @@ use twilight_model::id::{
 const REMOVE_SLASH_COMMANDS: &str = "remove-slash-commands";
 const GUILD_ID: &str = "guild-id";
 
-static mut TOKEN: Option<&str> = None;
+// static mut TOKEN: Option<&str> = None;
+const TOKEN: Option<&'static str> = option_env!("DISCORD_TOKEN");
 
 static mut APPLICATION_ID: Option<Id<ApplicationMarker>> = None;
 
@@ -32,11 +33,9 @@ impl Config {
 			}
 		}
 
-		let first_part = Self::token()
-			.into_diagnostic()?
-			.split('.')
-			.next()
-			.unwrap_or_default();
+		let token = Self::token().into_diagnostic()?;
+
+		let first_part = token.split('.').next().unwrap_or_default();
 
 		let decoded = base64::decode(first_part).into_diagnostic()?;
 
@@ -50,17 +49,8 @@ impl Config {
 	}
 
 	#[instrument]
-	pub fn token() -> Result<&'static str, VarError> {
-		if let Some(token) = unsafe { TOKEN } {
-			Ok(token)
-		} else {
-			let token = env::var("DISCORD_TOKEN")?;
-			unsafe {
-				let leaked = Box::leak(token.into_boxed_str());
-				TOKEN = Some(leaked);
-				Ok(leaked)
-			}
-		}
+	pub fn token() -> Result<String, VarError> {
+		TOKEN.map_or_else(|| env::var("DISCORD_TOKEN"), |token| Ok(token.to_owned()))
 	}
 }
 

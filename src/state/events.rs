@@ -1,6 +1,6 @@
 use std::convert::Infallible;
 
-use starchart::{action::{CreateEntryAction}, Action, ChartResult};
+use starchart::{action::CreateEntryAction, Action, Result as ChartResult};
 use tracing::{event, Level};
 use twilight_gateway::Event;
 use twilight_model::{
@@ -35,7 +35,7 @@ async fn ready(_: Context, ready: Ready) -> Result<(), Infallible> {
 	Ok(())
 }
 
-async fn guild_create(context: Context, guild: Guild) -> ChartResult<(), TomlBackend> {
+async fn guild_create(context: Context, guild: Guild) -> ChartResult<()> {
 	let id = guild.id;
 	let database = context.database();
 
@@ -43,7 +43,7 @@ async fn guild_create(context: Context, guild: Guild) -> ChartResult<(), TomlBac
 
 	action
 		.set_entry(&GuildSettings::new(id))
-		.set_table("guilds");
+		.set_table("guilds".to_owned());
 
 	action.run_create_entry(database).await?;
 

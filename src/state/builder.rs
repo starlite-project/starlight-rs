@@ -111,7 +111,7 @@ impl ContextBuilder {
 	{
 		let token = Config::token()?;
 		let http_builder = self.http.map_or_else(
-			move || ClientBuilder::new().token(token.to_owned()),
+			move || ClientBuilder::new().token(token),
 			|builder| builder,
 		);
 
@@ -124,7 +124,7 @@ impl ContextBuilder {
 
 	pub async fn build(self) -> Result<(Context, Events)> {
 		let config = self.config.unwrap_or_default();
-		let token = Config::token().into_diagnostic()?.to_owned();
+		let token = Config::token().into_diagnostic()?;
 		let http_builder = self
 			.http
 			.unwrap_or_else(cloned!(token => move || ClientBuilder::new().token(token)));

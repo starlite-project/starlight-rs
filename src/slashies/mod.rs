@@ -3,14 +3,18 @@ mod r#impl;
 
 use std::ops::Deref;
 
-use twilight_model::{application::{
+use twilight_model::{
+	application::{
 		callback::{Autocomplete, CallbackData},
 		command::CommandOptionChoice,
 		interaction::ApplicationCommand,
-	}, channel::{
+	},
+	channel::{
 		embed::Embed,
 		message::{allowed_mentions::AllowedMentionsBuilder, MessageFlags},
-	}, id::{Id, marker::UserMarker}};
+	},
+	id::{marker::UserMarker, Id},
+};
 
 pub use self::r#impl::{DefineCommand, SlashCommand};
 
@@ -40,14 +44,16 @@ impl SlashData {
 		}
 	}
 
+	#[must_use]
+	#[allow(clippy::option_if_let_else)]
 	pub fn user_id(&self) -> Id<UserMarker> {
-		if let Some(member) = self.command.member {
-			if let Some(user) = member.user {
+		if let Some(member) = &self.command.member {
+			if let Some(user) = &member.user {
 				user.id
 			} else {
 				panic!("failed to get user_id")
 			}
-		} else if let Some(user) = self.command.user {
+		} else if let Some(user) = &self.command.user {
 			user.id
 		} else {
 			panic!("failed to get user_id")
@@ -90,9 +96,7 @@ impl SlashData {
 	pub fn embeds(&mut self, embeds: Vec<Embed>) -> &mut Self {
 		assert!(!embeds.is_empty(), "empty embeds not allowed");
 
-		// self.callback.embeds.extend(embeds);
-
-		if let Some( current_embeds) = &mut self.callback.embeds {
+		if let Some(current_embeds) = &mut self.callback.embeds {
 			current_embeds.extend(embeds);
 		} else {
 			self.callback.embeds = Some(embeds);

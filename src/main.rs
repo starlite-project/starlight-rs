@@ -13,10 +13,12 @@ use tokio::signal::windows::{ctrl_break, ctrl_c};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 use twilight_cache_inmemory::{InMemoryCacheBuilder, ResourceType};
 use twilight_gateway::Intents;
+use dotenv::dotenv;
 
 static ATOMIC_ID: AtomicUsize = AtomicUsize::new(1);
 
 fn main() -> Result<()> {
+	dotenv().ok();
 	Builder::new_multi_thread()
 		.enable_all()
 		.thread_name_fn(|| {

@@ -1,7 +1,6 @@
 mod guild;
 use starchart::{
 	action::{ActionError, CreateTableAction},
-	backend::FsError,
 	Action,
 };
 
@@ -10,11 +9,11 @@ use crate::{prelude::*, state::Context};
 
 // custom function to initialize all tables.
 #[instrument(skip(context))]
-pub async fn init_tables(context: Context) -> Result<(), ActionError<FsError>> {
+pub async fn init_tables(context: Context) -> Result<(), ActionError> {
 	let default = GuildSettings::default();
 	event!(Level::INFO, ?default, "creating table guilds");
 	let mut action: CreateTableAction<GuildSettings> = Action::new();
-	action.set_table("guilds");
+	action.set_table("guilds".to_owned());
 
 	let chart = context.database();
 
