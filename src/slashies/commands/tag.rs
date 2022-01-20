@@ -1,7 +1,10 @@
 use std::{hint::unreachable_unchecked, mem, pin::Pin};
 
 use futures_util::Future;
-use starchart::{action::ReadEntryAction, Action};
+use starchart::{
+	action::{CreateEntryAction, ReadEntryAction},
+	Action,
+};
 use twilight_model::application::{
 	command::CommandType,
 	interaction::application_command::{CommandData, CommandDataOption, CommandOptionValue},
@@ -11,7 +14,7 @@ use twilight_util::builder::command::{CommandBuilder, StringBuilder, SubCommandB
 use crate::{
 	helpers::{parsing::CommandParse, InteractionsHelper},
 	prelude::*,
-	settings::{GuildSettings, GuildTag},
+	settings::{GuildSettings, GuildTag, Tables},
 	slashies::{DefineCommand, SlashCommand, SlashData},
 };
 
@@ -70,7 +73,7 @@ impl Tag {
 				let mut action: ReadEntryAction<GuildSettings> = Action::new();
 
 				action
-					.set_table("guilds".to_owned())
+					.set_table(Tables::Guilds.to_string())
 					.set_key(unsafe { &responder.guild_id.unwrap_unchecked() });
 
 				action
@@ -81,12 +84,17 @@ impl Tag {
 			.ok_or_else(|| error!("failed to get GuildSettings"))?;
 
 			if guild_settings.get_tag(name).is_some() {
-				responder.message("that guild tag already exists, try editing or deleting it first.");
+				responder
+					.message("that guild tag already exists, try editing or deleting it first.");
 				helper.respond(&mut responder).await.into_diagnostic()?;
-				return Ok(())
+				return Ok(());
 			}
 
-			let _guild_tag = GuildTag::new(name.clone(), content.clone(), responder.user_id());
+			let guild_tag = GuildTag::new(name.clone(), content.clone(), responder.user_id());
+
+			let mut create_action: CreateEntryAction<GuildSettings> = Action::new();
+
+			create_action.set_table(Tables::Guilds.to_string()).set_data(&guild_tag);
 		} else {
 			unsafe { unreachable_unchecked() }
 		}

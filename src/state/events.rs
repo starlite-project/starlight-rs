@@ -10,7 +10,10 @@ use twilight_model::{
 };
 
 use super::Context;
-use crate::{prelude::*, settings::GuildSettings};
+use crate::{
+	prelude::*,
+	settings::{GuildSettings, Tables},
+};
 
 // these should all be the same caller context, taking a `Context` as the first parameter, and whatever the event content is in the second.
 // however, they should return as strict of an error type as possible, using `Infallible` whevever possible (for more optimizations).
@@ -43,7 +46,7 @@ async fn guild_create(context: Context, guild: Guild) -> ChartResult<()> {
 
 	action
 		.set_entry(&GuildSettings::new(id))
-		.set_table("guilds".to_owned());
+		.set_table(Tables::Guilds.to_string());
 
 	action.run_create_entry(database).await?;
 
