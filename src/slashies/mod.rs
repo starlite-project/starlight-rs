@@ -13,6 +13,7 @@ use twilight_model::{
 		embed::Embed,
 		message::{allowed_mentions::AllowedMentionsBuilder, MessageFlags},
 	},
+	guild::Permissions,
 	id::{marker::UserMarker, Id},
 };
 
@@ -69,6 +70,19 @@ impl SlashData {
 	#[must_use]
 	pub const fn is_dm(&self) -> bool {
 		!self.is_guild()
+	}
+
+	pub fn user_permissions(&self, helper: &impl QuickAccess) -> Result<Permissions> {
+		if self.is_dm() {
+			return Err(error!("can't get user permissions in a DM"));
+		}
+
+		let cache = helper.cache();
+
+		cache
+			.permissions()
+			.root(self.user_id(), unsafe { self.guild_id.unwrap_unchecked() })
+			.into_diagnostic()
 	}
 
 	pub fn allowed_mentions<F: FnOnce(AllowedMentionsBuilder) -> AllowedMentionsBuilder>(

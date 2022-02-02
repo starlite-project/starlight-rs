@@ -94,6 +94,11 @@ impl GuildTag {
 		&self.description
 	}
 
+	#[must_use]
+	pub const fn author(&self) -> Id<UserMarker> {
+		self.author
+	}
+
 	pub fn set_description(&mut self, content: String) {
 		self.description = content;
 	}

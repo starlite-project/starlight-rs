@@ -1,9 +1,12 @@
 use std::{hint::unreachable_unchecked, pin::Pin};
 
 use futures_util::{Future, FutureExt};
-use twilight_model::application::{
-	command::{CommandOptionChoice, CommandType},
-	interaction::application_command::{CommandData, CommandDataOption, CommandOptionValue},
+use twilight_model::{
+	application::{
+		command::{CommandOptionChoice, CommandType},
+		interaction::application_command::{CommandData, CommandDataOption, CommandOptionValue},
+	},
+	guild::Permissions,
 };
 use twilight_util::builder::command::{CommandBuilder, StringBuilder, SubCommandBuilder};
 
@@ -12,7 +15,7 @@ use crate::{
 	prelude::*,
 	settings::{GuildSettings, GuildTag, Tables},
 	slashies::{DefineCommand, SlashCommand, SlashData},
-	utils::levenshtein,
+	utils::{levenshtein, DefaultMessages},
 };
 
 #[derive(Debug, Clone)]
@@ -61,62 +64,6 @@ impl Tag {
 		Self::Delete { name }
 	}
 
-	// 	async fn autocomplete_delete(
-	// 		self,
-	// 		helper: InteractionsHelper,
-	// 		mut responder: SlashData,
-	// 	) -> Result<()> {
-	// 		if let Self::Delete { name } = self {
-	// 			let guild_settings = Tables::Guilds
-	// 				.get_entry::<GuildSettings>(helper.database(), unsafe {
-	// 					&responder.guild_id.unwrap_unchecked()
-	// 				})
-	// 				.await?;
-
-	// 			let mut tags = guild_settings.tags().to_owned();
-
-	// 			tags.sort_by(|first, second| {
-	// 				levenshtein(first.name(), &name).cmp(&levenshtein(second.name(), &name))
-	// 			});
-
-	// 			let results = tags
-	// 				.into_iter()
-	// 				.filter(|tag| levenshtein(tag.name(), &name) <= 3)
-	// 				.map(|tag| {
-	// 					let tag = tag.name().to_owned();
-	// 					CommandOptionChoice::String {
-	// 						name: tag.clone(),
-	// 						value: tag,
-	// 					}
-	// 				})
-	// 				.collect();
-
-	// 			responder.autocomplete(results);
-	// 			helper
-	// 				.autocomplete(&mut responder)
-	// 				.await
-	// 				.into_diagnostic()?;
-	// 		} else {
-	// 			unsafe { unreachable_unchecked() }
-	// 		}
-
-	// 		Ok(())
-	// 	}
-
-	// 	async fn autocomplete_edit(
-	// 		self,
-	// 		helper: InteractionsHelper,
-	// 		mut responder: SlashData,
-	// 	) -> Result<()> {
-	// 		if let Self::Edit { name, .. } = self {
-	// let guild_settings = GuildSe
-	// 		} else {
-	// 			unsafe { unreachable_unchecked() }
-	// 		}
-
-	// 		Ok(())
-	// 	}
-
 	async fn run_add(self, helper: InteractionsHelper, mut responder: SlashData) -> Result<()> {
 		if let Self::Add { name, content } = self {
 			let mut guild_settings = Tables::Guilds
@@ -158,11 +105,26 @@ impl Tag {
 					&responder.guild_id.unwrap_unchecked()
 				})
 				.await?;
+
+			let can_manage_messages = {
+				let user_perms = responder.user_permissions(&helper)?;
+
+				user_perms.contains(Permissions::MANAGE_MESSAGES)
+					|| user_perms.contains(Permissions::ADMINISTRATOR)
+			};
+
+			let user_id = responder.user_id();
+
 			if let Some(tag) = guild_settings
 				.tags_mut()
 				.iter_mut()
 				.find(|tag| tag.name() == name)
 			{
+				if !can_manage_messages && tag.author() != user_id {
+					responder.message(DefaultMessages::PermissionDenied.to_string());
+					helper.respond(&mut responder).await.into_diagnostic()?;
+					return Ok(());
+				}
 				tag.set_description(content);
 
 				Tables::Guilds
@@ -193,6 +155,27 @@ impl Tag {
 					&responder.guild_id.unwrap_unchecked()
 				})
 				.await?;
+
+			let can_manage_messages = {
+				let user_perms = responder.user_permissions(&helper)?;
+
+				user_perms.contains(Permissions::MANAGE_MESSAGES)
+					|| user_perms.contains(Permissions::ADMINISTRATOR)
+			};
+
+			let user_id = responder.user_id();
+
+			let mut manageable_tags = guild_settings
+				.tags()
+				.iter()
+				.filter(|tag| tag.author() == user_id)
+				.map(GuildTag::name);
+
+			if !can_manage_messages && !manageable_tags.any(|tag| tag == name) {
+				responder.message(DefaultMessages::PermissionDenied.to_string());
+				helper.respond(&mut responder).await.into_diagnostic()?;
+				return Ok(());
+			}
 
 			if guild_settings.remove_tag(&name).is_none() {
 				responder.message(format!("tag `{}` was not found.", &name));
@@ -245,7 +228,7 @@ impl SlashCommand for Tag {
 				return Ok(());
 			}
 			let name = match self {
-				Self::Add { .. } => return Ok(()),
+				Self::Add { .. } => unsafe { unreachable_unchecked() },
 				Self::Edit { name, .. } | Self::Delete { name, .. } => name.as_str(),
 			};
 
@@ -261,18 +244,30 @@ impl SlashCommand for Tag {
 
 			let tags = guild_settings.tags_mut();
 
+			let can_manage_messages = {
+				let user_permissions = responder.user_permissions(&helper)?;
+
+				user_permissions.contains(Permissions::ADMINISTRATOR)
+					|| user_permissions.contains(Permissions::MANAGE_MESSAGES)
+			};
+			let user_id = responder.user_id();
+
 			tags.sort_by(|first, second| {
 				levenshtein(first.name(), name).cmp(&levenshtein(second.name(), name))
 			});
 
 			let results = tags
 				.iter()
-				.filter(|tag| levenshtein(tag.name(), name) < 3)
-				.map(|tag| {
-					let tag = tag.name().to_owned();
-					CommandOptionChoice::String {
-						name: tag.clone(),
-						value: tag,
+				.filter_map(|tag| {
+					if (can_manage_messages || tag.author() == user_id)
+						&& levenshtein(tag.name(), name) < 3
+					{
+						Some(CommandOptionChoice::String {
+							name: tag.name().to_owned(),
+							value: tag.name().to_owned(),
+						})
+					} else {
+						None
 					}
 				})
 				.collect();

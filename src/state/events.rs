@@ -7,6 +7,7 @@ use twilight_model::{
 	application::interaction::Interaction,
 	gateway::payload::incoming::{InteractionCreate, Ready},
 	guild::Guild,
+	id::Id,
 };
 
 use super::Context;

@@ -80,3 +80,18 @@ pub fn levenshtein(a: &str, b: &str) -> usize {
 
 	result
 }
+
+#[derive(Debug, Clone, Copy)]
+pub enum DefaultMessages {
+	PermissionDenied,
+}
+
+impl Display for DefaultMessages {
+	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+		match self {
+			Self::PermissionDenied => {
+				f.write_str("you do not have permission to perform this action")
+			}
+		}
+	}
+}
