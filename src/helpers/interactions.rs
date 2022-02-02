@@ -78,7 +78,7 @@ impl InteractionsHelper {
 						let mut err_data = SlashData::new(command);
 
 						err_data
-							.message("an error occurred running the interaction")
+							.message("an error occurred running the interaction".to_owned())
 							.ephemeral();
 
 						if self.raw_get(&err_data).await.is_err() {
@@ -138,8 +138,7 @@ impl InteractionsHelper {
 	pub async fn update(self, data: &mut SlashData) -> Result<()> {
 		let callback_data = mem::replace(&mut data.callback, SlashData::BASE);
 		let context = self.interaction_client();
-		let update_interaction = context
-			.update_interaction_original(&data.command.token);
+		let update_interaction = context.update_interaction_original(&data.command.token);
 
 		let bytes = serde_json::to_vec(&callback_data).into_diagnostic()?;
 
@@ -186,12 +185,7 @@ impl InteractionsHelper {
 	}
 
 	fn get_slashies() -> [Command; 3] {
-		[
-			Ping::define(),
-			Crate::define(),
-			Tag::define(),
-		]
-		.map(CommandBuilder::build)
+		[Ping::define(), Crate::define(), Tag::define()].map(CommandBuilder::build)
 	}
 }
 

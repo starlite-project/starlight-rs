@@ -1,10 +1,9 @@
 // any `Result` or `Error` types should be prefixed with their respective module name.
 // any traits that are only used for their methods should be renamed to _
 pub use std::{
-	fmt::{Display, Formatter, Result as FmtResult},
+	fmt::{Display, Formatter, Result as FmtResult, Write as FmtWrite},
 	io::Result as IoResult,
 };
-
 
 pub use miette::{miette as error, IntoDiagnostic as _, Result, WrapErr as _};
 pub use reqwest::header;

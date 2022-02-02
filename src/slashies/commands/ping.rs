@@ -37,7 +37,7 @@ impl SlashCommand for Ping {
 					pong.as_millis()
 				));
 			} else {
-				data.message("Pong! Couldn't quite get average latency");
+				data.message("Pong! Couldn't quite get average latency".to_owned());
 			}
 
 			helper.respond(&mut data).await.into_diagnostic()?;

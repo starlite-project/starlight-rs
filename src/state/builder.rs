@@ -110,10 +110,9 @@ impl ContextBuilder {
 		F: FnOnce(ClientBuilder) -> ClientBuilder,
 	{
 		let token = Config::token()?;
-		let http_builder = self.http.map_or_else(
-			move || ClientBuilder::new().token(token),
-			|builder| builder,
-		);
+		let http_builder = self
+			.http
+			.map_or_else(move || ClientBuilder::new().token(token), |builder| builder);
 
 		let http = http_builder_fn(http_builder);
 

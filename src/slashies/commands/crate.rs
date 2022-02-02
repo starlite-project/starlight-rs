@@ -7,13 +7,17 @@ use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder};
 use twilight_model::{
 	application::{
 		command::{CommandOptionChoice, CommandType},
-		interaction::application_command::{CommandData},
+		interaction::application_command::CommandData,
 	},
 	datetime::Timestamp,
 };
 use twilight_util::builder::command::{CommandBuilder, StringBuilder};
 
-use crate::{helpers::{InteractionsHelper, STARLIGHT_COLORS, parsing::CommandParse}, prelude::*, slashies::{DefineCommand, SlashCommand, SlashData}};
+use crate::{
+	helpers::{parsing::CommandParse, InteractionsHelper, STARLIGHT_COLORS},
+	prelude::*,
+	slashies::{DefineCommand, SlashCommand, SlashData},
+};
 
 const USER_AGENT: &str = "pyrotechniac/starlight";
 
@@ -133,7 +137,7 @@ impl SlashCommand for Crate {
 	) -> Pin<Box<dyn Future<Output = Result<()>> + Send + '_>> {
 		Box::pin(async move {
 			if let Some(stdlib_url) = self.rustc_crate_link() {
-				responder.message(stdlib_url);
+				responder.message(stdlib_url.to_owned());
 
 				helper.respond(&mut responder).await.into_diagnostic()?;
 
@@ -248,7 +252,10 @@ impl DefineCommand for Crate {
 			.find(|value| value.name == "crate_name")
 			.ok_or_else(|| error!("Failed to find option"))?;
 
-		let crate_name = name.value.parse_option().ok_or_else(|| error!("value is not a string (this shouldn't happen)"))?;
+		let crate_name = name
+			.value
+			.parse_option()
+			.ok_or_else(|| error!("value is not a string (this shouldn't happen)"))?;
 
 		Ok(Self { crate_name })
 	}

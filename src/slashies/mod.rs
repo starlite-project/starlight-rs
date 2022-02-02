@@ -1,7 +1,7 @@
 pub mod commands;
 mod r#impl;
 
-use std::ops::Deref;
+use std::{fmt::Write, ops::Deref};
 
 use twilight_model::{
 	application::{
@@ -17,6 +17,7 @@ use twilight_model::{
 };
 
 pub use self::r#impl::{DefineCommand, SlashCommand};
+use crate::prelude::*;
 
 #[derive(Debug, Clone)]
 #[must_use = "SlashData has no side effects"]
@@ -79,10 +80,10 @@ impl SlashData {
 		self
 	}
 
-	pub fn message<T: AsRef<str>>(&mut self, content: T) -> &mut Self {
-		assert!(!content.as_ref().is_empty(), "empty message not allowed");
+	pub fn message(&mut self, content: String) -> &mut Self {
+		assert!(!content.is_empty(), "empty message not allowed");
 
-		self.callback.content = Some(content.as_ref().to_owned());
+		self.callback.content = Some(content);
 
 		self
 	}
@@ -143,5 +144,12 @@ impl Deref for SlashData {
 
 	fn deref(&self) -> &Self::Target {
 		&self.command
+	}
+}
+
+impl Write for SlashData {
+	fn write_str(&mut self, s: &str) -> FmtResult {
+		self.message(s.to_owned());
+		Ok(())
 	}
 }

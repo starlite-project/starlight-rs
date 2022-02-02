@@ -1,7 +1,7 @@
 mod guild;
 use starchart::{
-	action::{ActionError, CreateTableAction},
-	Action,
+	action::{ActionError, CreateTableAction, ReadEntryAction, UpdateEntryAction},
+	Action, IndexEntry, Starchart,
 };
 
 pub use self::guild::{GuildSettings, GuildTag};
@@ -10,6 +10,37 @@ use crate::{prelude::*, state::Context};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Tables {
 	Guilds,
+}
+
+impl Tables {
+	pub async fn get_entry<T: IndexEntry>(
+		self,
+		chart: &Starchart<TomlBackend>,
+		key: &<T as IndexEntry>::Key,
+	) -> Result<T>
+	where
+		<T as IndexEntry>::Key: Sync + Display,
+	{
+		let mut action: ReadEntryAction<T> = Action::new();
+		action.set_table(self.to_string()).set_key(key);
+
+		action
+			.run_read_entry(chart)
+			.await
+			.into_diagnostic()?
+			.ok_or_else(|| error!("could not find entry with key {}", key))
+	}
+
+	pub async fn update_entry<T: IndexEntry>(
+		self,
+		chart: &Starchart<TomlBackend>,
+		entry: &T,
+	) -> Result<()> {
+		let mut action: UpdateEntryAction<T> = Action::new();
+		action.set_table(self.to_string()).set_entry(entry);
+
+		action.run_update_entry(chart).await.into_diagnostic()
+	}
 }
 
 impl Display for Tables {

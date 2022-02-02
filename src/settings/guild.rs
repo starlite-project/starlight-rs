@@ -1,8 +1,6 @@
-use std::{collections::HashMap, iter::Extend};
+use std::iter::Extend;
 
-use serde::{
-	Deserialize, Serialize,
-};
+use serde::{Deserialize, Serialize};
 use starchart::IndexEntry;
 use twilight_model::id::{
 	marker::{GuildMarker, UserMarker},
@@ -13,37 +11,50 @@ use twilight_model::id::{
 #[derive(Debug, Clone, IndexEntry, Serialize, Deserialize)]
 pub struct GuildSettings {
 	id: Id<GuildMarker>,
-	tags: HashMap<String, GuildTag>,
+	tags: Vec<GuildTag>,
 }
 
 impl GuildSettings {
 	#[must_use]
-	pub fn new(id: Id<GuildMarker>) -> Self {
+	pub const fn new(id: Id<GuildMarker>) -> Self {
 		Self {
 			id,
-			tags: HashMap::new(),
+			tags: Vec::new(),
 		}
 	}
 
-	pub fn insert_tag(&mut self, tag: GuildTag) -> Option<GuildTag> {
-		self.tags.insert(tag.name.clone(), tag)
+	#[must_use]
+	pub const fn id(&self) -> Id<GuildMarker> {
+		self.id
 	}
 
-	pub fn get_tag<Q: AsRef<str>>(&self, tag: &Q) -> Option<&GuildTag> {
-		let tag = tag.as_ref();
-		self.tags
-			.get(tag)
-			.or_else(|| self.tags.values().find(|t| t.name == tag))
+	#[must_use]
+	pub fn tags(&self) -> &[GuildTag] {
+		&self.tags
+	}
+
+	pub fn push_tag(&mut self, tag: GuildTag) {
+		self.tags.push(tag);
+	}
+
+	pub fn remove_tag(&mut self, tag_name: &str) -> Option<GuildTag> {
+		let position = self.tags().iter().position(|x| x.name == tag_name)?;
+		Some(self.tags.swap_remove(position))
+	}
+
+	#[must_use]
+	pub fn tags_mut(&mut self) -> &mut [GuildTag] {
+		&mut self.tags
 	}
 }
 
 impl Default for GuildSettings {
 	fn default() -> Self {
-		let default_map = HashMap::from([("default".to_owned(), GuildTag::default())]);
+		let default_tags = vec![GuildTag::default()];
 
 		Self {
 			id: unsafe { Id::new_unchecked(1) },
-			tags: default_map,
+			tags: default_tags,
 		}
 	}
 }
@@ -51,7 +62,7 @@ impl Default for GuildSettings {
 impl Extend<GuildTag> for GuildSettings {
 	fn extend<T: IntoIterator<Item = GuildTag>>(&mut self, iter: T) {
 		for tag in iter {
-			self.insert_tag(tag);
+			self.push_tag(tag);
 		}
 	}
 }
@@ -71,6 +82,20 @@ impl GuildTag {
 			description,
 			author,
 		}
+	}
+
+	#[must_use]
+	pub fn name(&self) -> &str {
+		&self.name
+	}
+
+	#[must_use]
+	pub fn description(&self) -> &str {
+		&self.description
+	}
+
+	pub fn set_description(&mut self, content: String) {
+		self.description = content;
 	}
 }
 

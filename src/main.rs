@@ -1,6 +1,7 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use clap::Parser;
+use dotenv::dotenv;
 use starlight::{
 	prelude::*,
 	state::{Config, ContextBuilder, State},
@@ -13,21 +14,20 @@ use tokio::signal::windows::{ctrl_break, ctrl_c};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 use twilight_cache_inmemory::{InMemoryCacheBuilder, ResourceType};
 use twilight_gateway::Intents;
-use dotenv::dotenv;
 
-static ATOMIC_ID: AtomicUsize = AtomicUsize::new(1);
+static THREAD_ID: AtomicUsize = AtomicUsize::new(1);
 
 fn main() -> Result<()> {
 	dotenv().ok();
 	Builder::new_multi_thread()
 		.enable_all()
 		.thread_name_fn(|| {
-			let id = ATOMIC_ID.fetch_add(1, Ordering::SeqCst) + 1;
+			let id = THREAD_ID.fetch_add(1, Ordering::SeqCst) + 1;
 			let output = String::from("starlight-pool-");
 			output + &id.to_string()
 		})
 		.on_thread_stop(|| {
-			ATOMIC_ID.fetch_sub(1, Ordering::SeqCst);
+			THREAD_ID.fetch_sub(1, Ordering::SeqCst);
 		})
 		.build()
 		.into_diagnostic()?
