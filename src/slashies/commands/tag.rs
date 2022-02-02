@@ -23,6 +23,7 @@ pub enum Tag {
 	Add { name: String, content: String },
 	Delete { name: String },
 	Edit { name: String, content: String },
+	Show { name: String },
 }
 
 impl Tag {
@@ -53,7 +54,7 @@ impl Tag {
 		Self::Edit { name, content }
 	}
 
-	fn parse_delete(data: &[CommandDataOption]) -> Self {
+	fn parse_name(data: &[CommandDataOption]) -> String {
 		let name = data
 			.iter()
 			.find(|opt| opt.name == "name")
@@ -61,7 +62,41 @@ impl Tag {
 			.and_then(|opt| opt.value.parse_option())
 			.unwrap_or_default();
 
-		Self::Delete { name }
+		name
+	}
+
+	fn parse_delete(data: &[CommandDataOption]) -> Self {
+		Self::Delete {
+			name: Self::parse_name(data),
+		}
+	}
+
+	fn parse_show(data: &[CommandDataOption]) -> Self {
+		Self::Show {
+			name: Self::parse_name(data),
+		}
+	}
+
+	async fn run_show(self, helper: InteractionsHelper, mut responder: SlashData) -> Result<()> {
+		if let Self::Show { name } = self {
+			let guild_settings = Tables::Guilds
+				.get_entry::<GuildSettings>(helper.database(), unsafe {
+					&responder.guild_id.unwrap_unchecked()
+				})
+				.await?;
+
+			if let Some(tag) = guild_settings.tags().iter().find(|tag| tag.name() == name) {
+				responder.message(tag.description().to_owned());
+				helper.respond(&mut responder).await.into_diagnostic()?;
+			} else {
+				responder.message(format!("couldn't find tag `{}`", name));
+				helper.respond(&mut responder).await.into_diagnostic()?;
+			}
+		} else {
+			unsafe { unreachable_unchecked() }
+		}
+
+		Ok(())
 	}
 
 	async fn run_add(self, helper: InteractionsHelper, mut responder: SlashData) -> Result<()> {
@@ -213,6 +248,7 @@ impl SlashCommand for Tag {
 				Self::Add { .. } => self.clone().run_add(helper, responder).await,
 				Self::Delete { .. } => self.clone().run_delete(helper, responder).await,
 				Self::Edit { .. } => self.clone().run_edit(helper, responder).await,
+				Self::Show { .. } => self.clone().run_show(helper, responder).await,
 			}
 		}
 		.boxed()
@@ -229,7 +265,9 @@ impl SlashCommand for Tag {
 			}
 			let name = match self {
 				Self::Add { .. } => unsafe { unreachable_unchecked() },
-				Self::Edit { name, .. } | Self::Delete { name, .. } => name.as_str(),
+				Self::Edit { name, .. } | Self::Delete { name, .. } | Self::Show { name } => {
+					name.as_str()
+				}
 			};
 
 			if name.len() < 3 {
@@ -323,6 +361,13 @@ impl DefineCommand for Tag {
 						.autocomplete(true),
 				),
 		)
+		.option(
+			SubCommandBuilder::new("show".to_owned(), "View a specific tag".to_owned()).option(
+				StringBuilder::new("name".to_owned(), "Name of the tag".to_owned())
+					.required(true)
+					.autocomplete(true),
+			),
+		)
 	}
 
 	fn parse(mut data: CommandData) -> Result<Self> {
@@ -340,6 +385,7 @@ impl DefineCommand for Tag {
 				"add" => Ok(Self::parse_add(&v)),
 				"delete" => Ok(Self::parse_delete(&v)),
 				"edit" => Ok(Self::parse_edit(&v)),
+				"show" => Ok(Self::parse_show(&v)),
 				_ => Err(error!("invalid subcommand variant")),
 			},
 			_ => Err(error!("invalid subcommand value option")),
