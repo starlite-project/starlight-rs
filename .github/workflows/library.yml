@@ -1,0 +1,19 @@
+name: Library checks
+
+on:
+  push:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  audit:
+    name: Security audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Run security audit
+        uses: actions-rs/audit-check@v1
+        with:
+          token: ${{ github.TOKEN }}
