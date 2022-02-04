@@ -226,6 +226,16 @@ dependencies = [
 
 [[package]]
 name = "dashmap"
+version = "4.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e77a43b28d0668df09411cb0bc9a8c2adc40f9a048afe863e05fd43251e8e39c"
+dependencies = [
+ "cfg-if",
+ "num_cpus",
+]
+
+[[package]]
+name = "dashmap"
 version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b799062aaf67eb976af3bdca031ee6f846d2f0a5710ddbb0d2efee33f3cc4760"
@@ -243,6 +253,12 @@ checksum = "d3dd60d1080a57a05ab032377049e0591415d2b31afd7028356dbf3cc6dcb066"
 dependencies = [
  "generic-array",
 ]
+
+[[package]]
+name = "dotenv"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
 
 [[package]]
 name = "encoding_rs"
@@ -692,9 +708,9 @@ checksum = "308cc39be01b73d0d18f82a0e7b2a3df85245f84af96fdddc5d202d27e47b86a"
 
 [[package]]
 name = "metrics"
-version = "0.17.1"
+version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "55586aa936c35f34ba8aa5d97356d554311206e1ce1f9e68fe7b07288e5ad827"
+checksum = "8f601807a248964869e222d209fd5f8e5bcc5542e4c9b1ef21bcee4424868ce5"
 dependencies = [
  "ahash",
  "metrics-macros",
@@ -702,14 +718,12 @@ dependencies = [
 
 [[package]]
 name = "metrics-macros"
-version = "0.4.1"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0daa0ab3a0ae956d0e2c1f42511422850e577d36a255357d1a7d08d45ee3a2f1"
+checksum = "44128401debcab0d777da11d005419b4d6ad6da8cb5eea64487c34ee0a311cf5"
 dependencies = [
- "lazy_static",
  "proc-macro2",
  "quote",
- "regex",
  "syn",
 ]
 
@@ -1380,7 +1394,7 @@ name = "starchart"
 version = "0.12.0"
 source = "git+https://github.com/starlite-project/starchart#9f68048ac6764075be08d065a075cc86eef53376"
 dependencies = [
- "dashmap",
+ "dashmap 5.0.0",
  "futures",
  "futures-util",
  "parking_lot",
@@ -1410,6 +1424,7 @@ version = "0.1.0"
 dependencies = [
  "base64",
  "clap",
+ "dotenv",
  "futures-util",
  "miette",
  "reqwest",
@@ -1769,27 +1784,28 @@ dependencies = [
 
 [[package]]
 name = "twilight-cache-inmemory"
-version = "0.8.3"
-source = "git+https://github.com/twilight-rs/twilight.git?rev=41778c27bd61ea29804ab0404f6e24539fef3199#41778c27bd61ea29804ab0404f6e24539fef3199"
+version = "0.9.0"
+source = "git+https://github.com/twilight-rs/twilight.git?rev=e31de7b92b7d7929eacca01355636ea841887d66#e31de7b92b7d7929eacca01355636ea841887d66"
 dependencies = [
  "bitflags",
- "dashmap",
+ "dashmap 4.0.2",
  "serde",
  "twilight-model",
+ "twilight-util",
 ]
 
 [[package]]
 name = "twilight-embed-builder"
-version = "0.8.0"
-source = "git+https://github.com/twilight-rs/twilight.git?rev=41778c27bd61ea29804ab0404f6e24539fef3199#41778c27bd61ea29804ab0404f6e24539fef3199"
+version = "0.9.0"
+source = "git+https://github.com/twilight-rs/twilight.git?rev=e31de7b92b7d7929eacca01355636ea841887d66#e31de7b92b7d7929eacca01355636ea841887d66"
 dependencies = [
  "twilight-model",
 ]
 
 [[package]]
 name = "twilight-gateway"
-version = "0.8.2"
-source = "git+https://github.com/twilight-rs/twilight.git?rev=41778c27bd61ea29804ab0404f6e24539fef3199#41778c27bd61ea29804ab0404f6e24539fef3199"
+version = "0.9.0"
+source = "git+https://github.com/twilight-rs/twilight.git?rev=e31de7b92b7d7929eacca01355636ea841887d66#e31de7b92b7d7929eacca01355636ea841887d66"
 dependencies = [
  "bitflags",
  "flate2",
@@ -1811,8 +1827,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-gateway-queue"
-version = "0.8.0"
-source = "git+https://github.com/twilight-rs/twilight.git?rev=41778c27bd61ea29804ab0404f6e24539fef3199#41778c27bd61ea29804ab0404f6e24539fef3199"
+version = "0.9.0"
+source = "git+https://github.com/twilight-rs/twilight.git?rev=e31de7b92b7d7929eacca01355636ea841887d66#e31de7b92b7d7929eacca01355636ea841887d66"
 dependencies = [
  "tokio",
  "twilight-http",
@@ -1820,8 +1836,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-http"
-version = "0.8.3"
-source = "git+https://github.com/twilight-rs/twilight.git?rev=41778c27bd61ea29804ab0404f6e24539fef3199#41778c27bd61ea29804ab0404f6e24539fef3199"
+version = "0.9.0"
+source = "git+https://github.com/twilight-rs/twilight.git?rev=e31de7b92b7d7929eacca01355636ea841887d66#e31de7b92b7d7929eacca01355636ea841887d66"
 dependencies = [
  "brotli",
  "hyper",
@@ -1840,8 +1856,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-http-ratelimiting"
-version = "0.8.2"
-source = "git+https://github.com/twilight-rs/twilight.git?rev=41778c27bd61ea29804ab0404f6e24539fef3199#41778c27bd61ea29804ab0404f6e24539fef3199"
+version = "0.9.0"
+source = "git+https://github.com/twilight-rs/twilight.git?rev=e31de7b92b7d7929eacca01355636ea841887d66#e31de7b92b7d7929eacca01355636ea841887d66"
 dependencies = [
  "futures-util",
  "http",
@@ -1850,8 +1866,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-model"
-version = "0.8.3"
-source = "git+https://github.com/twilight-rs/twilight.git?rev=41778c27bd61ea29804ab0404f6e24539fef3199#41778c27bd61ea29804ab0404f6e24539fef3199"
+version = "0.9.0"
+source = "git+https://github.com/twilight-rs/twilight.git?rev=e31de7b92b7d7929eacca01355636ea841887d66#e31de7b92b7d7929eacca01355636ea841887d66"
 dependencies = [
  "bitflags",
  "serde",
@@ -1863,10 +1879,10 @@ dependencies = [
 
 [[package]]
 name = "twilight-standby"
-version = "0.8.1"
-source = "git+https://github.com/twilight-rs/twilight.git?rev=41778c27bd61ea29804ab0404f6e24539fef3199#41778c27bd61ea29804ab0404f6e24539fef3199"
+version = "0.9.0"
+source = "git+https://github.com/twilight-rs/twilight.git?rev=e31de7b92b7d7929eacca01355636ea841887d66#e31de7b92b7d7929eacca01355636ea841887d66"
 dependencies = [
- "dashmap",
+ "dashmap 4.0.2",
  "futures-util",
  "tokio",
  "tracing",
@@ -1875,8 +1891,8 @@ dependencies = [
 
 [[package]]
 name = "twilight-util"
-version = "0.8.1"
-source = "git+https://github.com/twilight-rs/twilight.git?rev=41778c27bd61ea29804ab0404f6e24539fef3199#41778c27bd61ea29804ab0404f6e24539fef3199"
+version = "0.9.0"
+source = "git+https://github.com/twilight-rs/twilight.git?rev=e31de7b92b7d7929eacca01355636ea841887d66#e31de7b92b7d7929eacca01355636ea841887d66"
 dependencies = [
  "twilight-model",
 ]
@@ -1884,7 +1900,7 @@ dependencies = [
 [[package]]
 name = "twilight-validate"
 version = "0.9.0"
-source = "git+https://github.com/twilight-rs/twilight.git?rev=41778c27bd61ea29804ab0404f6e24539fef3199#41778c27bd61ea29804ab0404f6e24539fef3199"
+source = "git+https://github.com/twilight-rs/twilight.git?rev=e31de7b92b7d7929eacca01355636ea841887d66#e31de7b92b7d7929eacca01355636ea841887d66"
 dependencies = [
  "twilight-model",
 ]

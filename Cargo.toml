@@ -54,40 +54,40 @@ version = "0.3.3"
 default-features = false
 features = ["permission-calculator"]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [dependencies.twilight-embed-builder]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [dependencies.twilight-gateway]
 default-features = false
 features = ["zlib-simd", "metrics", "rustls-tls", "tracing", "rustls-native-roots"]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [dependencies.twilight-http]
 features = ["tracing", "simd-json", "brotli"]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [dependencies.twilight-model]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [dependencies.twilight-standby]
 features = ["tracing"]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [dependencies.twilight-util]
 features = ["builder"]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [dependencies.twilight-validate]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "41778c27bd61ea29804ab0404f6e24539fef3199"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [profile.release]
 codegen-units = 1
