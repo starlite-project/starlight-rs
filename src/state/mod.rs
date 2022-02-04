@@ -10,7 +10,7 @@ use twilight_standby::Standby;
 
 use self::events::handle;
 pub use self::{builder::ContextBuilder, config::Config};
-use crate::{helpers::Helpers, prelude::*, settings::init_tables};
+use crate::{helpers::Helpers, prelude::*, settings::Tables};
 
 mod builder;
 mod config;
@@ -46,7 +46,7 @@ impl Context {
 
 		event!(Level::INFO, "creating tables");
 
-		init_tables(self).await.into_diagnostic()?;
+		Tables::init(self).await.into_diagnostic()?;
 
 		self.0.shard.start().await.into_diagnostic()?;
 		event!(Level::INFO, "shard connected");

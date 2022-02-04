@@ -107,7 +107,7 @@ impl InteractionsHelper {
 	pub async fn ack(self, data: &SlashData) -> Result<(), HttpError> {
 		self.context()
 			.interaction_client()
-			.interaction_callback(
+			.create_response(
 				data.command.id,
 				&data.command.token,
 				&InteractionResponse::DeferredChannelMessageWithSource(SlashData::BASE),
@@ -121,7 +121,7 @@ impl InteractionsHelper {
 	pub async fn respond(self, data: &mut SlashData) -> Result<(), HttpError> {
 		self.context()
 			.interaction_client()
-			.interaction_callback(
+			.create_response(
 				data.command.id,
 				&data.command.token,
 				&InteractionResponse::ChannelMessageWithSource(mem::replace(
@@ -138,7 +138,7 @@ impl InteractionsHelper {
 	pub async fn update(self, data: &mut SlashData) -> Result<()> {
 		let callback_data = mem::replace(&mut data.callback, SlashData::BASE);
 		let context = self.interaction_client();
-		let update_interaction = context.update_interaction_original(&data.command.token);
+		let update_interaction = context.update_response(&data.command.token);
 
 		let bytes = serde_json::to_vec(&callback_data).into_diagnostic()?;
 
@@ -157,7 +157,7 @@ impl InteractionsHelper {
 		let context = self.context();
 		context
 			.interaction_client()
-			.interaction_callback(
+			.create_response(
 				data.command.id,
 				&data.command.token,
 				&InteractionResponse::Autocomplete(autocomplete_data),
@@ -170,7 +170,7 @@ impl InteractionsHelper {
 
 	pub async fn raw_get(self, data: &SlashData) -> Result<Message> {
 		let http = self.interaction_client();
-		let get_original = http.get_interaction_original(&data.command.token);
+		let get_original = http.response(&data.command.token);
 
 		model!(get_original).await.into_diagnostic()
 	}

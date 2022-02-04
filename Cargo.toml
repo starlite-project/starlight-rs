@@ -33,6 +33,7 @@ version = "1.0.132"
 [dependencies.starchart]
 features = ["derive", "toml", "pretty", "metadata"]
 git = "https://github.com/starlite-project/starchart"
+rev = "f91a226fcc5a30a0e2c4d87ff7497711ded6541f"
 
 [dependencies.starlight-macros]
 path = "./starlight-macros"

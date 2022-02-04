@@ -45,9 +45,12 @@ async fn guild_create(context: Context, guild: Guild) -> ChartResult<()> {
 
 	let mut action: CreateEntryAction<GuildSettings> = Action::new();
 
+	let table = Tables::Guilds.to_string();
+	let entry = GuildSettings::new(id);
+
 	action
-		.set_entry(&GuildSettings::new(id))
-		.set_table(Tables::Guilds.to_string());
+		.set_entry(&entry)
+		.set_table(&table);
 
 	action.run_create_entry(database).await?;
 

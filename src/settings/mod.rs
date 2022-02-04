@@ -13,6 +13,12 @@ pub enum Tables {
 }
 
 impl Tables {
+	#[instrument(skip(context))]
+	pub async fn init(context: Context) -> Result<(), ActionError> {
+		Self::init_guilds(context).await?;
+		Ok(())
+	}
+
 	pub async fn get_entry<T: IndexEntry>(
 		self,
 		chart: &Starchart<TomlBackend>,
@@ -22,7 +28,8 @@ impl Tables {
 		<T as IndexEntry>::Key: Sync + Display,
 	{
 		let mut action: ReadEntryAction<T> = Action::new();
-		action.set_table(self.to_string()).set_key(key);
+		let table = self.to_string();
+		action.set_table(&table).set_key(key);
 
 		action
 			.run_read_entry(chart)
@@ -37,9 +44,24 @@ impl Tables {
 		entry: &T,
 	) -> Result<()> {
 		let mut action: UpdateEntryAction<T> = Action::new();
-		action.set_table(self.to_string()).set_entry(entry);
+		let table = self.to_string();
+		action.set_table(&table).set_entry(entry);
 
 		action.run_update_entry(chart).await.into_diagnostic()
+	}
+
+	async fn init_guilds(context: Context) -> Result<(), ActionError> {
+		let default = GuildSettings::default();
+		event!(Level::INFO, ?default, "creating table guilds");
+		let mut action: CreateTableAction<GuildSettings> = Action::new();
+		let guilds_table = Self::Guilds.to_string();
+		action.set_table(&guilds_table);
+
+		let chart = context.database();
+
+		action.run_create_table(chart).await?;
+
+		Ok(())
 	}
 }
 
@@ -49,19 +71,4 @@ impl Display for Tables {
 			Self::Guilds => f.write_str("guilds"),
 		}
 	}
-}
-
-// custom function to initialize all tables.
-#[instrument(skip(context))]
-pub async fn init_tables(context: Context) -> Result<(), ActionError> {
-	let default = GuildSettings::default();
-	event!(Level::INFO, ?default, "creating table guilds");
-	let mut action: CreateTableAction<GuildSettings> = Action::new();
-	action.set_table(Tables::Guilds.to_string());
-
-	let chart = context.database();
-
-	action.run_create_table(chart).await?;
-
-	Ok(())
 }
