@@ -4,6 +4,7 @@
 !Cargo.lock
 !.cargo/*
 !src/*
+!target/*
 !starlight-macros/*
 !build.rs
 !rust-toolchain.toml
