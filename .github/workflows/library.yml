@@ -81,24 +81,3 @@ jobs:
 
       - name: Run Codespell
         uses: codespell-project/actions-codespell@master
-
-  bloat:
-    name: Bloat check
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-
-      - name: Install nightly toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          profile: minimal
-          override: true
-
-      - name: Run bloat check
-        uses: orf/cargo-bloat-action@v1
-        with:
-          token: ${{ github.TOKEN }}
-          exclude_packages: starlight-macros
