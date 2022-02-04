@@ -1368,9 +1368,8 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 
 [[package]]
 name = "starchart"
-version = "0.18.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71e9083d301c476f7d9f517c9da3faf1883f4e11aae1c7fedbd27717617c4a49"
+version = "0.18.0"
+source = "git+https://github.com/starlite-project/starchart?rev=f91a226fcc5a30a0e2c4d87ff7497711ded6541f#f91a226fcc5a30a0e2c4d87ff7497711ded6541f"
 dependencies = [
  "futures-executor",
  "futures-util",
@@ -1384,9 +1383,8 @@ dependencies = [
 
 [[package]]
 name = "starchart-derive"
-version = "0.18.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cbbad0b24dc2877d55f06cfb736d98fdddb1dd9a79dd2e38ca556a040977cc2b"
+version = "0.18.0"
+source = "git+https://github.com/starlite-project/starchart?rev=f91a226fcc5a30a0e2c4d87ff7497711ded6541f#f91a226fcc5a30a0e2c4d87ff7497711ded6541f"
 dependencies = [
  "proc-macro2",
  "quote",
