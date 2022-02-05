@@ -23,7 +23,7 @@ COPY ./src ./src
 # Remove old build, and rebuild
 RUN rm ./target/release/deps/starlight*
 RUN cargo build --release
-# RUN strip -s ./target/release/starlight
+RUN strip -s ./target/release/starlight
 
 # Download certs from an alpine image
 FROM alpine:3.6 as deps
