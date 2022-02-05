@@ -17,7 +17,11 @@ jobs:
         uses: tj-actions/verify-changed-files@v8.8
         id: check-files
         with:
-          files: Cargo.lock | Cargo.toml
+          files: |
+            Cargo.toml
+            Cargo.lock
+            starlight-macros/Cargo.toml
+            starlight-macros/Cargo.lock
 
       - name: Run security audit
         if: steps.check-files.outputs.files_changed == 'true'
