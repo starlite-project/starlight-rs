@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 2
 
       - name: Check if Cargo files changed
-        uses: tj-actions/changed-files
+        uses: tj-actions/changed-files@v14.3
         id: check-files
         with:
           files: |
