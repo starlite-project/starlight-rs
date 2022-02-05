@@ -1,12 +1,7 @@
-use once_cell::sync::Lazy;
 #[cfg(feature = "docker")]
 use std::{io::Error as IoError, net::ToSocketAddrs};
-use sysinfo::{get_current_pid, Process, System, SystemExt};
-use thiserror::Error;
-use twilight_cache_inmemory::ResourceType;
-use twilight_model::{application::interaction::ApplicationCommand, id::UserId};
 
-pub mod constants;
+use crate::prelude::*;
 
 #[derive(Debug, Error)]
 #[allow(missing_copy_implementations)]
@@ -22,34 +17,6 @@ pub enum UtilError {
 	OptionWasNone(&'static str),
 }
 
-static mut SYSTEM: Lazy<System> = Lazy::new(System::new);
-
-pub fn get_current_process<'a>() -> Result<&'a Process, UtilError> {
-	let process_id = get_current_pid().map_err(|_| UtilError::Pid)?;
-	unsafe {
-		if SYSTEM.refresh_process(process_id) {
-			SYSTEM.process(process_id).ok_or(UtilError::Process)
-		} else {
-			Err(UtilError::Process)
-		}
-	}
-}
-
-#[must_use]
-pub const fn interaction_author(command: &ApplicationCommand) -> UserId {
-	if let Some(ref member) = command.member {
-		if let Some(user) = &member.user {
-			return user.id;
-		}
-	}
-
-	if let Some(ref user) = command.user {
-		return user.id;
-	}
-
-	unsafe { UserId::new_unchecked(1) }
-}
-
 #[cfg(feature = "docker")]
 pub fn get_host(host: &str, port: u16) -> Result<String, UtilError> {
 	(host, port)
@@ -59,6 +26,72 @@ pub fn get_host(host: &str, port: u16) -> Result<String, UtilError> {
 		.map(|socket| socket.to_string())
 }
 
-pub trait CacheReliant {
-	fn needs() -> ResourceType;
+#[must_use]
+pub fn levenshtein(a: &str, b: &str) -> usize {
+	let mut result = 0;
+
+	if a == b {
+		return result;
+	}
+
+	let length_a = a.chars().count();
+	let length_b = b.chars().count();
+
+	if length_a == 0 {
+		return length_b;
+	}
+
+	if length_b == 0 {
+		return length_a;
+	}
+
+	let mut cache = (1..).take(length_a).collect::<Vec<usize>>();
+	let mut distance_a;
+	let mut distance_b;
+
+	for (index_b, code_b) in b.chars().enumerate() {
+		result = index_b;
+		distance_a = index_b;
+
+		for (index_a, code_a) in a.chars().enumerate() {
+			distance_b = if code_a == code_b {
+				distance_a
+			} else {
+				distance_a + 1
+			};
+
+			distance_a = cache[index_a];
+
+			result = if distance_a > result {
+				if distance_b > result {
+					result + 1
+				} else {
+					distance_b
+				}
+			} else if distance_b > distance_a {
+				distance_a + 1
+			} else {
+				distance_b
+			};
+
+			cache[index_a] = result;
+		}
+	}
+
+	result
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum DefaultMessages {
+	PermissionDenied,
+}
+
+impl Display for DefaultMessages {
+	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+		match self {
+			Self::PermissionDenied => {
+				f.write_str("you do not have permission to perform this action")
+			}
+		}
+	}
 }

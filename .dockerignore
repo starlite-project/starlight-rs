@@ -4,9 +4,8 @@
 !Cargo.lock
 !.cargo/*
 !src/*
-!star-derive/*
-!nebula/*
-!supernova/*
-!starchart/*
+!target/*
+!starlight-macros/*
 !build.rs
 !rust-toolchain.toml
+!mold-install.sh

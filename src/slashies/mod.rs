@@ -1,94 +1,109 @@
-#![allow(dead_code)]
+pub mod commands;
+mod r#impl;
 
-use self::commands::Commands;
-use super::{components::ActionRowBuilder, state::State};
-use crate::{
-	components::ComponentBuilder, helpers::Color, utils::constants::SlashiesErrorMessages,
-};
-use tracing::{event, instrument, Level};
-use twilight_embed_builder::EmbedBuilder;
+use std::{fmt::Write, ops::Deref};
+
 use twilight_model::{
 	application::{
-		callback::{CallbackData, InteractionResponse},
-		component::{Component, ComponentType},
-		interaction::application_command::ApplicationCommand,
+		callback::{Autocomplete, CallbackData},
+		command::CommandOptionChoice,
+		interaction::ApplicationCommand,
 	},
 	channel::{
 		embed::Embed,
 		message::{allowed_mentions::AllowedMentionsBuilder, MessageFlags},
 	},
+	guild::Permissions,
+	id::{marker::UserMarker, Id},
 };
 
-pub mod commands;
-mod r#impl;
-pub mod interaction;
-
-pub use self::r#impl::{ClickCommand, ClickError, ParseCommand, ParseError, SlashCommand};
+pub use self::r#impl::{DefineCommand, SlashCommand};
+use crate::prelude::*;
 
 #[derive(Debug, Clone)]
-pub struct Response(CallbackData);
+#[must_use = "SlashData has no side effects"]
+pub struct SlashData {
+	pub callback: CallbackData,
+	pub command: ApplicationCommand,
+	pub autocomplete: Autocomplete,
+}
 
-impl Response {
-	const BASE: CallbackData = CallbackData {
+impl SlashData {
+	pub const BASE: CallbackData = CallbackData {
 		allowed_mentions: None,
 		content: None,
-		embeds: vec![],
+		embeds: None,
 		flags: None,
 		components: None,
 		tts: None,
 	};
 
-	#[must_use]
-	pub const fn new() -> Self {
-		Self(Self::BASE)
-	}
-
-	#[must_use]
-	pub const fn ack() -> InteractionResponse {
-		InteractionResponse::DeferredChannelMessageWithSource(Self::BASE)
-	}
-
-	pub fn add_component(&mut self, component: Component) -> &mut Self {
-		self.add_components(vec![component])
-	}
-
-	#[allow(clippy::option_if_let_else)]
-	pub fn add_components(&mut self, components: Vec<Component>) -> &mut Self {
-		let components = Self::check_components(components);
-		if let Some(ref mut current) = self.0.components {
-			current.extend(components);
-
-			self
-		} else {
-			self.set_components(components)
+	pub const fn new(command: ApplicationCommand) -> Self {
+		Self {
+			callback: Self::BASE,
+			command,
+			autocomplete: Autocomplete { choices: vec![] },
 		}
 	}
 
+	#[must_use]
+	#[allow(clippy::option_if_let_else)]
+	pub fn user_id(&self) -> Id<UserMarker> {
+		if let Some(member) = &self.command.member {
+			if let Some(user) = &member.user {
+				user.id
+			} else {
+				panic!("failed to get user_id")
+			}
+		} else if let Some(user) = &self.command.user {
+			user.id
+		} else {
+			panic!("failed to get user_id")
+		}
+	}
+
+	#[must_use]
+	pub const fn is_guild(&self) -> bool {
+		self.command.guild_id.is_some()
+	}
+
+	#[must_use]
+	pub const fn is_dm(&self) -> bool {
+		!self.is_guild()
+	}
+
+	pub fn user_permissions(&self, helper: &impl QuickAccess) -> Result<Permissions> {
+		if self.is_dm() {
+			return Err(error!("can't get user permissions in a DM"));
+		}
+
+		let cache = helper.cache();
+
+		cache
+			.permissions()
+			.root(self.user_id(), unsafe { self.guild_id.unwrap_unchecked() })
+			.into_diagnostic()
+	}
+
 	pub fn allowed_mentions<F: FnOnce(AllowedMentionsBuilder) -> AllowedMentionsBuilder>(
-		mut self,
+		&mut self,
 		builder: F,
-	) -> Self {
-		self.0.allowed_mentions = Some(builder(AllowedMentionsBuilder::new()).build());
+	) -> &mut Self {
+		self.callback.allowed_mentions = Some(builder(AllowedMentionsBuilder::new()).build());
 
 		self
 	}
 
-	pub fn set_components(&mut self, components: Vec<Component>) -> &mut Self {
-		let components = Self::check_components(components);
-		self.0.components = Some(components);
-		self
-	}
+	pub fn message(&mut self, content: String) -> &mut Self {
+		assert!(!content.is_empty(), "empty message not allowed");
 
-	pub fn clear_components(&mut self) -> &mut Self {
-		self.0.components = Some(vec![]);
+		self.callback.content = Some(content);
 
 		self
 	}
 
-	pub fn message<T: AsRef<str>>(&mut self, content: T) -> &mut Self {
-		assert!(!content.as_ref().is_empty(), "empty message not allowed");
-
-		self.0.content = Some(content.as_ref().to_owned());
+	pub fn autocomplete(&mut self, choices: Vec<CommandOptionChoice>) -> &mut Self {
+		self.autocomplete = Autocomplete { choices };
 
 		self
 	}
@@ -96,7 +111,11 @@ impl Response {
 	pub fn embeds(&mut self, embeds: Vec<Embed>) -> &mut Self {
 		assert!(!embeds.is_empty(), "empty embeds not allowed");
 
-		self.0.embeds.extend(embeds);
+		if let Some(current_embeds) = &mut self.callback.embeds {
+			current_embeds.extend(embeds);
+		} else {
+			self.callback.embeds = Some(embeds);
+		}
 
 		self
 	}
@@ -106,8 +125,8 @@ impl Response {
 	}
 
 	pub fn flags(&mut self, flags: MessageFlags) -> &mut Self {
-		self.0.flags = self
-			.0
+		self.callback.flags = self
+			.callback
 			.flags
 			.map_or(Some(flags), |current_flags| Some(flags | current_flags));
 
@@ -118,115 +137,33 @@ impl Response {
 		self.flags(MessageFlags::EPHEMERAL)
 	}
 
-	#[must_use]
-	pub fn error(message: SlashiesErrorMessages) -> InteractionResponse {
-		Self::from(message.to_string()).exec()
-	}
-
-	#[allow(clippy::missing_const_for_fn)]
-	#[must_use]
-	pub fn exec(self) -> InteractionResponse {
-		InteractionResponse::ChannelMessageWithSource(self.0)
-	}
-
 	pub fn take(&mut self) -> Self {
-		Self(CallbackData {
-			allowed_mentions: self.0.allowed_mentions.take(),
-			components: self.0.components.take(),
-			content: self.0.content.take(),
-			embeds: self.0.embeds.clone(),
-			flags: self.0.flags.take(),
-			tts: self.0.tts.take(),
-		})
-	}
-
-	fn check_component(component: Component) -> Component {
-		if component.kind() == ComponentType::ActionRow {
-			component
-		} else {
-			ActionRowBuilder::new()
-				.push_component(component)
-				.build_component()
-				.unwrap()
+		Self {
+			callback: CallbackData {
+				allowed_mentions: self.callback.allowed_mentions.take(),
+				components: self.callback.components.take(),
+				content: self.callback.content.take(),
+				embeds: self.callback.embeds.clone(),
+				flags: self.callback.flags.take(),
+				tts: self.callback.tts.take(),
+			},
+			command: self.command.clone(),
+			autocomplete: self.autocomplete.clone(),
 		}
 	}
+}
 
-	fn check_components(components: Vec<Component>) -> Vec<Component> {
-		components.into_iter().map(Self::check_component).collect()
+impl Deref for SlashData {
+	type Target = ApplicationCommand;
+
+	fn deref(&self) -> &Self::Target {
+		&self.command
 	}
 }
 
-impl From<&str> for Response {
-	fn from(message: &str) -> Self {
-		Self::new().message(message).take()
-	}
-}
-
-impl From<String> for Response {
-	fn from(message: String) -> Self {
-		Self::new().message(message.as_str()).take()
-	}
-}
-
-impl From<Embed> for Response {
-	fn from(embed: Embed) -> Self {
-		Self::new().embed(embed).take()
-	}
-}
-
-impl From<Vec<Embed>> for Response {
-	fn from(embeds: Vec<Embed>) -> Self {
-		Self::new().embeds(embeds).take()
-	}
-}
-
-impl From<Response> for InteractionResponse {
-	fn from(response: Response) -> Self {
-		response.exec()
-	}
-}
-
-impl From<&mut Response> for InteractionResponse {
-	fn from(response: &mut Response) -> Self {
-		response.take().exec()
-	}
-}
-
-impl From<Response> for CallbackData {
-	fn from(response: Response) -> Self {
-		response.0
-	}
-}
-
-impl From<&mut Response> for CallbackData {
-	fn from(response: &mut Response) -> Self {
-		response.take().0
-	}
-}
-
-#[instrument(skip(state, command), fields(command.name = %command.data.name, command.guild_id))]
-pub async fn act(state: State, command: ApplicationCommand) {
-	if let Some(cmd) = Commands::r#match(&command) {
-		let interaction = state.interaction(&command);
-		if let Err(e) = cmd.run(interaction).await {
-			event!(
-				Level::ERROR,
-				error = &*e.root_cause(),
-				"error running command"
-			);
-			let mut error_response =
-				Response::from(SlashiesErrorMessages::InteractionError.to_string());
-			let embed_builder = EmbedBuilder::new()
-				.color(Color::new(255, 0, 0).to_decimal())
-				.title("Error")
-				.description(format!("```\n{}\t\n```", e.root_cause()));
-			error_response.embed(unsafe { embed_builder.build().unwrap_unchecked() });
-			interaction
-				.response(error_response)
-				.await
-				.expect("unknown failure");
-		}
-	} else {
-		event!(Level::WARN, "received unregistered command");
+impl Write for SlashData {
+	fn write_str(&mut self, s: &str) -> FmtResult {
+		self.message(s.to_owned());
+		Ok(())
 	}
 }

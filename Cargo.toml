@@ -1,120 +1,101 @@
-cargo-features = ["strip"]
-
 [package]
 authors = ["Gryffon Bellish <owenbellish@gmail.com>"]
 edition = "2021"
 license = "MIT"
 name = "starlight"
-version = "0.1.0"
 resolver = "2"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+version = "0.1.0"
 
 [dependencies]
-async-trait = "0.1.51"
 base64 = "0.13.0"
 dotenv = "0.15.0"
-futures = "0.3.17"
-num_cpus = "1.13.0"
-once_cell = "1.8"
-serde_json = "1"
-sysinfo = "0.20.3"
-thiserror = "1.0.29"
-tracing = "0.1.26"
-tracing-log = "0.1.2"
-
-[dependencies.chrono]
-default-features = false
-features = ["std", "clock", "serde"]
-version = "0.4.19"
+futures-util = "0.3.19"
+serde_json = "1.0.73"
+thiserror = "1.0.30"
+tracing = "0.1.29"
 
 [dependencies.clap]
-git = "https://github.com/clap-rs/clap.git"
-
-[dependencies.star-derive]
-path = "./star-derive"
+features = ["cargo", "env"]
+version = "3.0.0-rc.7"
 
 [dependencies.miette]
 features = ["fancy"]
-version = "3.0.1"
+version = "3.2.0"
 
-[dependencies.nebula]
-path = "./nebula"
+[dependencies.reqwest]
+features = ["json"]
+version = "0.11.8"
 
 [dependencies.serde]
-default-features = false
 features = ["derive"]
-version = "1.0.130"
+version = "1.0.132"
 
 [dependencies.starchart]
-path = "./starchart"
+features = ["derive", "toml", "pretty", "metadata"]
+git = "https://github.com/starlite-project/starchart"
+rev = "f91a226fcc5a30a0e2c4d87ff7497711ded6541f"
 
-[dependencies.star-utils]
-git = "https://github.com/PyroTechniac/starlight-rs-utils.git"
+[dependencies.starlight-macros]
+path = "./starlight-macros"
 
-[dependencies.supernova]
-path = "./supernova"
+[dependencies.time]
+version = "0.3.5"
+features = ["serde"]
 
 [dependencies.tokio]
 features = ["macros", "rt-multi-thread", "signal", "fs"]
-version = "1.11.0"
+version = "1.15.0"
 
 [dependencies.tracing-subscriber]
-features = ["fmt", "ansi"]
-version = "0.2.20"
+default-features = false
+features = ["fmt", "ansi", "std", "env-filter"]
+version = "0.3.3"
 
 [dependencies.twilight-cache-inmemory]
 default-features = false
+features = ["permission-calculator"]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [dependencies.twilight-embed-builder]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [dependencies.twilight-gateway]
 default-features = false
-features = ["zlib-simd", "metrics", "rustls", "tracing"]
+features = ["zlib-simd", "metrics", "rustls-tls", "tracing", "rustls-native-roots"]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [dependencies.twilight-http]
-default-features = false
-features = ["tracing", "simd-json", "rustls"]
+features = ["tracing", "simd-json", "brotli"]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
-
-[dependencies.twilight-mention]
-git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [dependencies.twilight-model]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [dependencies.twilight-standby]
 features = ["tracing"]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [dependencies.twilight-util]
-default-features = false
-features = ["builder", "snowflake"]
+features = ["builder"]
 git = "https://github.com/twilight-rs/twilight.git"
-rev = "9aa74e074741c4ae46e6625e83af050a3db076d0"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
-[dev-dependencies]
-static_assertions = "1.1.0"
-
-[build-dependencies]
-built = "0.5.1"
+[dependencies.twilight-validate]
+git = "https://github.com/twilight-rs/twilight.git"
+rev = "e31de7b92b7d7929eacca01355636ea841887d66"
 
 [profile.release]
 codegen-units = 1
 debug = true
-lto = "fat"
 opt-level = 3
 overflow-checks = false
+lto = 'fat'
 panic = "abort"
 strip = "symbols"
 
@@ -122,7 +103,7 @@ strip = "symbols"
 lto = "fat"
 
 [workspace]
-members = ["./star-derive", "./starchart", "./nebula", "./supernova"]
+members = ["./starlight-macros"]
 
 [features]
 default = []

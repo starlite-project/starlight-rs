@@ -1,181 +1,165 @@
 use std::{
+	env::VarError,
 	path::{Path, PathBuf},
 	sync::Arc,
 };
 
-use super::{ClientComponents, Config, State};
-use miette::{IntoDiagnostic, Result, WrapErr};
-use nebula::Leak;
-use starchart::StarChartBuilder;
-use supernova::cloned;
+use starchart::Starchart;
+use starlight_macros::cloned;
 use thiserror::Error;
-use tokio::time::Instant;
-use twilight_cache_inmemory::InMemoryCacheBuilder as CacheBuilder;
+use twilight_cache_inmemory::InMemoryCacheBuilder;
 use twilight_gateway::{
-	cluster::{ClusterBuilder, Events},
+	shard::{Events, ShardBuilder},
 	Intents,
 };
-use twilight_http::client::ClientBuilder as HttpBuilder;
+use twilight_http::client::ClientBuilder;
 
-#[derive(Debug, Error, Clone, Copy)]
-pub enum StateBuilderError {
+use super::{Config, Context, State};
+use crate::prelude::*;
+
+#[derive(Debug, Error)]
+pub enum ContextBuildError {
 	#[error("intents not set")]
 	Intents,
-	#[error("config not set")]
-	Config,
-	#[error("cluster not built")]
-	Cluster,
-	#[error("database url not set")]
+	#[error("shard builder not set")]
+	Shard,
+	#[error("database path not set")]
 	Database,
 }
 
 #[derive(Debug, Default)]
-pub struct StateBuilder {
-	cluster: Option<ClusterBuilder>,
-	cache: Option<CacheBuilder>,
-	http: Option<HttpBuilder>,
+#[must_use = "a context builder has no side effects"]
+pub struct ContextBuilder {
+	shard: Option<ShardBuilder>,
+	cache: Option<InMemoryCacheBuilder>,
+	http: Option<ClientBuilder>,
 	intents: Option<Intents>,
+	cdn: Option<reqwest::ClientBuilder>,
 	config: Option<Config>,
-	database: Option<StarChartBuilder>,
 	database_path: Option<PathBuf>,
 }
 
-impl StateBuilder {
-	#[must_use]
+impl ContextBuilder {
 	pub const fn new() -> Self {
 		Self {
-			cluster: None,
+			shard: None,
 			cache: None,
 			http: None,
 			intents: None,
 			config: None,
-			database: None,
+			cdn: None,
 			database_path: None,
 		}
 	}
 
-	pub const fn config(mut self, config: Config) -> Result<Self> {
+	pub const fn config(mut self, config: Config) -> Self {
 		self.config = Some(config);
 
-		Ok(self)
+		self
 	}
 
-	pub const fn intents(mut self, intents: Intents) -> Result<Self> {
+	pub const fn intents(mut self, intents: Intents) -> Self {
 		self.intents = Some(intents);
 
-		Ok(self)
+		self
 	}
 
-	pub fn database_builder<P, F>(mut self, path: P, database_fn: F) -> Result<Self>
+	pub fn shard_builder<F>(mut self, shard_builder: F) -> Result<Self>
 	where
-		P: AsRef<Path>,
-		F: FnOnce(StarChartBuilder) -> StarChartBuilder,
-	{
-		self.database_path = Some(path.as_ref().to_path_buf());
-
-		let database = database_fn(StarChartBuilder::new());
-
-		self.database = Some(database);
-
-		Ok(self)
-	}
-
-	pub fn cluster_builder<F>(mut self, cluster_fn: F) -> Result<Self>
-	where
-		F: FnOnce(ClusterBuilder) -> ClusterBuilder,
+		F: FnOnce(ShardBuilder) -> ShardBuilder,
 	{
 		let intents = self
 			.intents
-			.ok_or(StateBuilderError::Intents)
+			.ok_or(ContextBuildError::Intents)
 			.into_diagnostic()
-			.context("need intents to build cluster")?;
-		let token = Config::token()?;
+			.context("need intents to build shard")?;
+		let token = Config::token().into_diagnostic()?;
 
-		let cluster = cluster_fn((token, intents).into());
+		let shard = shard_builder((token, intents).into());
 
-		self.cluster = Some(cluster);
-
-		Ok(self)
-	}
-
-	pub fn cache_builder<F>(mut self, cache_fn: F) -> Result<Self>
-	where
-		F: FnOnce(CacheBuilder) -> CacheBuilder,
-	{
-		let built = cache_fn(CacheBuilder::default());
-
-		self.cache = Some(built);
+		self.shard = Some(shard);
 
 		Ok(self)
 	}
 
-	pub fn http_builder<F>(mut self, http_fn: F) -> Result<Self>
+	pub const fn cache(mut self, cache_builder: InMemoryCacheBuilder) -> Self {
+		self.cache = Some(cache_builder);
+
+		self
+	}
+
+	pub fn database_path<T: AsRef<Path>>(mut self, p: T) -> Self {
+		let path = p.as_ref().to_path_buf();
+
+		self.database_path = Some(path);
+
+		self
+	}
+
+	pub fn cdn_builder<F>(mut self, cdn_builder: F) -> Result<Self, reqwest::Error>
 	where
-		F: FnOnce(HttpBuilder) -> HttpBuilder,
+		F: FnOnce(reqwest::ClientBuilder) -> reqwest::ClientBuilder,
+	{
+		self.cdn = Some(cdn_builder(reqwest::ClientBuilder::new()));
+
+		Ok(self)
+	}
+
+	pub fn http_builder<F>(mut self, http_builder_fn: F) -> Result<Self, VarError>
+	where
+		F: FnOnce(ClientBuilder) -> ClientBuilder,
 	{
 		let token = Config::token()?;
-		let http_builder = self.http.map_or_else(
-			move || HttpBuilder::new().token(token.to_owned()),
-			|builder| builder,
-		);
-		let http = http_fn(http_builder);
+		let http_builder = self
+			.http
+			.map_or_else(move || ClientBuilder::new().token(token), |builder| builder);
+
+		let http = http_builder_fn(http_builder);
 
 		self.http = Some(http);
 
 		Ok(self)
 	}
 
-	pub async fn build(self) -> Result<(State, Events)> {
+	pub async fn build(self) -> Result<(Context, Events)> {
 		let config = self.config.unwrap_or_default();
-		let token = Config::token()?.to_owned();
+		let token = Config::token().into_diagnostic()?;
 		let http_builder = self
 			.http
-			.unwrap_or_else(cloned!((token) => move || HttpBuilder::new().token(token)));
-		let cluster_builder: ClusterBuilder = self
-			.cluster
-			.ok_or(StateBuilderError::Cluster)
+			.unwrap_or_else(cloned!(token => move || ClientBuilder::new().token(token)));
+		let shard_builder: ShardBuilder = self
+			.shard
+			.ok_or(ContextBuildError::Shard)
 			.into_diagnostic()
 			.context("need cluster to build state")?;
+		let cdn_builder = self.cdn.unwrap_or_default();
+		let db_path = self
+			.database_path
+			.ok_or(ContextBuildError::Database)
+			.into_diagnostic()
+			.context("need database path to build state")?;
+
 		let cache_builder = self.cache.unwrap_or_default();
 
 		let http = Arc::new(http_builder.token(token).build());
 		let cache = Arc::new(cache_builder.build());
-		let (cluster, events) = cluster_builder
-			.http_client(Arc::clone(&http))
-			.build()
-			.await
-			.into_diagnostic()?;
+		let (shard, events) = shard_builder.http_client(Arc::clone(&http)).build();
+		let cdn = cdn_builder.build().into_diagnostic()?;
 		let standby = Arc::default();
-		let database_builder: StarChartBuilder = self
-			.database
-			.ok_or(StateBuilderError::Database)
-			.into_diagnostic()
-			.context("need database to build state")?;
-		let database_path: PathBuf = self
-			.database_path
-			.ok_or(StateBuilderError::Database)
-			.into_diagnostic()
-			.context("need database url to build state")?;
+		let backend = TomlBackend::new(db_path).into_diagnostic()?;
 
-		let database = database_builder
-			.build(database_path)
-			.await
-			.into_diagnostic()
-			.context("failed to build database")?;
+		let database = Starchart::new(backend).await.into_diagnostic()?;
 
-		let components = unsafe {
-			ClientComponents {
-				cache,
-				cluster: Arc::new(cluster),
-				standby,
-				http,
-				runtime: Instant::now(),
-				config,
-				database,
-			}
-			.leak()
-		};
+		let components = Box::leak(Box::new(State {
+			cache,
+			shard: Arc::new(shard),
+			standby,
+			http,
+			cdn,
+			config,
+			database,
+		}));
 
-		Ok((State(components), events))
+		Ok((Context(components), events))
 	}
 }

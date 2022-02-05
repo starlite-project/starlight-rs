@@ -1,49 +1,37 @@
-#![feature(string_remove_matches)]
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use clap::Parser;
-use miette::{IntoDiagnostic, Result};
-#[cfg(feature = "docker")]
-use starlight::utils::get_host;
+use dotenv::dotenv;
 use starlight::{
-	slashies::commands::Commands,
-	state::{ClientComponents, Config, StateBuilder},
-	utils::CacheReliant,
-};
-use std::{
-	path::Path,
-	sync::atomic::{AtomicUsize, Ordering},
+	prelude::*,
+	state::{Config, ContextBuilder, State},
 };
 use tokio::runtime::Builder;
-use tracing::{event, Level};
-use tracing_subscriber::{fmt, prelude::*, EnvFilter};
-use twilight_gateway::cluster::ShardScheme;
-use twilight_model::gateway::Intents;
-
-// One because the main thread is technically first, so this has to be +1
-static ATOMIC_ID: AtomicUsize = AtomicUsize::new(1);
-
-#[cfg(windows)]
-use tokio::signal::windows::{ctrl_break, ctrl_c};
-
 #[cfg(unix)]
 use tokio::signal::unix::{signal, SignalKind};
+#[cfg(windows)]
+use tokio::signal::windows::{ctrl_break, ctrl_c};
+use tracing_subscriber::{fmt, prelude::*, EnvFilter};
+use twilight_cache_inmemory::{InMemoryCacheBuilder, ResourceType};
+use twilight_gateway::Intents;
+
+static THREAD_ID: AtomicUsize = AtomicUsize::new(1);
 
 fn main() -> Result<()> {
+	dotenv().ok();
 	Builder::new_multi_thread()
 		.enable_all()
 		.thread_name_fn(|| {
-			let id = ATOMIC_ID.fetch_add(1, Ordering::SeqCst) + 1;
+			let id = THREAD_ID.fetch_add(1, Ordering::SeqCst) + 1;
 			let output = String::from("starlight-pool-");
 			output + &id.to_string()
 		})
 		.on_thread_stop(|| {
-			ATOMIC_ID.fetch_sub(1, Ordering::SeqCst);
+			THREAD_ID.fetch_sub(1, Ordering::SeqCst);
 		})
 		.build()
 		.into_diagnostic()?
-		.block_on(run())?;
-
-	Ok(())
+		.block_on(run())
 }
 
 async fn run() -> Result<()> {
@@ -56,9 +44,7 @@ async fn run() -> Result<()> {
 		.with_thread_names(true);
 
 	log_filter_layer = if cfg!(debug_assertions) {
-		log_filter_layer
-			.add_directive("starlight[act]=debug".parse().into_diagnostic()?)
-			.add_directive("starlight=trace".parse().into_diagnostic()?)
+		log_filter_layer.add_directive("starlight=debug".parse().into_diagnostic()?)
 	} else {
 		log_filter_layer.add_directive("starlight=info".parse().into_diagnostic()?)
 	};
@@ -70,7 +56,14 @@ async fn run() -> Result<()> {
 		.into_diagnostic()?;
 
 	let config = Config::parse();
-	let (client, events) = get_builder(config)?.build().await?;
+	let (client, events) = ContextBuilder::new()
+		.config(config)
+		.intents(Intents::from_bits(3).unwrap_or_else(Intents::all))
+		.shard_builder(|b| b)?
+		.cache(InMemoryCacheBuilder::new().resource_types(ResourceType::all()))
+		.database_path("./target/db")
+		.build()
+		.await?;
 
 	client.connect().await?;
 
@@ -101,31 +94,9 @@ async fn run() -> Result<()> {
 
 	client.shutdown();
 
-	let client_ptr =
-		unsafe { Box::from_raw(client.0 as *const ClientComponents as *mut ClientComponents) };
+	let client_ptr = unsafe { Box::from_raw(client.0 as *const State as *mut State) };
 
-	// Drop the client components pointer so it's memory can be freed
 	drop(client_ptr);
 
 	Ok(())
-}
-
-#[cfg(feature = "docker")]
-fn get_builder(config: Config) -> Result<StateBuilder> {
-	let host = get_host("twilight_proxy", 3000).into_diagnostic()?;
-	shared(config)?.http_builder(|builder| builder.proxy(host, true).ratelimiter(None))
-}
-
-#[cfg(not(feature = "docker"))]
-fn get_builder(config: Config) -> Result<StateBuilder> {
-	shared(config)
-}
-
-fn shared(config: Config) -> Result<StateBuilder> {
-	StateBuilder::new()
-		.config(config)?
-		.intents(Intents::empty())?
-		.cluster_builder(|builder| builder.shard_scheme(ShardScheme::Auto))?
-		.cache_builder(|builder| builder.resource_types(Commands::needs()))?
-		.database_builder(Path::new("./target").join("stardb"), |builder| builder)
 }

@@ -1,25 +1,36 @@
-pub mod cache;
-pub mod color;
+use crate::state::{Context, QuickAccess};
 
-pub use self::{
-	cache::{models, CacheHelper},
-	color::Color,
-};
+mod color;
+mod interactions;
+pub mod parsing;
+pub mod playground;
 
-pub const STARLIGHT_PRIMARY_COLOR: Color = Color::new(132, 61, 164);
-pub const STARLIGHT_SECONDARY_COLOR: Color = Color::new(218, 0, 78);
+pub use self::{color::Color, interactions::InteractionsHelper};
 
-#[cfg(test)]
-mod tests {
-	use super::{STARLIGHT_PRIMARY_COLOR, STARLIGHT_SECONDARY_COLOR};
+pub const STARLIGHT_COLORS: [Color; 3] = [
+	Color::new(132, 61, 164),
+	Color::new(218, 0, 78),
+	Color::new(183, 47, 0),
+];
 
-	#[test]
-	fn secondary_color() {
-		assert_eq!(STARLIGHT_SECONDARY_COLOR.to_decimal(), 14_286_926);
+#[derive(Debug, Clone, Copy)]
+#[must_use = "Helpers do nothing if not used"]
+pub struct Helpers {
+	context: Context,
+}
+
+impl Helpers {
+	pub const fn new(context: Context) -> Self {
+		Self { context }
 	}
 
-	#[test]
-	fn primary_color() {
-		assert_eq!(STARLIGHT_PRIMARY_COLOR.to_decimal(), 8_666_532);
+	pub const fn interactions(self) -> InteractionsHelper {
+		InteractionsHelper::new(self)
+	}
+}
+
+impl QuickAccess for Helpers {
+	fn context(&self) -> Context {
+		self.context
 	}
 }

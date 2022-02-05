@@ -1,51 +1,63 @@
-use crate::slashies::{interaction::Interaction, Response, SlashCommand};
-use async_trait::async_trait;
-use miette::{IntoDiagnostic, Result};
-use std::{convert::TryInto, time::Duration};
-use twilight_model::application::{command::CommandType, interaction::ApplicationCommand};
+use std::pin::Pin;
+
+use futures_util::Future;
+use twilight_model::application::{
+	command::CommandType, interaction::application_command::CommandData,
+};
 use twilight_util::builder::command::CommandBuilder;
 
-#[derive(Debug, Clone)]
-pub struct Ping(pub(super) ApplicationCommand);
+use crate::{
+	helpers::InteractionsHelper,
+	prelude::*,
+	slashies::{DefineCommand, SlashCommand, SlashData},
+};
 
-#[async_trait]
+#[derive(Debug, Clone, Copy)]
+pub struct Ping;
+
 impl SlashCommand for Ping {
-	const NAME: &'static str = "ping";
+	fn run(
+		&self,
+		helper: InteractionsHelper,
+		mut data: SlashData,
+	) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> {
+		Box::pin(async move {
+			data.ephemeral();
+			let context = helper.context();
 
+			if let Some(pong) = context
+				.shard()
+				.info()
+				.into_diagnostic()?
+				.latency()
+				.average()
+			{
+				data.message(format!(
+					"Pong! Average latency is {} milliseconds",
+					pong.as_millis()
+				));
+			} else {
+				data.message("Pong! Couldn't quite get average latency".to_owned());
+			}
+
+			helper.respond(&mut data).await.into_diagnostic()?;
+
+			Ok(())
+		})
+	}
+}
+
+impl DefineCommand for Ping {
 	fn define() -> CommandBuilder {
 		CommandBuilder::new(
-			Self::NAME.to_owned(),
-			"Pings the bot".to_owned(),
+			"ping".to_owned(),
+			"Pings the bot.".to_owned(),
 			CommandType::ChatInput,
 		)
+		.default_permission(true)
 	}
 
-	async fn run(&self, interaction: Interaction<'_>) -> Result<()> {
-		let state = interaction.state;
-
-		let ping = state
-			.cluster()
-			.info()
-			.values()
-			.filter_map(|info| info.latency().average())
-			.sum::<Duration>()
-			/ state
-				.cluster()
-				.shards()
-				.len()
-				.try_into()
-				.into_diagnostic()?;
-
-		let mut response = match ping.as_millis() {
-			0 => Response::from("Pong! Couldn't quite get average latency"),
-			ping => Response::from(format!("Pong! Average latency is {} milliseconds", ping)),
-		};
-
-		interaction
-			.response(response.ephemeral().take())
-			.await
-			.into_diagnostic()?;
-
-		Ok(())
+	fn parse(_: CommandData) -> Result<Self> {
+		Ok(Self)
 	}
 }
