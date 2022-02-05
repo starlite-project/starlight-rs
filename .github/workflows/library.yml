@@ -12,16 +12,18 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
 
-      - name: Check if Cargo.* files changed
-        uses: tj-actions/verify-changed-files@v8.8
+      - name: Check if Cargo files changed
+        uses: tj-actions/changed-files
         id: check-files
         with:
           files: |
-            ./Cargo.toml
-            ./Cargo.lock
-            ./starlight-macros/Cargo.toml
-            ./starlight-macros/Cargo.lock
+            Cargo.toml
+            Cargo.lock
+            starlight-macros/Cargo.toml
+            starlight-macros/Cargo.lock
 
       - name: Run security audit
         if: steps.check-files.outputs.files_changed == 'true'
