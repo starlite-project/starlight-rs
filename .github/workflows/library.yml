@@ -18,10 +18,10 @@ jobs:
         id: check-files
         with:
           files: |
-            Cargo.toml
-            Cargo.lock
-            starlight-macros/Cargo.toml
-            starlight-macros/Cargo.lock
+            ./Cargo.toml
+            ./Cargo.lock
+            ./starlight-macros/Cargo.toml
+            ./starlight-macros/Cargo.lock
 
       - name: Run security audit
         if: steps.check-files.outputs.files_changed == 'true'
