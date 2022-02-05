@@ -21,7 +21,7 @@ impl Tables {
 
 	pub async fn get_entry<T: IndexEntry>(
 		self,
-		chart: &Starchart<TomlBackend>,
+		chart: &Starchart<YamlBackend>,
 		key: &<T as IndexEntry>::Key,
 	) -> Result<T>
 	where
@@ -40,7 +40,7 @@ impl Tables {
 
 	pub async fn update_entry<T: IndexEntry>(
 		self,
-		chart: &Starchart<TomlBackend>,
+		chart: &Starchart<YamlBackend>,
 		entry: &T,
 	) -> Result<()> {
 		let mut action: UpdateEntryAction<T> = Action::new();

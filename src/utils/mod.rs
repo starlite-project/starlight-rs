@@ -81,9 +81,10 @@ pub fn levenshtein(a: &str, b: &str) -> usize {
 	result
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum DefaultMessages {
 	PermissionDenied,
+	BlockedUser(String),
 }
 
 impl Display for DefaultMessages {
@@ -91,6 +92,11 @@ impl Display for DefaultMessages {
 		match self {
 			Self::PermissionDenied => {
 				f.write_str("you do not have permission to perform this action")
+			}
+			Self::BlockedUser(reason) => {
+				f.write_str("you have been blocked from using the bot for reason: `")?;
+				Display::fmt(reason, f)?;
+				f.write_char('`')
 			}
 		}
 	}

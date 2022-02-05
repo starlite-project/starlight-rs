@@ -93,7 +93,7 @@ pub struct State {
 	http: Arc<HttpClient>,
 	standby: Arc<Standby>,
 	config: Config,
-	database: Starchart<TomlBackend>,
+	database: Starchart<YamlBackend>,
 }
 
 impl State {
@@ -128,7 +128,7 @@ impl State {
 	}
 
 	#[must_use]
-	pub const fn database(&self) -> &Starchart<TomlBackend> {
+	pub const fn database(&self) -> &Starchart<YamlBackend> {
 		&self.database
 	}
 
@@ -165,7 +165,7 @@ pub trait QuickAccess {
 		self.context().0.config()
 	}
 
-	fn database(&self) -> &Starchart<TomlBackend> {
+	fn database(&self) -> &Starchart<YamlBackend> {
 		self.context().0.database()
 	}
 

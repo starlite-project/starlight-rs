@@ -146,7 +146,7 @@ impl ContextBuilder {
 		let (shard, events) = shard_builder.http_client(Arc::clone(&http)).build();
 		let cdn = cdn_builder.build().into_diagnostic()?;
 		let standby = Arc::default();
-		let backend = TomlBackend::new(db_path).into_diagnostic()?;
+		let backend = YamlBackend::new(db_path).into_diagnostic()?;
 
 		let database = Starchart::new(backend).await.into_diagnostic()?;
 

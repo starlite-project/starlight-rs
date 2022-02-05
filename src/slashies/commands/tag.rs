@@ -1,17 +1,19 @@
 use std::{hint::unreachable_unchecked, pin::Pin};
 
-use futures_util::{Future, FutureExt};
 use twilight_model::{
 	application::{
 		command::{CommandOptionChoice, CommandType},
-		interaction::application_command::{CommandData, CommandDataOption, CommandOptionValue},
+		interaction::application_command::{CommandData, CommandDataOption},
 	},
 	guild::Permissions,
 };
 use twilight_util::builder::command::{CommandBuilder, StringBuilder, SubCommandBuilder};
 
 use crate::{
-	helpers::{parsing::CommandParse, InteractionsHelper},
+	helpers::{
+		parsing::{parse_subcommand, CommandParse},
+		InteractionsHelper,
+	},
 	prelude::*,
 	settings::{GuildSettings, GuildTag, Tables},
 	slashies::{DefineCommand, SlashCommand, SlashData},
@@ -376,19 +378,15 @@ impl DefineCommand for Tag {
 				"more than one subcommand was received (this shouldn't happen)"
 			));
 		}
-		let subcommand_value = data
-			.options
-			.pop()
-			.ok_or_else(|| error!("failed to get subcommand value (this shouldn't happen)"))?;
-		match subcommand_value.value {
-			CommandOptionValue::SubCommand(v) => match subcommand_value.name.as_str() {
-				"add" => Ok(Self::parse_add(&v)),
-				"delete" => Ok(Self::parse_delete(&v)),
-				"edit" => Ok(Self::parse_edit(&v)),
-				"show" => Ok(Self::parse_show(&v)),
-				_ => Err(error!("invalid subcommand variant")),
-			},
-			_ => Err(error!("invalid subcommand value option")),
+		let subcommand_value = unsafe { data.options.pop().unwrap_unchecked() };
+		let args = parse_subcommand(subcommand_value.value)
+			.ok_or_else(|| error!("invalid subcommand value option"))?;
+		match subcommand_value.name.as_str() {
+			"add" => Ok(Self::parse_add(&args)),
+			"delete" => Ok(Self::parse_delete(&args)),
+			"edit" => Ok(Self::parse_edit(&args)),
+			"show" => Ok(Self::parse_show(&args)),
+			_ => Err(error!("invalid subcommand variant")),
 		}
 	}
 }

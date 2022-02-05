@@ -19,7 +19,7 @@ use super::Helpers;
 use crate::{
 	prelude::*,
 	slashies::{
-		commands::{Crate, Ping, Tag},
+		commands::{Block, Crate, Ping, Tag},
 		DefineCommand, SlashCommand, SlashData,
 	},
 	state::{Context, QuickAccess},
@@ -65,9 +65,13 @@ impl InteractionsHelper {
 	pub async fn handle(self, command: ApplicationCommand) {
 		if let Some(slashie) = Self::match_command(command.data.name.as_str(), command.data.clone())
 		{
-			let data = SlashData::new(command.clone());
+			let mut data = SlashData::new(command.clone());
 			match command.kind {
 				InteractionType::ApplicationCommand => {
+					if let Ok(true) = data.is_user_blocked(&self).await {
+						self.respond(&mut data).await.unwrap();
+						return;
+					}
 					if let Err(e) = slashie.run(self, data).await {
 						event!(
 							Level::ERROR,
@@ -180,12 +184,19 @@ impl InteractionsHelper {
 			"ping" => Some(Box::new(Ping {})),
 			"crate" => Some(Box::new(Crate::parse(data).unwrap())),
 			"tag" => Some(Box::new(Tag::parse(data).unwrap())),
+			"block" => Some(Box::new(Block::parse(data).unwrap())),
 			_ => None,
 		}
 	}
 
-	fn get_slashies() -> [Command; 3] {
-		[Ping::define(), Crate::define(), Tag::define()].map(CommandBuilder::build)
+	fn get_slashies() -> [Command; 4] {
+		[
+			Ping::define(),
+			Crate::define(),
+			Tag::define(),
+			Block::define(),
+		]
+		.map(CommandBuilder::build)
 	}
 }
 

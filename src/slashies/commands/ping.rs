@@ -21,7 +21,7 @@ impl SlashCommand for Ping {
 		helper: InteractionsHelper,
 		mut data: SlashData,
 	) -> Pin<Box<dyn Future<Output = Result<()>> + Send>> {
-		Box::pin(async move {
+		async move {
 			data.ephemeral();
 			let context = helper.context();
 
@@ -43,7 +43,8 @@ impl SlashCommand for Ping {
 			helper.respond(&mut data).await.into_diagnostic()?;
 
 			Ok(())
-		})
+		}
+		.boxed()
 	}
 }
 

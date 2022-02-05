@@ -135,7 +135,7 @@ impl SlashCommand for Crate {
 		helper: InteractionsHelper,
 		mut responder: SlashData,
 	) -> Pin<Box<dyn Future<Output = Result<()>> + Send + '_>> {
-		Box::pin(async move {
+		async move {
 			if let Some(stdlib_url) = self.rustc_crate_link() {
 				responder.message(stdlib_url.to_owned());
 
@@ -179,7 +179,8 @@ impl SlashCommand for Crate {
 			helper.respond(&mut responder).await.into_diagnostic()?;
 
 			Ok(())
-		})
+		}
+		.boxed()
 	}
 
 	fn autocomplete<'a>(
@@ -187,7 +188,7 @@ impl SlashCommand for Crate {
 		helper: InteractionsHelper,
 		mut responder: SlashData,
 	) -> Pin<Box<dyn Future<Output = Result<()>> + Send + 'a>> {
-		Box::pin(async move {
+		async move {
 			let client = helper.cdn();
 
 			let response = client
@@ -223,7 +224,8 @@ impl SlashCommand for Crate {
 				.into_diagnostic()?;
 
 			Ok(())
-		})
+		}
+		.boxed()
 	}
 }
 

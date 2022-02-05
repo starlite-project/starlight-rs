@@ -18,7 +18,11 @@ use twilight_model::{
 };
 
 pub use self::r#impl::{DefineCommand, SlashCommand};
-use crate::prelude::*;
+use crate::{
+	prelude::*,
+	settings::{GuildSettings, Tables},
+	utils::DefaultMessages,
+};
 
 #[derive(Debug, Clone)]
 #[must_use = "SlashData has no side effects"]
@@ -83,6 +87,30 @@ impl SlashData {
 			.permissions()
 			.root(self.user_id(), unsafe { self.guild_id.unwrap_unchecked() })
 			.into_diagnostic()
+	}
+
+	pub async fn is_user_blocked<Q: QuickAccess + Sync>(&mut self, helper: &Q) -> Result<bool> {
+		if self.is_dm() {
+			return Ok(false);
+		}
+
+		let guild_id = unsafe { self.guild_id.unwrap_unchecked() };
+		let user_id = self.user_id();
+
+		let settings = Tables::Guilds
+			.get_entry::<GuildSettings>(helper.database(), &guild_id)
+			.await?;
+
+		let potentially_blocked_user = settings
+			.blocked_users()
+			.iter()
+			.find(|user| user.id() == user_id);
+
+		potentially_blocked_user.map_or(Ok(false), |user| {
+			self.message(DefaultMessages::BlockedUser(user.reason().to_owned()).to_string())
+				.ephemeral();
+			Ok(true)
+		})
 	}
 
 	pub fn allowed_mentions<F: FnOnce(AllowedMentionsBuilder) -> AllowedMentionsBuilder>(
