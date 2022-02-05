@@ -22,7 +22,7 @@ COPY ./src ./src
 
 # Remove old build, and rebuild
 RUN rm ./target/release/deps/starlight*
-RUN cargo build --release
+RUN cargo build --release -Z build-std=std,panic_abort --target x86_64-unknown-linux-gnu
 RUN strip -s ./target/release/starlight
 
 # Download certs from an alpine image
