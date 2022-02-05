@@ -12,21 +12,8 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
-        with:
-          fetch-depth: "0"
-
-      - name: Check if Cargo files changed
-        uses: tj-actions/changed-files@v14.3
-        id: check-files
-        with:
-          files: |
-            Cargo.toml
-            Cargo.lock
-            starlight-macros/Cargo.toml
-            starlight-macros/Cargo.lock
 
       - name: Run security audit
-        if: steps.check-files.outputs.files_changed == 'true'
         uses: actions-rs/audit-check@v1
         with:
           token: ${{ github.TOKEN }}
