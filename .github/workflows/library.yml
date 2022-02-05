@@ -13,10 +13,14 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v1
+      - name: Check if Cargo.* files changed
+        uses: tj-actions/verify-changed-files@v8.8'
+        id: check-files
+        with:
+          files: Cargo.lock | Cargo.toml
 
       - name: Run security audit
+        if: steps.check-files.outputs.files_changed == 'true'
         uses: actions-rs/audit-check@v1
         with:
           token: ${{ github.TOKEN }}
