@@ -14,7 +14,7 @@ COPY ./.cargo/config.toml ./.cargo/config.toml
 COPY ./starlight-macros ./starlight-macros
 
 # Build the empty ./src, which contains the default main.rs from cargo new
-RUN cargo build --release
+RUN cargo build --release -Z build-std=std,panic_abort --target x86_64-unknown-linux-gnu
 
 # Remove the empty source and add ours, to prevent rebuilding of deps on every change
 RUN rm -rf src/
