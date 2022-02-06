@@ -7,6 +7,7 @@ mod private {
 	use twilight_model::{
 		channel::{Channel, Message},
 		guild::{Emoji, Member, Role},
+		oauth::current_application_info::CurrentApplicationInfo,
 		user::{CurrentUser, User},
 	};
 
@@ -19,6 +20,7 @@ mod private {
 	impl Sealed for User {}
 	impl Sealed for Channel {}
 	impl Sealed for Member {}
+	impl Sealed for CurrentApplicationInfo {}
 
 	impl<T: Sealed> Sealed for Option<T> {}
 	impl<T: Sealed> Sealed for Vec<T> {}

@@ -1,8 +1,11 @@
+use std::hint::unreachable_unchecked;
+
 use twilight_model::{
 	application::{
 		command::CommandType,
 		interaction::application_command::{CommandData, CommandDataOption},
 	},
+	guild::Permissions,
 	id::{marker::UserMarker, Id},
 };
 use twilight_util::builder::command::{
@@ -15,7 +18,9 @@ use crate::{
 		InteractionsHelper,
 	},
 	prelude::*,
+	settings::{GuildSettings, Tables, BlockedUser},
 	slashies::{DefineCommand, SlashCommand, SlashData},
+	utils::DefaultMessages,
 };
 
 #[derive(Debug, Clone)]
@@ -67,15 +72,67 @@ impl Block {
 				.ok_or_else(|| error!("couldn't parse user (this shouldn't happen)"))?,
 		})
 	}
+
+	async fn run_add(self, helper: InteractionsHelper, mut data: SlashData) -> Result<()> {
+		if let Self::Add { user, reason } = self {
+			let user_permissions = data.author_permissions(&helper)?;
+
+			let can_manage_users = user_permissions.contains(Permissions::ADMINISTRATOR)
+				|| (user_permissions.contains(Permissions::KICK_MEMBERS)
+					&& user_permissions.contains(Permissions::BAN_MEMBERS));
+
+			if !can_manage_users {
+				data.message(DefaultMessages::PermissionDenied.to_string());
+				helper.respond(&mut data).await.into_diagnostic()?;
+				return Ok(());
+			}
+
+			let guild_settings = Tables::Guilds
+				.get_entry::<GuildSettings>(helper.database(), unsafe {
+					&data.guild_id.unwrap_unchecked()
+				})
+				.await?;
+
+			if guild_settings.blocked_users().iter().map(BlockedUser::id).any(|blocked| blocked == user) {
+				data.message("That user has already been blocked".to_owned()).ephemeral();
+				helper.respond(&mut data).await.into_diagnostic()?;
+				return Ok(())
+			}
+		} else {
+			unsafe { unreachable_unchecked() }
+		}
+
+		Ok(())
+	}
+
+	async fn run_remove(self, helper: InteractionsHelper, mut data: SlashData) -> Result<()> {
+		Ok(())
+	}
+
+	async fn run_why(self, helper: InteractionsHelper, mut data: SlashData) -> Result<()> {
+		Ok(())
+	}
 }
 
 impl SlashCommand for Block {
 	fn run<'a>(
 		&'a self,
 		helper: InteractionsHelper,
-		responder: SlashData,
+		mut responder: SlashData,
 	) -> Pin<Box<dyn Future<Output = Result<()>> + Send + 'a>> {
-		todo!()
+		async move {
+			if responder.is_dm() {
+				responder.message("this command can only be used in a guild".to_owned());
+				helper.respond(&mut responder).await.into_diagnostic()?;
+				return Ok(());
+			}
+
+			match self {
+				Self::Add { .. } => self.clone().run_add(helper, responder).await,
+				_ => todo!(),
+			}
+		}
+		.boxed()
 	}
 }
 

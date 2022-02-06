@@ -1,25 +1,27 @@
 use std::convert::Infallible;
 
 use starchart::{action::CreateEntryAction, Action, Result as ChartResult};
+use starlight_macros::model;
 use tracing::{event, Level};
 use twilight_gateway::Event;
 use twilight_model::{
 	application::interaction::Interaction,
 	gateway::payload::incoming::{InteractionCreate, Ready},
 	guild::Guild,
+	oauth::current_application_info::CurrentApplicationInfo,
 };
 
 use super::Context;
 use crate::{
 	prelude::*,
-	settings::{GuildSettings, Tables},
+	settings::{GlobalSettings, GuildSettings, Tables},
 };
 
 // these should all be the same caller context, taking a `Context` as the first parameter, and whatever the event content is in the second.
 // however, they should return as strict of an error type as possible, using `Infallible` whevever possible (for more optimizations).
 pub(super) async fn handle(context: Context, event: Event) {
 	if let Err(e) = match event {
-		Event::Ready(e) => ready(context, *e).await.into_diagnostic(),
+		Event::Ready(e) => ready(context, *e).await,
 		Event::GuildCreate(e) => guild_create(context, (*e).0).await.into_diagnostic(),
 		Event::InteractionCreate(e) => {
 			interaction_create(context, *e).await;
@@ -32,9 +34,34 @@ pub(super) async fn handle(context: Context, event: Event) {
 }
 
 #[allow(clippy::unused_async)]
-async fn ready(_: Context, ready: Ready) -> Result<(), Infallible> {
+async fn ready(context: Context, ready: Ready) -> Result<()> {
 	event!(Level::INFO, user_name = %ready.user.name);
 	event!(Level::INFO, guilds = %ready.guilds.len());
+
+	let http = context.http();
+
+	let current_user_app_future = http.current_user_application();
+
+	let current_user_app: CurrentApplicationInfo =
+		model!(current_user_app_future).await.into_diagnostic()?;
+
+	let app_id = current_user_app.id;
+	// there will always be at least 1
+	let mut owners = Vec::with_capacity(1);
+	if let Some(team) = current_user_app.team {
+		let ids = team.members.iter().map(|mem| mem.user.id);
+		owners.extend(ids);
+	}
+
+	owners.push(current_user_app.owner.id);
+
+	owners.sort();
+	owners.dedup();
+
+	let settings = GlobalSettings::new(app_id, owners);
+
+	Tables::Global.create_entry(context.database(), &settings).await?;
+
 	Ok(())
 }
 

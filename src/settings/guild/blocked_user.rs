@@ -8,14 +8,17 @@ pub struct BlockedUser {
 }
 
 impl BlockedUser {
+	#[must_use]
 	pub const fn new(id: Id<UserMarker>, reason: String) -> Self {
 		Self { id, reason }
 	}
 
+	#[must_use]
 	pub const fn id(&self) -> Id<UserMarker> {
 		self.id
 	}
 
+	#[must_use]
 	pub fn reason(&self) -> &str {
 		&self.reason
 	}

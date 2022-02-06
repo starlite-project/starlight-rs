@@ -76,7 +76,11 @@ impl SlashData {
 		!self.is_guild()
 	}
 
-	pub fn user_permissions(&self, helper: &impl QuickAccess) -> Result<Permissions> {
+	pub fn user_permissions(
+		&self,
+		id: Id<UserMarker>,
+		helper: &impl QuickAccess,
+	) -> Result<Permissions> {
 		if self.is_dm() {
 			return Err(error!("can't get user permissions in a DM"));
 		}
@@ -85,8 +89,12 @@ impl SlashData {
 
 		cache
 			.permissions()
-			.root(self.user_id(), unsafe { self.guild_id.unwrap_unchecked() })
+			.root(id, unsafe { self.guild_id.unwrap_unchecked() })
 			.into_diagnostic()
+	}
+
+	pub fn author_permissions(&self, helper: &impl QuickAccess) -> Result<Permissions> {
+		self.user_permissions(self.user_id(), helper)
 	}
 
 	pub async fn is_user_blocked<Q: QuickAccess + Sync>(&mut self, helper: &Q) -> Result<bool> {

@@ -144,7 +144,7 @@ impl Tag {
 				.await?;
 
 			let can_manage_messages = {
-				let user_perms = responder.user_permissions(&helper)?;
+				let user_perms = responder.author_permissions(&helper)?;
 
 				user_perms.contains(Permissions::MANAGE_MESSAGES)
 					|| user_perms.contains(Permissions::ADMINISTRATOR)
@@ -194,7 +194,7 @@ impl Tag {
 				.await?;
 
 			let can_manage_messages = {
-				let user_perms = responder.user_permissions(&helper)?;
+				let user_perms = responder.author_permissions(&helper)?;
 
 				user_perms.contains(Permissions::MANAGE_MESSAGES)
 					|| user_perms.contains(Permissions::ADMINISTRATOR)
@@ -285,7 +285,7 @@ impl SlashCommand for Tag {
 			let tags = guild_settings.tags_mut();
 
 			let can_manage_messages = {
-				let user_permissions = responder.user_permissions(&helper)?;
+				let user_permissions = responder.author_permissions(&helper)?;
 
 				user_permissions.contains(Permissions::ADMINISTRATOR)
 					|| user_permissions.contains(Permissions::MANAGE_MESSAGES)

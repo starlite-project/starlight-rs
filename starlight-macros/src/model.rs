@@ -7,6 +7,7 @@ use twilight_http::{
 use twilight_model::{
 	channel::{Channel, Message},
 	guild::{Emoji, Member, Role},
+	oauth::current_application_info::CurrentApplicationInfo,
 	user::{CurrentUser, User},
 };
 
@@ -59,6 +60,7 @@ impl ModelInput for Emoji {}
 impl ModelInput for User {}
 impl ModelInput for Channel {}
 impl ModelInput for Member {}
+impl ModelInput for CurrentApplicationInfo {}
 
 impl<T: ModelInput> ModelInput for Option<T> {}
 impl<T: ModelInput> ModelInput for Vec<T> {}
